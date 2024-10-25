@@ -20,9 +20,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "KIWE-Android"
-include(":app-kiosk")
-include(":app-manager")
-include(":domain")
-include(":data")
 include(":presentation:kiosk")
 include(":presentation:manager")
+include(":domain")
+include(":data")

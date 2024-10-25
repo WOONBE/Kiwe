@@ -11,6 +11,10 @@ composeBom = "2024.04.01"
 jetbrainsKotlinJvm = "2.0.0"
 appcompat = "1.7.0"
 material = "1.12.0"
+orbit = "9.0.0"
+coil = "2.3.0"
+hilt = "2.52"
+ksp = "2.0.0-1.0.24"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,10 +34,40 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
+
+# Orbit
+orbit-core = { group = "org.orbit-mvi", name = "orbit-core", version.ref = "orbit"}
+orbit-viewmodel = { group = "org.orbit-mvi", name = "orbit-viewmodel", version.ref = "orbit"}
+orbit-compose = { group = "org.orbit-mvi", name = "orbit-compose", version.ref = "orbit"}
+
+# Coil -> 3.0 쓰려고했는데, Network 분리돼있어서 그냥 구버전 쓰겠습니다
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil"}
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil"}
+
+# Navigation
+hilt-navigation-compose = { group = "androidx.hilt" , name = "hilt-navigation-compose", version = "1.2.0"}
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version = "2.8.3"}
+
+# Hilt
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
+
+# Serialization
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.7.3"}
+
+# DataStore
+datastore = { module = "androidx.datastore:datastore-preferences", version = "1.1.1" }
+
+# Splash
+splash = { group = "androidx.core", name = "core-splashscreen", version = "1.0.1" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
