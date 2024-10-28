@@ -1,9 +1,14 @@
+import io.gitlab.arturbosch.detekt.Detekt
+import io.gitlab.arturbosch.detekt.DetektCreateBaselineTask
+import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.detekt)
 }
 
 android {
@@ -22,7 +27,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -33,8 +38,30 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    buildFeatures{
+    buildFeatures {
         buildConfig = true
+    }
+
+    extensions.configure<DetektExtension> {
+        toolVersion = "1.23.5"
+        config.setFrom(files("${rootProject.projectDir}/config/detekt.yml"))
+        buildUponDefaultConfig = true
+        parallel = true
+    }
+
+    tasks.withType<Detekt>().configureEach {
+        reports {
+            html.required.set(true)
+            xml.required.set(true)
+            txt.required.set(false)
+            sarif.required.set(true)
+        }
+        jvmTarget = "11"
+        ignoreFailures = false
+    }
+
+    tasks.withType<DetektCreateBaselineTask>().configureEach {
+        jvmTarget = "11"
     }
 }
 
@@ -56,6 +83,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     // datastore
     implementation(libs.datastore)
+    // detekt
+    implementation(libs.detekt.gradle)
+    detektPlugins(libs.detekt.formatting)
     // ktor
     implementation(platform(libs.ktor.bom))
     implementation(libs.ktor.client.android)
