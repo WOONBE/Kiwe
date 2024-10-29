@@ -57,4 +57,12 @@ public class MenuController {
         menuService.deleteMenu(id);
         return ResponseEntity.noContent().build(); // 204 No Content
     }
+
+    // 카테고리별 메뉴 조회
+    @GetMapping("/category")
+    @Operation(summary = "카테고리 조회", description = "카테고리별 메뉴를 조회하는 API")
+    public ResponseEntity<List<MenuResponse>> getMenusByCategory(@RequestParam String category) {
+        List<MenuResponse> responses = menuService.getMenusByCategory(category);
+        return new ResponseEntity<>(responses, HttpStatus.OK);
+    }
 }

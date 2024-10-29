@@ -5,6 +5,7 @@ import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_MEN
 import com.d205.KIWI_Backend.global.exception.BadRequestException;
 import com.d205.KIWI_Backend.global.exception.ExceptionCode;
 import com.d205.KIWI_Backend.menu.domain.Menu;
+import com.d205.KIWI_Backend.menu.domain.MenuCategory;
 import com.d205.KIWI_Backend.menu.dto.MenuRequest;
 import com.d205.KIWI_Backend.menu.dto.MenuResponse;
 import com.d205.KIWI_Backend.menu.repository.MenuRepository;
@@ -82,5 +83,16 @@ public class MenuService {
             throw new BadRequestException(NOT_FOUND_MENU);
         }
         menuRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MenuResponse> getMenusByCategory(String category) {
+        if (!MenuCategory.isValidCategory(category)) {
+            throw new BadRequestException(ExceptionCode.INVALID_CATEGORY);
+        }
+
+        return menuRepository.findByCategory(category).stream()
+            .map(MenuResponse::fromMenu)
+            .collect(Collectors.toList());
     }
 }
