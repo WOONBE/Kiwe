@@ -1,6 +1,5 @@
 package com.kiwe.data.network.service
 
-import com.kiwe.data.model.request.LoginRequest
 import com.kiwe.data.model.response.TestResponse
 import com.kiwe.data.network.util.ApiResponse
 import com.kiwe.data.network.util.BaseResponse
@@ -20,7 +19,7 @@ class UserService
             return client.get("test/api/test01").body()
         }
 
-        suspend fun login(request: LoginRequest): ApiResponse<Unit> = ApiResponse.Success(Unit)
+//        suspend fun login(request: LoginRequest): ApiResponse<Unit> = ApiResponse.Success(Unit)
 
         suspend fun logout(): ApiResponse<TestResponse> = ApiResponse.Success(TestResponse())
     }

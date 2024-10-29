@@ -35,50 +35,50 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient() = HttpClient(Android) {
+    fun provideHttpClient() =
+        HttpClient(Android) {
+            install(ContentNegotiation) {
+                json(
+                    Json {
+                        prettyPrint = true
+                        isLenient = true
+                        useAlternativeNames = true
+                        ignoreUnknownKeys = true
+                        encodeDefaults = false
+                    },
+                )
+            }
 
-        install(ContentNegotiation) {
-            json(
-                Json {
-                    prettyPrint = true
-                    isLenient = true
-                    useAlternativeNames = true
-                    ignoreUnknownKeys = true
-                    encodeDefaults = false
+            install(HttpTimeout) {
+                requestTimeoutMillis = NETWORK_TIMEOUT
+                connectTimeoutMillis = NETWORK_TIMEOUT
+                socketTimeoutMillis = NETWORK_TIMEOUT
+            }
+
+            install(Logging) {
+                logger =
+                    object : Logger {
+                        override fun log(message: String) {
+                            Log.v(TAG, message)
+                        }
+                    }
+                level = LogLevel.ALL
+            }
+
+            install(ResponseObserver) {
+                onResponse { response ->
+                    Log.d(TAG, "HTTP status: ${response.status.value}")
                 }
-            )
-        }
+            }
 
-        install(HttpTimeout) {
-            requestTimeoutMillis = NETWORK_TIMEOUT
-            connectTimeoutMillis = NETWORK_TIMEOUT
-            socketTimeoutMillis = NETWORK_TIMEOUT
-        }
-
-        install(Logging) {
-            logger = object : Logger {
-                override fun log(message: String) {
-                    Log.v(TAG, message)
+            install(DefaultRequest) {
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                url {
+                    protocol = URLProtocol.HTTPS
+                    host = BASE_URL
                 }
             }
-            level = LogLevel.ALL
         }
-
-        install(ResponseObserver) {
-            onResponse { response ->
-                Log.d(TAG, "HTTP status: ${response.status.value}")
-
-            }
-        }
-
-        install(DefaultRequest) {
-            header(HttpHeaders.ContentType, ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
-            url {
-                protocol = URLProtocol.HTTPS
-                host = BASE_URL
-            }
-        }
-    }
 }

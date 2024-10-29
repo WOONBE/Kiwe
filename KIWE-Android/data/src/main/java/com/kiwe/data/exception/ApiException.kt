@@ -7,4 +7,4 @@ class ApiException(
     override val message: String? = null,
     override val cause: Throwable? = null,
     val error: ErrorResponse,
-): IOException(message, cause)
+) : IOException(message, cause)
