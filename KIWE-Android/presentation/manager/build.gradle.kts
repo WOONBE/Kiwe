@@ -110,4 +110,7 @@ dependencies {
 
     // Splash API
     implementation(libs.splash)
+
+    // Compose Constraint Layout
+    implementation(libs.androidx.constraintlayout.compose.android)
 }
