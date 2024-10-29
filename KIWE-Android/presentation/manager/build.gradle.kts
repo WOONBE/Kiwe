@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId = "com.kiwe.manager"
-        minSdk = 28
+        minSdk = 31
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -107,4 +107,7 @@ dependencies {
     // detekt
     implementation(libs.detekt.gradle)
     detektPlugins(libs.detekt.formatting)
+
+    // Splash API
+    implementation(libs.splash)
 }
