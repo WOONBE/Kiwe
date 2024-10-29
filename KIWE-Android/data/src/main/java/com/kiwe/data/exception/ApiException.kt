@@ -1,6 +1,6 @@
 package com.kiwe.data.exception
 
-import com.kiwe.domain.model.ErrorResponse
+import com.kiwe.data.network.util.ErrorResponse
 import java.io.IOException
 
 class ApiException(
