@@ -1,4 +1,4 @@
-package com.kiwe.domain.model
+package com.kiwe.data.network.util
 
 data class ErrorResponse(
     val errorCode: String,

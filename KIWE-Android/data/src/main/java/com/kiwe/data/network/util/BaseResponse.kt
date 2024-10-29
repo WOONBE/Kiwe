@@ -1,7 +1,6 @@
-package com.kiwe.data.network.reponse
+package com.kiwe.data.network.util
 
 import com.kiwe.data.exception.ApiException
-import com.kiwe.domain.model.ApiResponse
 
 data class BaseResponse<T>(
     val code: String,
@@ -20,7 +19,7 @@ suspend fun <T> emitApiResponse(
             ApiResponse.Success(data = result.data ?: default)
         },
         onFailure = { e ->
-            when(e) {
+            when (e) {
                 is ApiException ->
                     ApiResponse.Error.ServerError(
                         errorCode = e.error.errorCode,
@@ -31,6 +30,5 @@ suspend fun <T> emitApiResponse(
                         errorMessage = e.message ?: "",
                     )
             }
-        }
-
+        },
     )

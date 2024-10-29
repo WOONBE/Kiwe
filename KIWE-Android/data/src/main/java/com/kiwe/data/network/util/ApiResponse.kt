@@ -1,4 +1,4 @@
-package com.kiwe.domain.model
+package com.kiwe.data.network.util
 
 sealed class ApiResponse<out D> {
     data class Success<out D>(
