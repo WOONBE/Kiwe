@@ -18,16 +18,19 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.URLProtocol
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
 private const val TAG = "NetworkModule"
+
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    private const val BASE_URL = "https://702bb8b6-4cfb-4bd5-8e8c-33553ee83b0c.mock.pstmn.io/" // Postman Mock Server
+    private const val BASE_URL =
+        "702bb8b6-4cfb-4bd5-8e8c-33553ee83b0c.mock.pstmn.io" // Postman Mock Server
     private const val NETWORK_TIMEOUT = 5000L
 
     @Provides
@@ -53,7 +56,7 @@ object NetworkModule {
         }
 
         install(Logging) {
-            logger = object: Logger {
+            logger = object : Logger {
                 override fun log(message: String) {
                     Log.v(TAG, message)
                 }
@@ -72,7 +75,10 @@ object NetworkModule {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
-            host = BASE_URL
+            url {
+                protocol = URLProtocol.HTTPS
+                host = BASE_URL
+            }
         }
     }
 }
