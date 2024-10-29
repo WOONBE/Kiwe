@@ -1,4 +1,4 @@
-package com.kiwe.kiosk.app
+package com.kiwe.kiosk
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

@@ -12,7 +12,7 @@ plugins {
 }
 
 android {
-    namespace = "com.kiwe.presentation_manager"
+    namespace = "com.kiwe.manager"
     compileSdk = 34
 
     defaultConfig {

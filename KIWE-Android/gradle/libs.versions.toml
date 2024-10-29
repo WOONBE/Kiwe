@@ -15,11 +15,15 @@ material = "1.12.0"
 orbit = "9.0.0"
 coil = "2.3.0"
 hilt = "2.52"
+hiltCompiler = "1.2.0"
 ksp = "2.0.0-1.0.24"
 detekt = "1.23.5"
 timberVersion = "5.0.1"
 
 [libraries]
+android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 jakewharton-timber = { module = "com.jakewharton.timber:timber", version.ref = "timberVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -46,25 +50,26 @@ material = { group = "com.google.android.material", name = "material", version.r
 
 
 # Orbit
-orbit-core = { group = "org.orbit-mvi", name = "orbit-core", version.ref = "orbit"}
-orbit-viewmodel = { group = "org.orbit-mvi", name = "orbit-viewmodel", version.ref = "orbit"}
-orbit-compose = { group = "org.orbit-mvi", name = "orbit-compose", version.ref = "orbit"}
+orbit-core = { group = "org.orbit-mvi", name = "orbit-core", version.ref = "orbit" }
+orbit-viewmodel = { group = "org.orbit-mvi", name = "orbit-viewmodel", version.ref = "orbit" }
+orbit-compose = { group = "org.orbit-mvi", name = "orbit-compose", version.ref = "orbit" }
 
 # Coil -> 3.0 쓰려고했는데, Network 분리돼있어서 그냥 구버전 쓰겠습니다
-coil = { group = "io.coil-kt", name = "coil", version.ref = "coil"}
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil"}
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 # Navigation
-hilt-navigation-compose = { group = "androidx.hilt" , name = "hilt-navigation-compose", version = "1.2.0"}
-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version = "2.8.3"}
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version = "1.2.0" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version = "2.8.3" }
 
 # Hilt
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompiler" }
 
 # Serialization
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.7.3"}
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.7.3" }
 
 # DataStore
 datastore = { module = "androidx.datastore:datastore-preferences", version = "1.1.1" }
@@ -86,3 +91,5 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+kiwe-detekt = { id = "kiwe.detekt", version = "1" }
+kiwe-hilt = { id = "kiwe.hilt", version = "1" }
