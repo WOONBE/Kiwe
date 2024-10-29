@@ -45,19 +45,13 @@ fun LoginAppBar() {
             modifier = Modifier.height(60.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Spacer(
-                modifier = Modifier.weight(1F),
-            )
+            Spacer(modifier = Modifier.weight(1F))
             ConstraintLayout(
                 constraintSet = constraintSet,
-                modifier =
-                    Modifier
-                        .weight(32F),
+                modifier = Modifier.weight(32F),
             ) {
                 Image(
-                    modifier =
-                        Modifier
-                            .layoutId("logoImage"),
+                    modifier = Modifier.layoutId("logoImage"),
                     painter = painterResource(R.mipmap.ic_launcher_foreground),
                     contentDescription = "로고",
                 )

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -14,20 +13,17 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kiwe.manager.R
+import com.kiwe.manager.ui.component.LoginTextField
 import com.kiwe.manager.ui.theme.KIWEAndroidTheme
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -94,9 +90,7 @@ private fun LoginScreen(
                 modifier = Modifier.fillMaxSize(),
             ) {
                 Spacer(Modifier.weight(1F))
-                Column(
-                    modifier = Modifier.weight(6F),
-                ) {
+                Column(modifier = Modifier.weight(6F)) {
                     Text(
                         modifier =
                             Modifier
@@ -104,62 +98,19 @@ private fun LoginScreen(
                                 .padding(bottom = 20.dp),
                         text = "환영합니다",
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
                     )
-                    Text(
-                        text = "Id",
-                        color = Color.White,
-                    )
-                    TextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true,
-                        textStyle =
-                            TextStyle(
-                                color = Color.White,
-                            ),
-                        colors =
-                            TextFieldDefaults.colors(
-                                focusedContainerColor = colorResource(R.color.login_text_field_inside), // 포커스된 상태의 배경색
-                                unfocusedContainerColor = colorResource(R.color.login_text_field_inside), // 포커스되지 않은 상태의 배경색
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                            ),
+                    Text(text = "Id")
+                    LoginTextField(
                         value = id,
                         onValueChange = onIdChange,
-                        placeholder = {
-                            Text(
-                                text = "Your Id",
-                            )
-                        },
+                        placeHolderText = "아이디를 입력해주세요",
                     )
-                    Text(
-                        text = "Password",
-                        color = Color.White,
-                    )
-                    TextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true,
-                        textStyle =
-                            TextStyle(
-                                color = Color.White,
-                            ),
-                        colors =
-                            TextFieldDefaults.colors(
-                                errorTextColor = Color.Red,
-                                focusedContainerColor = colorResource(R.color.login_text_field_inside), // 포커스된 상태의 배경색
-                                unfocusedContainerColor = colorResource(R.color.login_text_field_inside), // 포커스되지 않은 상태의 배경색
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                            ),
+
+                    Text(text = "Password")
+                    LoginTextField(
                         value = password,
                         onValueChange = onPasswordChange,
-                        placeholder = {
-                            Text(
-                                text = "Your PassWord",
-                            )
-                        },
+                        placeHolderText = "비밀번호를 입력해주세요",
                     )
                     Row(
                         modifier =
@@ -177,14 +128,10 @@ private fun LoginScreen(
                             colors =
                                 ButtonDefaults.buttonColors(
                                     containerColor = colorResource(R.color.login_btn),
-                                    contentColor = Color.White,
                                 ),
                             shape = RoundedCornerShape(size = 12.dp),
                             content = {
-                                Text(
-                                    text = "로그인",
-                                    color = Color.White,
-                                )
+                                Text(text = "로그인")
                             },
                             onClick = {
                             },
@@ -197,9 +144,8 @@ private fun LoginScreen(
                     Text(
                         modifier =
                             Modifier
-                                .padding(
-                                    top = 20.dp,
-                                ).clickable {
+                                .padding(top = 20.dp)
+                                .clickable {
                                     onNavigateToFindPassWordScreen()
                                 },
                         text = "비밀번호를 잊어버리셨나요?",
