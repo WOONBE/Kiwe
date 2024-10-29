@@ -10,7 +10,7 @@ public enum ExceptionCode {
 
     INVALID_REQUEST(1000, "올바르지 않은 요청입니다."),
 
-    NOT_FOUND_ARTIST(1001, "검색 조건에 일치하는 화가가 없습니다."),
+    NOT_FOUND_MENU(1001, "해당 메뉴가 존재하지 않습니다."),
 
 
     NOT_FOUND_ARTWORK(1002, "검색 조건에 일치하는 미술품이 없습니다."),

@@ -1,6 +1,7 @@
 package com.d205.KIWI_Backend.menu.controller;
 
 import com.d205.KIWI_Backend.menu.service.CSVService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ public class CSVController {
     private final CSVService csvService;
 
     @GetMapping("/import-csv/{filename}")
+    @Operation(summary = "메뉴 csv로 입력", description = "메뉴 csv로 입력하는 API")
     public ResponseEntity<String> importCSV(@PathVariable String filename) {
         Resource resource = new ClassPathResource(filename);
 
