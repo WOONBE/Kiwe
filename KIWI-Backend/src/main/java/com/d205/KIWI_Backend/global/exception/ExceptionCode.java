@@ -20,11 +20,11 @@ public enum ExceptionCode {
 
     NOT_FOUND_THEME_ID(1003, "요청한 ID에 해당하는 테마가 존재하지 않습니다."),
 
-    NOT_FOUND_OWNER_ID(1004, "요청한 ID에 해당하는 미술관장이 존재하지 않습니다."),
-    NOT_FOUND_GALLERY_ID(1005, "요청한 ID에 해당하는 미술관이 존재하지 않습니다."),
+//    NOT_FOUND_MEMBER_ID(1004, "요청한 ID에 해당하는 유저가 존재하지 않습니다."),
+    NOT_FOUND_EMAIL(1005, "요청한 ID에 해당하는 이메일이 존재하지 않습니다."),
     NOT_FOUND_ARTWORK_ID(1006, "요청한 ID에 해당하는 미술품이 존재하지 않습니다."),
 
-    NOT_FOUND_CATEGORY_ID(1007, "요청한 ID에 해당하는 카테고리가 존재하지 않습니다."),
+    NOT_FOUND_KIOSK_ID(1007, "요청한 ID에 해당하는 키오스크가 없습니다"),
     NOT_FOUNT_IMAGE_URL(1008, "요청한 URL에 해당하는 이미지가 존재하지 않습니다."),
     NOT_FOUND_CURRENCY_DATA(1009, "요청한 날짜에 해당하는 환율 정보가 존재하지 않습니다."),
 
@@ -65,12 +65,12 @@ public enum ExceptionCode {
 
     NOT_ASSOCIATE_DAYLOG_WITH_TRIP(6001, "요청한 DayLog와 Trip은 연관관계가 아닙니다."),
 
-    NOT_FOUND_SHARED_CODE(7001, "요청한 URL에 해당하는 공유된 여행이 존재하지 않습니다."),
+    INVALID_UPDATE(7001, "요청한 변경이 불가능 합니다."),
     INVALID_SHARE_CODE(7002, "공유가 허용되지 않은 코드입니다."),
     FAIL_SHARE_CODE_HASH(7101, "공유 코드를 해싱하는 데 실패했습니다."),
 
     //    INVALID_USER_NAME(8001, "존재하지 않는 사용자입니다."),
-//    INVALID_PASSWORD(8002, "비밀번호가 일치하지 않습니다."),
+    INVALID_PASSWORD(8002, "비밀번호가 일치하지 않습니다."),
 //    NULL_ADMIN_AUTHORITY(8101, "잘못된 관리자 권한입니다."),
 //    DUPLICATED_ADMIN_USERNAME(8102, "중복된 사용자 이름입니다."),
 //    NOT_FOUND_ADMIN_ID(8103, "요청한 ID에 해당하는 관리자를 찾을 수 없습니다."),
