@@ -25,7 +25,7 @@ public enum ExceptionCode {
     NOT_FOUND_ARTWORK_ID(1006, "요청한 ID에 해당하는 미술품이 존재하지 않습니다."),
 
     NOT_FOUND_KIOSK_ID(1007, "요청한 ID에 해당하는 키오스크가 없습니다"),
-    NOT_FOUNT_IMAGE_URL(1008, "요청한 URL에 해당하는 이미지가 존재하지 않습니다."),
+    NOT_CORRECT_PASSWORD(1008, "입력한 비밀번호가 일치하지 않습니다."),
     NOT_FOUND_CURRENCY_DATA(1009, "요청한 날짜에 해당하는 환율 정보가 존재하지 않습니다."),
 
     INVALID_TRIP_WITH_MEMBER(1011, "요청한 멤버와 ID에 해당하는 여행이 존재하지 않습니다."),
