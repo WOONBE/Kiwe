@@ -3,11 +3,15 @@ package com.d205.KIWI_Backend.member.controller;
 import com.d205.KIWI_Backend.member.dto.MemberRequest;
 import com.d205.KIWI_Backend.member.dto.MemberResponse;
 import com.d205.KIWI_Backend.member.dto.SignInResponse;
+import com.d205.KIWI_Backend.member.service.BlackListService;
 import com.d205.KIWI_Backend.member.service.MemberService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +23,7 @@ import java.util.List;
 public class MemberController {
 
     private final MemberService memberService;
+    private final BlackListService blackListService;
 
     // 회원 등록
     @PostMapping("/register")
@@ -77,5 +82,20 @@ public class MemberController {
     public ResponseEntity<MemberResponse> findMemberByEmail(@RequestParam String email) {
         MemberResponse memberResponse = memberService.findMemberByEmail(email);
         return ResponseEntity.ok(memberResponse);
+    }
+
+    @PostMapping("/log-out")
+    @Operation(summary = "로그아웃", description = "로그인 된 사용자의 로그 아웃을 진행하는 API, Refresh Token을 BlackList 처리 + Access Token은 Redis에서 삭제")
+    public ResponseEntity<Void> signOut(@RequestHeader("Refresh-Token") String refreshToken) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            String accessToken = (String) authentication.getCredentials();
+            System.out.println("Refresh Token: " + accessToken);
+            blackListService.signOut(accessToken,refreshToken);
+            return ResponseEntity.noContent().build();
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

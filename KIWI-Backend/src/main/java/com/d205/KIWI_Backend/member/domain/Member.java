@@ -6,6 +6,7 @@ import com.d205.KIWI_Backend.kiosk.domain.Kiosk;
 import com.d205.KIWI_Backend.member.dto.MemberRequest;
 import jakarta.persistence.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +14,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
@@ -81,6 +84,10 @@ public class Member extends BaseEntity {
             .password(encoder.encode(memberRequest.getPassword()))
             .type(MemberType.USER)  // 기본 값으로 USER 설정
             .build();
+    }
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + type.name()));
     }
 
 
