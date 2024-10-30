@@ -3,8 +3,6 @@ package com.kiwe.manager.ui.login
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,7 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kiwe.manager.R
-import com.kiwe.manager.ui.component.LoginTextField
+import com.kiwe.manager.ui.component.ContentArea
+import com.kiwe.manager.ui.component.LoginTextFieldForm
 import com.kiwe.manager.ui.theme.KIWEAndroidTheme
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -84,83 +83,76 @@ private fun LoginScreen(
         color = colorResource(R.color.login_dark),
         contentColor = colorResource(R.color.white),
     ) {
-        Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxSize(),
+        ContentArea(
+            rowModifier = Modifier.fillMaxSize(),
+        ) {
+            Column(
+                modifier = Modifier.weight(6F),
             ) {
-                Spacer(Modifier.weight(1F))
-                Column(modifier = Modifier.weight(6F)) {
-                    Text(
-                        modifier =
-                            Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .padding(bottom = 20.dp),
-                        text = "환영합니다",
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(text = "Id")
-                    LoginTextField(
-                        value = id,
-                        onValueChange = onIdChange,
-                        placeHolderText = "아이디를 입력해주세요",
-                    )
+                Text(
+                    text = "환영합니다",
+                    fontWeight = FontWeight.Bold,
+                    modifier =
+                        Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(bottom = 20.dp),
+                )
 
-                    Text(text = "Password")
-                    LoginTextField(
-                        value = password,
-                        onValueChange = onPasswordChange,
-                        placeHolderText = "비밀번호를 입력해주세요",
-                    )
-                    Row(
-                        modifier =
-                            Modifier
-                                .padding(top = 30.dp),
-                    ) {
-                        Spacer(
-                            modifier = Modifier.weight(1F),
-                        )
-                        Button(
-                            modifier =
-                                Modifier
-                                    .weight(2F)
-                                    .padding(bottom = 10.dp),
-                            colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = colorResource(R.color.login_btn),
-                                ),
-                            shape = RoundedCornerShape(size = 12.dp),
-                            content = {
-                                Text(text = "로그인")
-                            },
-                            onClick = {
-                            },
-                        )
-                        Spacer(
-                            modifier = Modifier.weight(1F),
-                        )
-                    }
+                LoginTextFieldForm(
+                    "Id",
+                    id,
+                    onIdChange,
+                    "아이디를 입력해주세요",
+                )
 
-                    Text(
+                LoginTextFieldForm(
+                    "Password",
+                    password,
+                    onPasswordChange,
+                    "비밀번호를 입력해주세요",
+                )
+
+                ContentArea(
+                    rowModifier =
+                        Modifier
+                            .padding(top = 30.dp),
+                ) {
+                    Button(
                         modifier =
                             Modifier
-                                .padding(top = 20.dp)
-                                .clickable {
-                                    onNavigateToFindPassWordScreen()
-                                },
-                        text = "비밀번호를 잊어버리셨나요?",
-                        color = colorResource(R.color.login_text_button),
-                    )
-                    Text(
-                        modifier =
-                            Modifier.clickable {
-                                onNavigateToSignUpScreen()
-                            },
-                        text = "점주 등록을 진행하지 않으셨나요?",
-                        color = colorResource(R.color.login_text_button),
+                                .weight(2F)
+                                .padding(bottom = 10.dp),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = colorResource(R.color.login_btn),
+                            ),
+                        shape = RoundedCornerShape(size = 12.dp),
+                        content = {
+                            Text(text = "로그인")
+                        },
+                        onClick = {
+                        },
                     )
                 }
-                Spacer(Modifier.weight(1F))
+
+                Text(
+                    modifier =
+                        Modifier
+                            .padding(top = 20.dp)
+                            .clickable {
+                                onNavigateToFindPassWordScreen()
+                            },
+                    text = "비밀번호를 잊어버리셨나요?",
+                    color = colorResource(R.color.login_text_button),
+                )
+                Text(
+                    modifier =
+                        Modifier.clickable {
+                            onNavigateToSignUpScreen()
+                        },
+                    text = "점주 등록을 진행하지 않으셨나요?",
+                    color = colorResource(R.color.login_text_button),
+                )
             }
         }
     }

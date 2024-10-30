@@ -55,6 +55,7 @@ private fun SignUpScreen(onNavigateToLoginScreen: () -> Unit) {
     Surface(
         modifier = Modifier.systemBarsPadding(),
     ) {
+
         Button(
             onClick = {
                 onNavigateToLoginScreen()
