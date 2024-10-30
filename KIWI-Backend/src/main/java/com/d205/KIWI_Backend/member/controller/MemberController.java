@@ -89,10 +89,8 @@ public class MemberController {
     public ResponseEntity<Void> signOut(@RequestHeader("Refresh-Token") String refreshToken) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
             String accessToken = (String) authentication.getCredentials();
-            System.out.println("Refresh Token: " + accessToken);
-            blackListService.signOut(accessToken,refreshToken);
+            blackListService.userSignOut(accessToken,refreshToken);
             return ResponseEntity.noContent().build();
         } catch (JsonProcessingException e) {
             return ResponseEntity.badRequest().build();
