@@ -2,6 +2,8 @@ package com.d205.KIWI_Backend.member.service;
 
 
 import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_CORRECT_PASSWORD;
+import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_MEMBER_ID;
+import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_VALID_REFRESH_TOKEN;
 
 import com.d205.KIWI_Backend.global.config.TokenProvider;
 import com.d205.KIWI_Backend.global.exception.BadRequestException;
@@ -41,11 +43,10 @@ public class BlackListService {
     public void kioskSignOut(String password, String refreshToken) throws JsonProcessingException {
         // 현재 로그인한 사용자 ID 조회
         Integer memberId = getCurrentMemberId();
-        System.out.println("memberId: " + memberId);
 
         // 사용자 ID로 사용자 조회
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new JsonProcessingException("User not found with ID: " + memberId) {});
+            .orElseThrow(() -> new BadRequestException(NOT_FOUND_MEMBER_ID));
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(password, member.getPassword())) {
@@ -65,7 +66,7 @@ public class BlackListService {
     private void validateAndBlacklistRefreshToken(String refreshToken) throws JsonProcessingException {
         // Refresh token이 블랙리스트에 존재하는지 확인
         if (blackListRepository.existsByInvalidRefreshToken(refreshToken)) {
-            throw new JsonProcessingException("Refresh token is blacklisted.") {};  // JSON 처리 예외를 사용하여 표시
+            throw new BadRequestException(NOT_VALID_REFRESH_TOKEN);  // JSON 처리 예외를 사용하여 표시
         }
 
         // Refresh token의 유효성 검사
