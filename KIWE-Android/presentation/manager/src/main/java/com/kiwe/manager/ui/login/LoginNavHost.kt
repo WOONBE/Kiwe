@@ -16,10 +16,22 @@ fun LoginNavHost() {
         composable(route = LoginRoute.LoginScreen.name) {
             LoginScreen(
                 onNavigateToSignUpScreen = {
-                    navController.navigate(LoginRoute.SignUpScreen.name)
+                    navController.navigate(
+                        LoginRoute.SignUpScreen.name,
+                        navOptions =
+                            navOptions {
+                                popUpTo(LoginRoute.LoginScreen.name) { inclusive = true }
+                            },
+                    )
                 },
                 onNavigateToFindPassWordScreen = {
-                    navController.navigate(LoginRoute.FindPassWordScreen.name)
+                    navController.navigate(
+                        LoginRoute.FindPassWordScreen.name,
+                        navOptions =
+                            navOptions {
+                                popUpTo(LoginRoute.LoginScreen.name) { inclusive = true }
+                            },
+                    )
                 },
             )
         }
@@ -31,7 +43,7 @@ fun LoginNavHost() {
                         route = LoginRoute.LoginScreen.name,
                         navOptions =
                             navOptions {
-                                popUpTo(LoginRoute.LoginScreen.name)
+                                popUpTo(LoginRoute.SignUpScreen.name) { inclusive = true }
                             },
                     )
                 },
@@ -41,7 +53,13 @@ fun LoginNavHost() {
         composable(route = LoginRoute.FindPassWordScreen.name) {
             FindPassWordScreen(
                 onNavigateToLoginScreen = {
-                    navController.navigate(route = LoginRoute.LoginScreen.name)
+                    navController.navigate(
+                        route = LoginRoute.LoginScreen.name,
+                        navOptions =
+                            navOptions {
+                                popUpTo(LoginRoute.FindPassWordScreen.name) { inclusive = true }
+                            },
+                    )
                 },
             )
         }

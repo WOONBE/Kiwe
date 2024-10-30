@@ -1,5 +1,11 @@
 package com.kiwe.manager.ui.login
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -30,14 +36,11 @@ class SignUpViewModel
                 },
             )
 
-        fun onLoginClick() =
-            intent {
-//                val id = state.id
-//                val password = state.password
-//                val token = loginUseCase(id, password).getOrThrow()
-//                setTokenUseCase(token)
-//        postSideEffect(LoginSideEffect.Toast(message = "token = $token"))
-                postSideEffect(SignUpSideEffect.NavigateToMainActivity)
+        fun onNameChange(name: String) =
+            blockingIntent {
+                reduce {
+                    state.copy(name = name)
+                }
             }
 
         fun onIdChange(id: String) =
@@ -53,18 +56,69 @@ class SignUpViewModel
                     state.copy(password = password)
                 }
             }
+
+        fun onPasswordRepeatChange(repeatPassword: String) =
+            blockingIntent {
+                reduce {
+                    state.copy(passwordRepeat = repeatPassword)
+                }
+            }
+
+        fun onShowPasswordChange() =
+            intent {
+                reduce {
+                    if (!state.showPassword) {
+                        state.copy(
+                            showPassword = true,
+                            passwordImageVector = Icons.Filled.Visibility,
+                            passwordVisualTransformation = VisualTransformation.None,
+                        )
+                    } else {
+                        state.copy(
+                            showPassword = false,
+                            passwordImageVector = Icons.Filled.VisibilityOff,
+                            passwordVisualTransformation = PasswordVisualTransformation(),
+                        )
+                    }
+                }
+            }
+
+        fun onShowPasswordRepeatChange() =
+            intent {
+                reduce {
+                    if (!state.showPasswordRepeat) {
+                        state.copy(
+                            showPasswordRepeat = true,
+                            passwordRepeatImageVector = Icons.Filled.Visibility,
+                            passwordRepeatVisualTransformation = VisualTransformation.None,
+                        )
+                    } else {
+                        state.copy(
+                            showPasswordRepeat = false,
+                            passwordRepeatImageVector = Icons.Filled.VisibilityOff,
+                            passwordRepeatVisualTransformation = PasswordVisualTransformation(),
+                        )
+                    }
+                }
+            }
     }
 
 @Immutable
 data class SignUpState(
+    val name: String = "",
     val id: String = "",
     val password: String = "",
+    val passwordRepeat: String = "",
+    val showPassword: Boolean = false,
+    val passwordImageVector: ImageVector = Icons.Filled.VisibilityOff,
+    val passwordRepeatImageVector: ImageVector = Icons.Filled.VisibilityOff,
+    val passwordVisualTransformation: VisualTransformation = VisualTransformation.None,
+    val passwordRepeatVisualTransformation: VisualTransformation = VisualTransformation.None,
+    val showPasswordRepeat: Boolean = false,
 )
 
 sealed interface SignUpSideEffect {
     class Toast(
         val message: String,
     ) : SignUpSideEffect
-
-    object NavigateToMainActivity : SignUpSideEffect
 }

@@ -2,14 +2,18 @@ package com.kiwe.manager.ui.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.kiwe.manager.R
 
@@ -18,6 +22,9 @@ fun LoginTextField(
     value: String,
     placeHolderText: String,
     onValueChange: (String) -> Unit,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    imageVector: ImageVector?,
+    onIconClick: () -> Unit = {}
 ) {
     TextField(
         modifier = Modifier.fillMaxWidth(),
@@ -35,5 +42,19 @@ fun LoginTextField(
             ),
         onValueChange = onValueChange,
         placeholder = { Text(text = placeHolderText) },
+        visualTransformation = visualTransformation,
+        trailingIcon = {
+            imageVector?.let {
+                IconButton(
+                    onClick = onIconClick
+                ) {
+                    Icon(
+                        imageVector = it,
+                        contentDescription = "텍스트 필드 우측 아이콘",
+                    )
+                }
+
+            }
+        },
     )
 }

@@ -113,4 +113,6 @@ dependencies {
 
     // Compose Constraint Layout
     implementation(libs.androidx.constraintlayout.compose.android)
+    // compose icon
+    implementation(libs.androidx.material.icons.extended)
 }
