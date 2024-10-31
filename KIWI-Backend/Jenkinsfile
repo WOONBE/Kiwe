@@ -30,8 +30,9 @@ pipeline {
                     def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
                     def Commit_Message = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
 
-                    // 모든 커밋 메시지 가져오기
-                    def allCommits = sh(script: "git log --pretty=format:'%h - %s (%an)' $env.GIT_PREVIOUS_SUCCESSFUL_COMMIT..HEAD", returnStdout: true).trim()
+                    // 이전 커밋을 확인하고 기본값을 설정
+                    def previousCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT ?: 'HEAD'
+                    def allCommits = sh(script: "git log --pretty=format:'%h - %s (%an)' ${previousCommit}..HEAD", returnStdout: true).trim()
                     def formattedCommits = allCommits.split('\\n').collect { line ->
                         def escapedLine = line.replaceAll("([\\[\\]\\(\\)])", '\\\\$1')
                         "• ${escapedLine}"
@@ -63,11 +64,15 @@ pipeline {
         }
         stage('Prepare Config') {
             steps {
-                withCredentials([file(credentialsId: 'kiwi-application-properties', variable: 'CONFIG_FILE')]) {
+                withCredentials([
+                    file(credentialsId: 'kiwi-application-properties', variable: 'CONFIG_FILE'),
+                    file(credentialsId: 'kiwi-application-dev-properties', variable: 'CONFIG_DEV_FILE')
+                ]) {
                     sh '''
                         mkdir -p KIWI-Backend/src/main/resources
                         chmod -R 755 KIWI-Backend/src/main/resources
-                        cp $CONFIG_FILE KIWI-Backend/src/main/resources/application.yml
+                        cp $CONFIG_FILE KIWI-Backend/src/main/resources/application.properties
+                        cp $CONFIG_DEV_FILE KIWI-Backend/src/main/resources/application-dev.properties
                     '''
                 }
             }
