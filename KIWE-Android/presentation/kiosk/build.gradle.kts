@@ -104,4 +104,7 @@ dependencies {
 
     // timber
     implementation(libs.jakewharton.timber)
+
+    // Compose Constraint Layout
+    implementation(libs.androidx.constraintlayout.compose.android)
 }
