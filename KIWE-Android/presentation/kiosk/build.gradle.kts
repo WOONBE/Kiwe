@@ -101,4 +101,8 @@ dependencies {
     // detekt
     implementation(libs.detekt.gradle)
     detektPlugins(libs.detekt.formatting)
+
+    // lottie
+    implementation(libs.lottie)
+    implementation(libs.lottie.compose)
 }
