@@ -8,6 +8,7 @@ import com.d205.KIWI_Backend.kiosk.repository.KioskRepository;
 import com.d205.KIWI_Backend.global.exception.BadRequestException;
 import com.d205.KIWI_Backend.member.domain.Member; // Member import 추가
 import com.d205.KIWI_Backend.member.repository.MemberRepository;
+import com.d205.KIWI_Backend.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ public class KioskService {
 
     private final KioskRepository kioskRepository;
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     @Transactional
     public KioskResponse createKiosk(KioskRequest request) {
@@ -62,4 +64,36 @@ public class KioskService {
             .map(KioskResponse::fromKiosk)
             .toList();
     }
+
+    @Transactional(readOnly = true)
+    public List<KioskResponse> getMyKiosks() {
+        Integer currentMemberId = memberService.getCurrentMemberId();
+
+        // 현재 사용자의 ID로 Member 조회
+        Member owner = memberRepository.findById(currentMemberId)
+            .orElseThrow(() -> new BadRequestException(ExceptionCode.NOT_FOUND_MEMBER_ID));
+
+        // owner와 연관된 모든 키오스크 조회
+        return kioskRepository.findByMember(owner).stream()
+            .map(KioskResponse::fromKiosk)
+            .toList();
+    }
+
+    @Transactional
+    public KioskResponse updateMyKiosk(Integer kioskId, KioskRequest request) {
+        Integer currentMemberId = memberService.getCurrentMemberId();  // 현재 사용자 ID 조회
+        Kiosk kiosk = kioskRepository.findById(kioskId)
+            .orElseThrow(() -> new BadRequestException(ExceptionCode.NOT_FOUND_KIOSK_ID));
+
+        if (!kiosk.getMember().getId().equals(currentMemberId)) {
+            throw new BadRequestException(ExceptionCode.NOT_VALID_UPDATE_KIOSK); // 권한이 없는 경우 예외 발생
+        }
+
+        kiosk.updateLocation(request.getLocation());
+        kiosk.updateStatus(request.getStatus());
+
+        Kiosk updatedKiosk = kioskRepository.save(kiosk);
+        return KioskResponse.fromKiosk(updatedKiosk);
+    }
+
 }

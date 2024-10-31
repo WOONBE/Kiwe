@@ -96,4 +96,22 @@ public class MemberController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping
+    @Operation(summary = "자신의 정보 조회", description = "자신의 정보를 조회하는 API")
+    public ResponseEntity<MemberResponse> findMemberById() {
+        Integer currentMemberId = memberService.getCurrentMemberId();
+        MemberResponse memberResponse = memberService.findMemberById(currentMemberId);
+        return ResponseEntity.ok(memberResponse);
+    }
+    // 회원 정보 업데이트
+    @PutMapping
+    @Operation(summary = "자신의 정보 수정", description = "자신의 정보를 수정하는 API")
+    public ResponseEntity<MemberResponse> updateMemberInfo(@RequestBody MemberRequest memberRequest) {
+        Integer currentMemberId = memberService.getCurrentMemberId();
+        MemberResponse updatedMember = memberService.updateMemberInfo(currentMemberId, memberRequest);
+        return ResponseEntity.ok(updatedMember);
+    }
+
+
 }

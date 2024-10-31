@@ -30,7 +30,7 @@ public enum ExceptionCode {
 
     NOT_VALID_REFRESH_TOKEN(1011, "유효한 refresh token이 아닙니다."),
 
-    FAIL_TO_GENERATE_RANDOM_NICKNAME(1012, "랜덤한 닉네임을 생성하는데 실패하였습니다."),
+    NOT_VALID_UPDATE_KIOSK(1012, "수정가능한 키오스크가 아닙니다."),
 
     DUPLICATED_MEMBER_NICKNAME(1013, "중복된 닉네임입니다."),
 

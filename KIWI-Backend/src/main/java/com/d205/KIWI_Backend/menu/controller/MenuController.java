@@ -27,7 +27,7 @@ public class MenuController {
     }
 
     // 메뉴 전체 조회
-    @GetMapping
+    @GetMapping("/all")
     @Operation(summary = "메뉴 전체 조회", description = "메뉴를 전체 조회하는 API")
     public ResponseEntity<List<MenuResponse>> getAllMenus() {
         List<MenuResponse> responses = menuService.getAllMenus();
