@@ -17,6 +17,7 @@ pipeline {
                     env.CONTAINER_URL = props['CONTAINER_URL']
                     env.NGINX_CONTAINER_NAME = props['NGINX_CONTAINER_NAME']
                     env.NGINX_CONFIG_PATH = props['NGINX_CONFIG_PATH']
+                    env.DEPLOY_LOG_PATH = props['DEPLOY_LOG_PATH']
                     env.MATTERMOST_CHANNEL_NAME = props['MATTERMOST_CHANNEL_NAME']
                     env.MATTERMOST_WEBHOOK_URL = props['MATTERMOST_WEBHOOK_URL']
                     env.DOCKER_NETWORK = props['DOCKER_NETWORK']
