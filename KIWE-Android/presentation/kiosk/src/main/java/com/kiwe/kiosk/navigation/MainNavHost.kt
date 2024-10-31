@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.kiwe.kiosk.screen.intro.IntroScreen
+import com.kiwe.kiosk.ui.screen.intro.IntroScreen
 
 @Composable
 fun MainNavHost() {
