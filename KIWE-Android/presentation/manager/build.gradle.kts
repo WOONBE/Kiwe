@@ -66,7 +66,6 @@ android {
 
 dependencies {
     implementation(project(":domain"))
-    implementation(project(":data"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -103,4 +102,12 @@ dependencies {
     // detekt
     implementation(libs.detekt.gradle)
     detektPlugins(libs.detekt.formatting)
+
+    // Splash API
+    implementation(libs.splash)
+
+    // Compose Constraint Layout
+    implementation(libs.androidx.constraintlayout.compose.android)
+    // compose icon
+    implementation(libs.androidx.material.icons.extended)
 }
