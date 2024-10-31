@@ -24,7 +24,7 @@ fun LoginTextField(
     onValueChange: (String) -> Unit,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     imageVector: ImageVector?,
-    onIconClick: () -> Unit = {}
+    onIconClick: () -> Unit = {},
 ) {
     TextField(
         modifier = Modifier.fillMaxWidth(),
@@ -46,14 +46,13 @@ fun LoginTextField(
         trailingIcon = {
             imageVector?.let {
                 IconButton(
-                    onClick = onIconClick
+                    onClick = onIconClick,
                 ) {
                     Icon(
                         imageVector = it,
                         contentDescription = "텍스트 필드 우측 아이콘",
                     )
                 }
-
             }
         },
     )

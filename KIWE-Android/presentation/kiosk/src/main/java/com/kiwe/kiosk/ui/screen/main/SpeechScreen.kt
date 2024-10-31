@@ -1,5 +1,6 @@
 package com.kiwe.kiosk.ui.screen.main
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -28,14 +29,21 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainViewModel
+import com.kiwe.kiosk.ui.screen.utils.rotatedScreenSize
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
-fun SpeechScreen(viewModel: MainViewModel) {
+fun SpeechScreen(
+    viewModel: MainViewModel,
+    rotationAngle: Float,
+    configuration: Configuration,
+) {
     val state = viewModel.collectAsState().value
 
     SpeechScreen(
+        rotationAngle = rotationAngle,
+        configuration = configuration,
         isDialogOpen = state.isRecording,
         onDismissRequest = viewModel::onDismissSpeechDialog,
         commandText = "\"차가운 아메리카노 한잔 주세요\"",
@@ -44,6 +52,8 @@ fun SpeechScreen(viewModel: MainViewModel) {
 
 @Composable
 private fun SpeechScreen(
+    rotationAngle: Float,
+    configuration: Configuration,
     isDialogOpen: Boolean,
     onDismissRequest: () -> Unit,
     commandText: String,
@@ -63,6 +73,7 @@ private fun SpeechScreen(
         Surface(
             modifier =
                 Modifier
+                    .rotatedScreenSize(rotationAngle, configuration)
                     .fillMaxSize()
                     .background(
                         brush =
@@ -88,7 +99,7 @@ private fun SpeechScreen(
                             .padding(16.dp)
                             .fillMaxSize(),
                 ) {
-                    Spacer(modifier = Modifier.weight(1.4f))
+                    Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = commandText,
                         color = Color.White,
@@ -116,6 +127,8 @@ private fun SpeechScreen(
 fun SpeechScreenPreview() {
     KIWEAndroidTheme {
         SpeechScreen(
+            0f,
+            Configuration(),
             isDialogOpen = true,
             onDismissRequest = {},
             commandText = "dicat",

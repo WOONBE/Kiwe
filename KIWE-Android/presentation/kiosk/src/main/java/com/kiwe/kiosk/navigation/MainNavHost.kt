@@ -1,11 +1,13 @@
 package com.kiwe.kiosk.navigation
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,11 +22,18 @@ import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 fun MainNavHost() {
     val navController = rememberNavController()
     val mainViewModel: MainViewModel = viewModel()
+    val configuration = LocalConfiguration.current
+    val rotationAngle =
+        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) -90f else 0f
+
     Surface {
         Scaffold(
             content = { padding ->
                 NavHost(
-                    modifier = Modifier.background(KioskBackgroundBrush).padding(padding),
+                    modifier =
+                        Modifier
+                            .background(KioskBackgroundBrush)
+                            .padding(padding),
                     navController = navController,
                     startDestination = MainRoute.MENU.route,
                 ) {
@@ -32,10 +41,18 @@ fun MainNavHost() {
                         IntroScreen()
                     }
                     composable(route = MainRoute.MENU.route) {
-                        MenuScreen(viewModel = mainViewModel)
+                        MenuScreen(
+                            viewModel = mainViewModel,
+                            rotationAngle = rotationAngle,
+                            configuration = configuration,
+                        )
                     }
                 }
-                SpeechScreen(viewModel = mainViewModel)
+                SpeechScreen(
+                    viewModel = mainViewModel,
+                    rotationAngle = rotationAngle,
+                    configuration = configuration,
+                )
             },
         )
     }
