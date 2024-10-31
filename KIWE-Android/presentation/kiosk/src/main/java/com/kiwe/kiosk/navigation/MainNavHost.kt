@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.kiwe.kiosk.ui.screen.intro.IntroScreen
+import com.kiwe.kiosk.ui.screen.order.OrderScreen
 
 @Composable
 fun MainNavHost() {
@@ -19,10 +20,13 @@ fun MainNavHost() {
                 NavHost(
                     modifier = Modifier.padding(padding),
                     navController = navController,
-                    startDestination = MainRoute.INTRO.route,
+                    startDestination = MainRoute.ORDER.route,
                 ) {
                     composable(route = MainRoute.INTRO.route) {
                         IntroScreen()
+                    }
+                    composable(route = MainRoute.ORDER.route) {
+                        OrderScreen()
                     }
                 }
             },

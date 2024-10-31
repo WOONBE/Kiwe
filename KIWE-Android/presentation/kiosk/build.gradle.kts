@@ -101,4 +101,7 @@ dependencies {
     // detekt
     implementation(libs.detekt.gradle)
     detektPlugins(libs.detekt.formatting)
+
+    // timber
+    implementation(libs.jakewharton.timber)
 }
