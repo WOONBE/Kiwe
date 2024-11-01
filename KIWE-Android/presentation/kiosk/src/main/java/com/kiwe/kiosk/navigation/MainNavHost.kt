@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.intro.IntroScreen
+import com.kiwe.kiosk.ui.screen.order.OrderScreen
 import com.kiwe.kiosk.ui.screen.main.SpeechScreen
 import com.kiwe.kiosk.ui.screen.menu.MenuScreen
 import com.kiwe.kiosk.ui.screen.utils.rotatedScreenSize
@@ -41,6 +42,9 @@ fun MainNavHost() {
                 ) {
                     composable(route = MainRoute.INTRO.route) {
                         IntroScreen()
+                    }
+                    composable(route = MainRoute.ORDER.route) {
+                        OrderScreen()
                     }
                     composable(route = MainRoute.MENU.route) {
                         MenuScreen(
