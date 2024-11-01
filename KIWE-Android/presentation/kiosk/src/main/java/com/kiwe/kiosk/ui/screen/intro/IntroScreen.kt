@@ -1,4 +1,4 @@
-package com.kiwe.kiosk.screen.intro
+package com.kiwe.kiosk.ui.screen.intro
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface

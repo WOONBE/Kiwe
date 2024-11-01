@@ -46,7 +46,7 @@ public class KioskController {
     }
 
     // 모든 키오스크 조회
-    @GetMapping
+    @GetMapping("/all")
     @Operation(summary = "키오스크 전체 조회", description = "키오스크 정보를 전체 조회하는 API")
     public ResponseEntity<List<KioskResponse>> getAllKiosks() {
         List<KioskResponse> kiosks = kioskService.getAllKiosks();
@@ -63,5 +63,22 @@ public class KioskController {
         } catch (JsonProcessingException e) {
             return ResponseEntity.badRequest().build(); // 비밀번호 불일치 또는 기타 예외 처리
         }
+    }
+
+    @GetMapping
+    @Operation(summary = "나의 키오스크 목록 조회", description = "로그인한 사용자의 키오스크 목록을 조회하는 API")
+    public ResponseEntity<List<KioskResponse>> getMyKiosks() {
+        List<KioskResponse> myKiosks = kioskService.getMyKiosks();
+        return ResponseEntity.ok(myKiosks);
+    }
+
+    @PutMapping("/my/{kioskId}")
+    @Operation(summary = "나의 키오스크 정보 수정", description = "로그인한 사용자가 자신의 키오스크 정보를 수정하는 API")
+    public ResponseEntity<KioskResponse> updateMyKiosk(
+        @PathVariable Integer kioskId,
+        @RequestBody KioskRequest kioskRequest) {
+
+        KioskResponse updatedKiosk = kioskService.updateMyKiosk(kioskId, kioskRequest);
+        return ResponseEntity.ok(updatedKiosk);
     }
 }

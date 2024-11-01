@@ -52,7 +52,7 @@ fun LoginAppBar() {
             ) {
                 Image(
                     modifier = Modifier.layoutId("logoImage"),
-                    painter = painterResource(R.mipmap.ic_launcher_foreground),
+                    painter = painterResource(R.drawable.logo),
                     contentDescription = "로고",
                 )
                 Text(

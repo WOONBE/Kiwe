@@ -3,7 +3,7 @@ import io.gitlab.arturbosch.detekt.DetektCreateBaselineTask
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
@@ -16,12 +16,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.kiwe.kiosk"
         minSdk = 28
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -106,4 +101,8 @@ dependencies {
     // detekt
     implementation(libs.detekt.gradle)
     detektPlugins(libs.detekt.formatting)
+
+    // lottie
+    implementation(libs.lottie)
+    implementation(libs.lottie.compose)
 }
