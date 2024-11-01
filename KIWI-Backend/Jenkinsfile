@@ -1,0 +1,209 @@
+pipeline {
+    agent any
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('docker_hub_token')
+        KIWI_ENV = credentials('jenkins_kiwi_backend.env') // secretfile 가져오기
+    }
+    stages {
+        stage('Load Environment Variables') {
+            steps {
+                script {
+                    def props = readProperties(file: env.KIWI_ENV)
+                    env.DOCKER_REPO = props['DOCKER_REPO']
+                    env.DOCKER_TAG = props['DOCKER_TAG']
+                    env.DOCKER_IMAGE = props['DOCKER_IMAGE']
+                    env.BLUE_PORT = props['BLUE_PORT']
+                    env.GREEN_PORT = props['GREEN_PORT']
+                    env.CONTAINER_NAME_BLUE = props['CONTAINER_NAME_BLUE']
+                    env.CONTAINER_NAME_GREEN = props['CONTAINER_NAME_GREEN']
+                    env.CONTAINER_URL = props['CONTAINER_URL']
+                    env.NGINX_CONTAINER_NAME = props['NGINX_CONTAINER_NAME']
+                    env.NGINX_CONFIG_PATH = props['NGINX_CONFIG_PATH']
+                    env.DEPLOY_LOG_PATH = props['DEPLOY_LOG_PATH']
+                    env.MATTERMOST_CHANNEL_NAME = props['MATTERMOST_CHANNEL_NAME']
+                    env.MATTERMOST_WEBHOOK_URL = props['MATTERMOST_WEBHOOK_URL']
+                    env.DOCKER_NETWORK = props['DOCKER_NETWORK']
+                }
+            }
+        }
+        stage('Notify Build Start') {
+            steps {
+                script {
+                    def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+                    def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+                    def Commit_Message = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+
+                    // 이전 커밋을 확인하고 기본값을 설정
+                    def previousCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT ?: 'HEAD'
+                    def allCommits = sh(script: "git log --pretty=format:'%h - %s (%an)' ${previousCommit}..HEAD", returnStdout: true).trim()
+                    def formattedCommits = allCommits.split('\\n').collect { line ->
+                        def escapedLine = line.replaceAll("([\\[\\]\\(\\)])", '\\\\$1')
+                        "• ${escapedLine}"
+                    }.join('\\n')
+                    def message = """
+                        #### 🌐BE 빌드 시작
+                        **빌드 번호** $env.JOB_NAME #$env.BUILD_NUMBER
+                        **브랜치:** $env.GIT_BRANCH
+                        **작성자:** $Author_ID ($Author_Name)
+                        **빌드 URL:** [Details]($env.BUILD_URL)
+                        **포함된 커밋:**
+                        $formattedCommits
+                    """.stripIndent()
+
+                    mattermostSend(
+                        color: '#439FE0',
+                        message: message,
+                        endpoint: "$MATTERMOST_WEBHOOK_URL",
+                        channel: "$MATTERMOST_CHANNEL_NAME",
+                        icon: 'https://jenkins.io/images/logos/jenkins/jenkins.png'
+                    )
+                }
+            }
+        }
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Prepare Config') {
+            steps {
+                withCredentials([
+                    file(credentialsId: 'kiwi-application-properties', variable: 'CONFIG_FILE'),
+                    file(credentialsId: 'kiwi-application-dev-properties', variable: 'CONFIG_DEV_FILE')
+                ]) {
+                    sh '''
+                        mkdir -p KIWI-Backend/src/main/resources
+                        chmod -R 755 KIWI-Backend/src/main/resources
+                        cp $CONFIG_FILE KIWI-Backend/src/main/resources/application.properties
+                        cp $CONFIG_DEV_FILE KIWI-Backend/src/main/resources/application-dev.properties
+                    '''
+                }
+            }
+        }
+        stage('Build & Test') {
+            steps {
+                sh 'cd KIWI-Backend && chmod +x gradlew && ./gradlew clean build'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'cd KIWI-Backend && docker build -t $DOCKER_IMAGE .'
+                }
+            }
+        }
+        stage('Login to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker_hub_token', usernameVariable: 'DOCKER_HUB_CREDENTIALS_USR', passwordVariable: 'DOCKER_HUB_CREDENTIALS_PSW')]) {
+                        sh 'docker login -u $DOCKER_HUB_CREDENTIALS_USR -p $DOCKER_HUB_CREDENTIALS_PSW'
+                    }
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    sh 'docker push $DOCKER_IMAGE'
+                }
+            }
+        }
+        stage('Deploy and Update Nginx') {
+            steps {
+                script {
+                    sshPublisher(
+                        publishers: [
+                            sshPublisherDesc(
+                                configName: 'D205-Server',
+                                transfers: [
+                                    sshTransfer(
+                                        execCommand: """
+                                            set -x  # 디버깅 모드 활성화
+                                            exec > >(tee $DEPLOY_LOG_PATH) 2>&1
+                                            docker pull $DOCKER_IMAGE
+                                            container_id=\$(docker ps -q --filter name=$CONTAINER_NAME_BLUE)
+                                            echo "컨테이너 ID: \$container_id"
+                                            if [[ \$(docker ps -q --filter name=$CONTAINER_NAME_BLUE) ]]; then
+                                                NEW_PORT=$GREEN_PORT
+                                                NEW_NAME=$CONTAINER_NAME_GREEN
+                                                OLD_NAME=$CONTAINER_NAME_BLUE
+                                                CURRENT_PORT=$BLUE_PORT
+                                            else
+                                                NEW_PORT=$BLUE_PORT
+                                                NEW_NAME=$CONTAINER_NAME_BLUE
+                                                OLD_NAME=$CONTAINER_NAME_GREEN
+                                                CURRENT_PORT=$GREEN_PORT
+                                            fi
+
+                                            # 새 컨테이너가 이미 존재하는지 확인
+                                            if [[ \$(docker ps -aq --filter name=\$NEW_NAME) ]]; then
+                                                # 기존 컨테이너 중지 후 제거
+                                                docker stop \$NEW_NAME
+                                                docker rm \$NEW_NAME
+                                            fi
+                                            # 새 이미지로 컨테이너 생성
+                                            docker run -d --name \$NEW_NAME --network $DOCKER_NETWORK -p \$NEW_PORT:8080 $DOCKER_IMAGE
+
+                                            sleep 30
+                                            if curl -sf -m 10 http://localhost:\$NEW_PORT/actuator/health > /dev/null; then
+                                                # Update Nginx config
+                                                sed -i "s/server \$NEW_NAME:8080 down;/server \$NEW_NAME:8080;/" $NGINX_CONFIG_PATH
+                                                sed -i "s/server \$OLD_NAME:8080;/server \$OLD_NAME:8080 down;/" $NGINX_CONFIG_PATH
+                                                # Restart Nginx container
+                                                docker restart $NGINX_CONTAINER_NAME
+                                                # Stop old container (not remove)
+                                                docker stop \$OLD_NAME
+                                                echo "Switched to new version on port \$NEW_PORT and updated Nginx"
+                                                exit 0
+                                            else
+                                                docker stop \$NEW_NAME
+                                                echo "Deployment failed, keeping old version"
+                                                exit 1
+                                            fi
+                                        """
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                }
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+                def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+                def Commit_Message = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                def Build_Status = currentBuild.result ?: 'SUCCESS'
+                def Status_Color = Build_Status == 'SUCCESS' ? 'good' : (Build_Status == 'UNSTABLE' ? 'warning' : 'danger')
+                def Status_Text = Build_Status == 'SUCCESS' ? '빌드 성공' : (Build_Status == 'UNSTABLE' ? '빌드 불안정' : '빌드 실패')
+
+                // 이전 커밋을 확인하고 기본값을 설정
+                def previousCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT ?: 'HEAD'
+                def allCommits = sh(script: "git log --pretty=format:'%h - %s (%an)' ${previousCommit}..HEAD", returnStdout: true).trim()
+                def formattedCommits = allCommits.split('\\n').collect { line ->
+                    def escapedLine = line.replaceAll("([\\[\\]\\(\\)])", '\\\\$1')
+                    "• ${escapedLine}"
+                }.join('\\n')
+
+                def message = """
+                    #### 🌐BE $Status_Text
+                    **빌드 번호** $env.JOB_NAME #$env.BUILD_NUMBER
+                    **작성자:** $Author_ID ($Author_Name)
+                    **빌드 URL:** [Details]($env.BUILD_URL)
+                    **포함된 커밋:**
+                    $formattedCommits
+                """.stripIndent()
+                mattermostSend(
+                    color: Status_Color,
+                    message: message,
+                    endpoint: "$env.MATTERMOST_WEBHOOK_URL",
+                    channel: "$env.MATTERMOST_CHANNEL_NAME",
+                    icon: 'https://jenkins.io/images/logos/jenkins/jenkins.png'
+                )
+            }
+        }
+    }
+}

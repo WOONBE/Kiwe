@@ -1,5 +1,6 @@
 package com.d205.KIWI_Backend.global.config;
 
+import com.d205.KIWI_Backend.menu.dto.MenuResponse;
 import java.time.Duration;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;

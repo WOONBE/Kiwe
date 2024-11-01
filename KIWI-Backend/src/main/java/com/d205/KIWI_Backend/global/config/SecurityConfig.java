@@ -14,26 +14,32 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-@EnableMethodSecurity    // 추가
+
+@EnableMethodSecurity
 @RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationEntryPoint entryPoint;
 
-    private final String[] allowedUrls = {"/", "/swagger-ui/**", "/v3/**", "/members/register","/members/sign-in"};
+    private final String[] allowedUrls = {
+            "/",
+            "/swagger-ui/**",
+            "/v3/**",
+            "/members/register",
+            "/members/sign-in",
+            "/actuator/**"
+    };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(CsrfConfigurer<HttpSecurity>::disable)
                 .headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin))
-                .authorizeHttpRequests(requests ->
-//                        requests.anyRequest().permitAll()
-                        requests
-                            .requestMatchers(allowedUrls).permitAll()  // 허용할 URL 목록을 배열로 분리했다
-                                .requestMatchers(PathRequest.toH2Console()).permitAll()
-                                .anyRequest().authenticated()
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers(allowedUrls).permitAll()
+                        // H2 Console 관련 설정 제거
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -47,5 +53,4 @@ public class SecurityConfig {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }
