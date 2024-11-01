@@ -16,6 +16,7 @@ import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.intro.IntroScreen
 import com.kiwe.kiosk.ui.screen.main.SpeechScreen
 import com.kiwe.kiosk.ui.screen.menu.MenuScreen
+import com.kiwe.kiosk.ui.screen.utils.rotatedScreenSize
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 
 @Composable
@@ -32,6 +33,7 @@ fun MainNavHost() {
                 NavHost(
                     modifier =
                         Modifier
+                            .rotatedScreenSize(rotationAngle, configuration)
                             .background(KioskBackgroundBrush)
                             .padding(padding),
                     navController = navController,
@@ -43,8 +45,6 @@ fun MainNavHost() {
                     composable(route = MainRoute.MENU.route) {
                         MenuScreen(
                             viewModel = mainViewModel,
-                            rotationAngle = rotationAngle,
-                            configuration = configuration,
                         )
                     }
                 }

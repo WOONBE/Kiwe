@@ -1,6 +1,5 @@
 package com.kiwe.kiosk.ui.screen.menu
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,36 +16,23 @@ import androidx.compose.ui.unit.dp
 import com.kiwe.domain.model.Category
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.menu.component.MenuCategory
-import com.kiwe.kiosk.ui.screen.utils.rotatedScreenSize
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
-fun MenuScreen(
-    viewModel: MainViewModel,
-    rotationAngle: Float,
-    configuration: Configuration,
-) {
+fun MenuScreen(viewModel: MainViewModel) {
     val state = viewModel.collectAsState().value
     MenuScreen(
         category = state.category,
-        rotationAngle,
-        configuration,
     )
 }
 
 @Composable
-private fun MenuScreen(
-    category: List<Category>,
-    rotationAngle: Float,
-    configuration: Configuration,
-) {
+private fun MenuScreen(category: List<Category>) {
     Column(
         modifier =
-            Modifier
-                .rotatedScreenSize(rotationAngle, configuration)
-                .background(KioskBackgroundBrush),
+            Modifier.background(KioskBackgroundBrush),
     ) {
         LazyVerticalGrid(
             GridCells.Fixed(2),
@@ -72,6 +58,6 @@ private fun MenuScreen(
 @Composable
 fun MenuScreenPreview() {
     KIWEAndroidTheme {
-        MenuScreen(emptyList(), 0f, Configuration())
+        MenuScreen(emptyList())
     }
 }
