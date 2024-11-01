@@ -1,0 +1,109 @@
+pipeline {
+    agent any
+    environment {
+        KIWI_ANDROID_ENV = credentials('jenkins_kiwi_android.env')
+        JAVA_HOME = '/opt/java/openjdk'
+        ANDROID_HOME = '/opt/android-sdk'
+        PATH = "$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH"
+    }
+    stages {
+        stage('Load Environment Variables') {
+            steps {
+                script {
+                    def props = readProperties file: "${KIWI_ANDROID_ENV}"
+                    env.MATTERMOST_CHANNEL_NAME = props.MATTERMOST_CHANNEL_NAME
+                    env.MATTERMOST_WEBHOOK_URL = props.MATTERMOST_WEBHOOK_URL
+                    env.NGINX_CONTAINER_NAME = props.NGINX_CONTAINER_NAME
+                    env.DIST_PATH = props.DIST_PATH
+                    env.REMOVE_PREFIX = props.REMOVE_PREFIX
+                    env.HOST_PATH = props.HOST_PATH
+                }
+            }
+        }
+        stage('Environment Check') {
+            steps {
+                sh '''
+                    echo "Java version:"
+                    java -version
+                    echo "Android SDK location:"
+                    echo $ANDROID_HOME
+                    echo "Platform tools version:"
+                    $ANDROID_HOME/platform-tools/adb version
+                '''
+            }
+        }
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Prepare Config') {
+            steps {
+                withCredentials([file(credentialsId: 'kiwi-android-properties', variable: 'CONFIG_FILE')]) {
+                    sh '''
+                        chmod -R 755 KIWE-Android
+                        cp $CONFIG_FILE KIWE-Android/local.properties
+                    '''
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                script {
+                    sh '''
+                        cd KIWE-Android
+                        chmod +x gradlew
+                        ./gradlew clean assembleDebug --stacktrace
+                    '''
+                }
+            }
+        }
+        stage('Archive APK') {
+            steps {
+                archiveArtifacts artifacts: 'KIWE-Android/app/kiosk/build/outputs/apk/debug/*.apk', fingerprint: true
+                script {
+                    sh '''
+                        cd KIWE-Android/app/kiosk/build/outputs/apk/debug
+                        ls -la
+                    '''
+                }
+            }
+        }
+        stage('Transfer') {
+            steps {
+                sshPublisher(
+                    publishers: [
+                        sshPublisherDesc(
+                            configName: 'D205-Server',
+                            transfers: [
+                                sshTransfer(
+                                    sourceFiles: "${DIST_PATH}",
+                                    removePrefix: "${REMOVE_PREFIX}",
+                                    remoteDirectory: "${HOST_PATH}",
+                                )
+                            ],
+                            usePromotionTimestamp: false,
+                            alwaysPublishFromMaster: false
+                        )
+                    ]
+                )
+            }
+        }
+        stage('Deploy') {
+            steps {
+                script {
+                    sh "docker restart ${NGINX_CONTAINER_NAME}"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build successful'
+        }
+        failure {
+            echo 'Build failed'
+        }
+    }
+}
