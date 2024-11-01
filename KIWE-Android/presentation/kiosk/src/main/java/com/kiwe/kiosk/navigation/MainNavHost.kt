@@ -56,7 +56,6 @@ fun MainNavHost() {
                             MenuScreen(
                                 viewModel = mainViewModel,
                                 onCategoryClick = {
-                                    // String
                                     navController.navigate(MainRoute.MENU.route)
                                 },
                             )
