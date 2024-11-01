@@ -11,6 +11,10 @@ pipeline {
             steps {
                 script {
                     def props = readProperties file: "${KIWI_ENV}"
+                    // Mattermost 관련 환경변수 추가
+                    env.MATTERMOST_CHANNEL_NAME = props.MATTERMOST_CHANNEL_NAME
+                    env.MATTERMOST_WEBHOOK_URL = props.MATTERMOST_WEBHOOK_URL
+                    // 기존 환경변수들
                     env.DIST_PATH = props.DIST_PATH
                     env.REMOVE_PREFIX = props.REMOVE_PREFIX
                     env.HOST_PATH = props.HOST_PATH
