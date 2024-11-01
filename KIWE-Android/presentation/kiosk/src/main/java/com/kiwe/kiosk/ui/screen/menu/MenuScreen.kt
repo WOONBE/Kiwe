@@ -50,9 +50,9 @@ private fun MenuScreen(category: List<Category>) {
                 GridCells.Fixed(2),
                 modifier =
                     Modifier
+                        .padding(12.dp)
                         .fillMaxSize()
-                        .wrapContentSize()
-                        .padding(12.dp),
+                        .wrapContentSize(),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {

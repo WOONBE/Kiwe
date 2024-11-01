@@ -33,7 +33,7 @@ fun MenuCategory(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
+                .shadow(elevation = 10.dp, shape = RoundedCornerShape(20.dp))
                 .clip(RoundedCornerShape(20.dp)),
     ) {
         Column(

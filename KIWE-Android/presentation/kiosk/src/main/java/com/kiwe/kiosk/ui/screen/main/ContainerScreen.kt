@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -58,7 +58,7 @@ private fun ContainerScreen(
         topBar = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 StepIndicator(1)
-                Box(modifier = Modifier.clip(RoundedCornerShape(30.dp))) {
+                Box(modifier = Modifier.clip(CircleShape)) {
                     Image(
                         modifier =
                             Modifier
@@ -66,7 +66,7 @@ private fun ContainerScreen(
                                 .height(200.dp),
                         painter =
                             rememberAsyncImagePainter(
-                                model = R.mipmap.ic_launcher,
+                                model = R.drawable.ic_launcher_playstore,
                                 contentScale = ContentScale.Crop,
                             ),
                         contentDescription = "logo",

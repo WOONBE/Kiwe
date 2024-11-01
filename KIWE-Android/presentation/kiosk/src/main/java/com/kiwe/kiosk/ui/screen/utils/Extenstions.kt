@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 fun Modifier.rotatedScreenSize(
     rotationAngle: Float,
     configuration: Configuration,
-    xOffsetDefault: Dp = 336.dp,
+    xOffsetDefault: Dp = 576.dp,
 ): Modifier {
     val screenWidth =
         if (rotationAngle == -90f) {
