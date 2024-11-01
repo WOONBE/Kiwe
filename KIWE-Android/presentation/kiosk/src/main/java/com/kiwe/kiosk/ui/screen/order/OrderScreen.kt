@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,10 +35,16 @@ import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
-fun OrderScreen(viewModel: OrderViewModel = hiltViewModel()) {
+fun OrderScreen(
+    viewModel: OrderViewModel = hiltViewModel(),
+    onEnterScreen: (Int) -> Unit,
+) {
     val itemStatus = viewModel.collectAsState()
     val orderList = itemStatus.value.orderItem.chunked(6)
     val animationScope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        onEnterScreen(1)
+    }
     val pagerState =
         rememberPagerState(pageCount = {
             orderList.size
@@ -153,5 +160,5 @@ private fun OrderListScreen(orderItemList: List<List<OrderItem>>) {
 @Preview
 @Composable
 private fun OrderScreenPreview() {
-    OrderScreen(viewModel = hiltViewModel())
+    OrderScreen(viewModel = hiltViewModel(), onEnterScreen = {})
 }

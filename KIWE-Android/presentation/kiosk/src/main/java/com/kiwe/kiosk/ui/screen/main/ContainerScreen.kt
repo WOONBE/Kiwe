@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
@@ -63,13 +64,11 @@ private fun ContainerScreen(
     Scaffold(
         topBar = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                StepIndicator(1)
-                Box(modifier = Modifier.clip(CircleShape)) {
+                StepIndicator(page)
+                Box(modifier = Modifier.clip(CircleShape).size(68.dp).padding(vertical = 8.dp)) {
                     Image(
                         modifier =
-                            Modifier
-                                .width(200.dp)
-                                .height(200.dp),
+                            Modifier.fillMaxSize(),
                         painter =
                             rememberAsyncImagePainter(
                                 model = R.drawable.ic_launcher_playstore,
@@ -116,7 +115,7 @@ fun PreviousButton(
             modifier = Modifier.fillMaxWidth(),
             text = "이전으로",
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.titleLarge.copy(fontSize = 68.sp),
+            style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
         )
     }
 }
@@ -124,23 +123,25 @@ fun PreviousButton(
 @Composable
 fun StepIndicator(currentStep: Int) {
     val steps = listOf("메뉴", "주문", "결제", "확인")
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-                .padding(top = 12.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        steps.forEachIndexed { index, step ->
-            StepItem(
-                title = step,
-                isActive = index == currentStep,
-                isFirst = index == 0,
-                isLast = index == steps.size - 1,
-                modifier = Modifier.weight(1f),
-            )
+    if (currentStep >= 0) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
+                    .padding(top = 12.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            steps.forEachIndexed { index, step ->
+                StepItem(
+                    title = step,
+                    isActive = index == currentStep,
+                    isFirst = index == 0,
+                    isLast = index == steps.size - 1,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }
@@ -164,7 +165,7 @@ fun StepItem(
         Canvas(
             modifier =
                 Modifier
-                    .height(100.dp)
+                    .height(48.dp)
                     .fillMaxWidth()
                     .padding(horizontal = 2.dp),
         ) {
@@ -184,7 +185,7 @@ fun StepItem(
         Text(
             text = title,
             color = textColor,
-            style = MaterialTheme.typography.titleLarge.copy(fontSize = 60.sp),
+            style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
         )
     }
 }
