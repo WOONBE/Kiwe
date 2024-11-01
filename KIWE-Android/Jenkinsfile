@@ -11,31 +11,10 @@ pipeline {
             steps {
                 script {
                     def props = readProperties file: "${KIWI_ENV}"
-                    env.MATTERMOST_CHANNEL_NAME = props.MATTERMOST_CHANNEL_NAME
-                    env.MATTERMOST_WEBHOOK_URL = props.MATTERMOST_WEBHOOK_URL
-                    env.NGINX_CONTAINER_NAME = props.NGINX_CONTAINER_NAME
                     env.DIST_PATH = props.DIST_PATH
                     env.REMOVE_PREFIX = props.REMOVE_PREFIX
                     env.HOST_PATH = props.HOST_PATH
-
-                    // 환경변수 확인 로그
-                    echo "Loaded environment variables:"
-                    echo "DIST_PATH: ${env.DIST_PATH}"
-                    echo "REMOVE_PREFIX: ${env.REMOVE_PREFIX}"
-                    echo "HOST_PATH: ${env.HOST_PATH}"
                 }
-            }
-        }
-        stage('Environment Check') {
-            steps {
-                sh '''
-                    echo "Java version:"
-                    java -version
-                    echo "Android SDK location:"
-                    echo $ANDROID_HOME
-                    echo "Platform tools version:"
-                    $ANDROID_HOME/platform-tools/adb version
-                '''
             }
         }
         stage('Checkout') {
@@ -55,54 +34,28 @@ pipeline {
         }
         stage('Build') {
             steps {
-                script {
-                    sh '''
-                        cd KIWE-Android
-                        chmod +x gradlew
-                        ./gradlew clean assembleDebug --stacktrace
-                    '''
-                }
-            }
-        }
-        stage('Archive APK') {
-            steps {
-                archiveArtifacts artifacts: 'KIWE-Android/app/kiosk/build/outputs/apk/debug/*.apk', fingerprint: true
-                script {
-                    sh '''
-                        cd KIWE-Android/app/kiosk/build/outputs/apk/debug
-                        ls -la
-                    '''
-                }
+                sh '''
+                    cd KIWE-Android
+                    chmod +x gradlew
+                    ./gradlew clean assembleDebug
+                '''
             }
         }
         stage('Transfer') {
             steps {
-                script {
-                    // 현재 작업 디렉토리 및 파일 확인
-                    sh '''
-                        pwd
-                        echo "Checking APK file before transfer:"
-                        ls -l KIWE-Android/app/kiosk/build/outputs/apk/debug/
-                    '''
-                }
                 sshPublisher(
                     publishers: [
                         sshPublisherDesc(
                             configName: 'D205-Server',
                             transfers: [
                                 sshTransfer(
-                                    sourceFiles: '**/kiosk-debug.apk',         // 수정된 부분
-                                    remoteDirectory: 'dev/nginx/android/apk',  // 수정된 부분
-                                    removePrefix: 'KIWE-Android/app/kiosk/build/outputs/apk/debug',
-                                    execCommand: '''
-                                        echo "Checking transferred APK file:"
-                                        ls -l /home/ubuntu/dev/nginx/android/apk/
-                                    '''
+                                    sourceFiles: '**/kiosk-debug.apk',
+                                    remoteDirectory: 'dev/nginx/android/apk',
+                                    removePrefix: 'KIWE-Android/app/kiosk/build/outputs/apk/debug'
                                 )
                             ],
                             usePromotionTimestamp: false,
-                            useWorkspaceInPromotion: false,
-                            verbose: true
+                            useWorkspaceInPromotion: false
                         )
                     ]
                 )
@@ -110,11 +63,29 @@ pipeline {
         }
     }
     post {
-        success {
-            echo 'Build and deployment successful'
-        }
-        failure {
-            echo 'Build or deployment failed'
+        always {
+            script {
+                def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+                def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+                def Build_Status = currentBuild.result ?: 'SUCCESS'
+                def Status_Color = Build_Status == 'SUCCESS' ? 'good' : (Build_Status == 'UNSTABLE' ? 'warning' : 'danger')
+                def Status_Text = Build_Status == 'SUCCESS' ? '빌드 성공' : (Build_Status == 'UNSTABLE' ? '빌드 불안정' : '빌드 실패')
+
+
+                def message = """
+                    #### 👨‍💻Android ${Status_Text}
+                    **APK 다운로드:** [apk-debug](http://k11d205.p.ssafy.io/android/apk/kiosk-debug.apk)
+                    **apk-debug:** ${env.JOB_NAME} #${env.BUILD_NUMBER}
+                    **빌드 URL:** [Details](${env.BUILD_URL})
+                """.stripIndent()
+                mattermostSend(
+                    color: Status_Color,
+                    message: message,
+                    endpoint: "${env.MATTERMOST_WEBHOOK_URL}",
+                    channel: "${env.MATTERMOST_CHANNEL_NAME}",
+                    icon: 'https://jenkins.io/images/logos/jenkins/jenkins.png'
+                )
+            }
         }
     }
 }
