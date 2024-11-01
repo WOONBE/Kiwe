@@ -53,8 +53,8 @@ pipeline {
                     mattermostSend(
                         color: '#439FE0',
                         message: message,
-                        endpoint: "$env.MATTERMOST_WEBHOOK_URL",
-                        channel: "$env.MATTERMOST_CHANNEL_NAME",
+                        endpoint: "$MATTERMOST_WEBHOOK_URL",
+                        channel: "$MATTERMOST_CHANNEL_NAME",
                         icon: 'https://jenkins.io/images/logos/jenkins/jenkins.png'
                     )
                 }
@@ -136,11 +136,11 @@ pipeline {
                                             fi
                                             docker run -d --name \$NEW_NAME --network $DOCKER_NETWORK -p \$NEW_PORT:8080 $DOCKER_IMAGE
 
-                                            sleep 10
+                                            sleep 30
                                             if curl -sf -m 10 http://localhost:\$NEW_PORT/actuator/health > /dev/null; then
                                                 # Update Nginx config
-                                                sed -i "s/server $CONTAINER_URL:\$NEW_PORT down;/server $CONTAINER_URL:\$NEW_PORT;/" $NGINX_CONFIG_PATH
-                                                sed -i "s/server $CONTAINER_URL:\$CURRENT_PORT;/server $CONTAINER_URL:\$CURRENT_PORT down;/" $NGINX_CONFIG_PATH
+                                                sed -i "s/server \$NEW_NAME:8080 down;/server \$NEW_NAME:8080;/" $NGINX_CONFIG_PATH
+                                                sed -i "s/server \$OLD_NAME:8080;/server \$OLD_NAME:8080 down;/" $NGINX_CONFIG_PATH
                                                 # Restart Nginx container
                                                 docker restart $NGINX_CONTAINER_NAME
                                                 # Stop and remove old container
