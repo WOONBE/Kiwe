@@ -4,14 +4,22 @@ import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_MEN
 
 import com.d205.KIWI_Backend.global.exception.BadRequestException;
 import com.d205.KIWI_Backend.global.exception.ExceptionCode;
+import com.d205.KIWI_Backend.log.domain.ViewCount;
+import com.d205.KIWI_Backend.log.service.MenuStatisticsService;
 import com.d205.KIWI_Backend.menu.domain.Menu;
 import com.d205.KIWI_Backend.menu.domain.MenuCategory;
 import com.d205.KIWI_Backend.menu.dto.MenuRequest;
 import com.d205.KIWI_Backend.menu.dto.MenuResponse;
+import com.d205.KIWI_Backend.menu.dto.MenuViewResponse;
 import com.d205.KIWI_Backend.menu.repository.MenuRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +32,13 @@ import java.util.stream.Collectors;
 public class MenuService {
 
     private final MenuRepository menuRepository;
+    private final MenuStatisticsService menuStatisticsService;
+    private final Logger logger = LoggerFactory.getLogger(MenuService.class);
+
+    private final ObjectMapper objectMapper;
+
+    @Value("${server.image.base-url}")
+    private String defaultUrl;
 
     // 메뉴 단건 등록
 //    @Transactional
@@ -71,14 +86,21 @@ public class MenuService {
             .collect(Collectors.toList());
     }
 
-    // 메뉴 단건 조회
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "menus", key = "#id", sync = true, cacheManager = "rcm")
+//    @Cacheable(cacheNames = "menu_one", key = "#id", sync = true, cacheManager = "rcm")
     public MenuResponse getMenuById(Integer id) {
-        return menuRepository.findById(id)
-            .map(MenuResponse::fromMenu) // 변경된 부분
+        Menu menu = menuRepository.findById(id)
             .orElseThrow(() -> new BadRequestException(NOT_FOUND_MENU));
+
+        // 로그 기록
+        logger.info("메뉴 조회: ID={}, 이름={}", menu.getId(), menu.getName());
+
+        // MenuResponse로 변환
+        return MenuResponse.fromMenu(menu); // 수정된 부분
     }
+
+
+
 
     // 메뉴 단건 수정
     @Transactional
@@ -132,4 +154,25 @@ public class MenuService {
             .map(MenuResponse::fromMenu)
             .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public List<MenuViewResponse> getAllMenusWithViewCounts() { // 수정된 부분
+        List<Menu> menus = menuRepository.findAll();
+
+        // MenuStatisticsService에서 조회 수를 가져옴
+        List<ViewCount> viewCounts = menuStatisticsService.getMenuViewCounts();
+
+        // ViewCounts를 요청 URI에 따라 맵핑하여 접근 용이하게 함
+        Map<String, Integer> viewCountMap = viewCounts.stream()
+            .collect(Collectors.toMap(ViewCount::getRequestURI, ViewCount::getViewCount));
+
+        return menus.stream()
+            .map(menu -> {
+                int viewCount = viewCountMap.getOrDefault(defaultUrl+menu.getImgPath(), 0);
+                return MenuViewResponse.fromMenuWithViewCount(menu, viewCount); // 수정된 부분
+            })
+            .collect(Collectors.toList());
+    }
+
+
 }
