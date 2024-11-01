@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        KIWI_ANDROID_ENV = credentials('jenkins_kiwi_android.env')
+        CREWIN_ENV = credentials('jenkins_kiwi_android.env')
         JAVA_HOME = '/opt/java/openjdk'
         ANDROID_HOME = '/opt/android-sdk'
         PATH = "$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH"
@@ -10,13 +10,19 @@ pipeline {
         stage('Load Environment Variables') {
             steps {
                 script {
-                    def props = readProperties file: "${KIWI_ANDROID_ENV}"
+                    def props = readProperties file: "${CREWIN_ENV}"
                     env.MATTERMOST_CHANNEL_NAME = props.MATTERMOST_CHANNEL_NAME
                     env.MATTERMOST_WEBHOOK_URL = props.MATTERMOST_WEBHOOK_URL
                     env.NGINX_CONTAINER_NAME = props.NGINX_CONTAINER_NAME
                     env.DIST_PATH = props.DIST_PATH
                     env.REMOVE_PREFIX = props.REMOVE_PREFIX
                     env.HOST_PATH = props.HOST_PATH
+
+                    // 환경변수 확인 로그
+                    echo "Loaded environment variables:"
+                    echo "DIST_PATH: ${env.DIST_PATH}"
+                    echo "REMOVE_PREFIX: ${env.REMOVE_PREFIX}"
+                    echo "HOST_PATH: ${env.HOST_PATH}"
                 }
             }
         }
@@ -71,19 +77,31 @@ pipeline {
         }
         stage('Transfer') {
             steps {
+                script {
+                    // 전송 전 파일 존재 확인
+                    sh '''
+                        echo "Checking APK file before transfer:"
+                        ls -l KIWE-Android/app/kiosk/build/outputs/apk/debug/
+                    '''
+                }
                 sshPublisher(
                     publishers: [
                         sshPublisherDesc(
                             configName: 'D205-Server',
                             transfers: [
                                 sshTransfer(
-                                    sourceFiles: "${DIST_PATH}",
-                                    removePrefix: "${REMOVE_PREFIX}",
-                                    remoteDirectory: "${HOST_PATH}",
+                                    sourceFiles: "${env.DIST_PATH}",
+                                    removePrefix: "${env.REMOVE_PREFIX}",
+                                    remoteDirectory: "${env.HOST_PATH}",
+                                    execCommand: '''
+                                        echo "Checking transferred APK file:"
+                                        ls -l /home/ubuntu/dev/nginx/android/apk/
+                                    '''
                                 )
                             ],
                             usePromotionTimestamp: false,
-                            alwaysPublishFromMaster: false
+                            useWorkspaceInPromotion: false,
+                            verbose: true
                         )
                     ]
                 )
@@ -92,18 +110,24 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    sh "docker restart ${NGINX_CONTAINER_NAME}"
+                    // 컨테이너 상태 확인 후 재시작
+                    sh """
+                        echo "Checking nginx container status:"
+                        docker ps | grep ${env.NGINX_CONTAINER_NAME} || echo "Container not found"
+
+                        echo "Attempting to restart nginx container:"
+                        docker restart ${env.NGINX_CONTAINER_NAME} || echo "Failed to restart container"
+                    """
                 }
             }
         }
     }
-
     post {
         success {
-            echo 'Build successful'
+            echo 'Build and deployment successful'
         }
         failure {
-            echo 'Build failed'
+            echo 'Build or deployment failed'
         }
     }
 }
