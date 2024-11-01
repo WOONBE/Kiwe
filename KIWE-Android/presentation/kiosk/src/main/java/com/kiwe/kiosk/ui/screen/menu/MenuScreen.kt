@@ -9,15 +9,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kiwe.domain.model.Category
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.menu.component.MenuCategory
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
-import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
@@ -30,25 +33,35 @@ fun MenuScreen(viewModel: MainViewModel) {
 
 @Composable
 private fun MenuScreen(category: List<Category>) {
-    Column(
+    Surface(
         modifier =
-            Modifier.background(KioskBackgroundBrush),
+            Modifier
+                .background(Color(0xFFF9F9F9))
+                .clip(RoundedCornerShape(30.dp))
+                .padding(horizontal = 40.dp),
     ) {
-        LazyVerticalGrid(
-            GridCells.Fixed(2),
+        Column(
             modifier =
                 Modifier
-                    .fillMaxSize()
-                    .wrapContentSize()
-                    .padding(20.dp),
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+                    .background(Color(0xFFF9F9F9))
+                    .clip(RoundedCornerShape(30.dp)),
         ) {
-            items(category.size) { idx ->
-                MenuCategory(
-                    categoryImage = category[idx].categoryImage,
-                    categoryName = category[idx].categoryName,
-                )
+            LazyVerticalGrid(
+                GridCells.Fixed(2),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .wrapContentSize()
+                        .padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+            ) {
+                items(category.size) { idx ->
+                    MenuCategory(
+                        categoryImage = category[idx].categoryImage,
+                        categoryName = category[idx].categoryName,
+                    )
+                }
             }
         }
     }

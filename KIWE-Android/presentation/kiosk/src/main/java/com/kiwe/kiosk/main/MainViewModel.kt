@@ -62,7 +62,7 @@ class MainViewModel
 
 data class MainState(
     val page: Int = 0,
-    val mode: MainEnum.KioskMode = MainEnum.KioskMode.MANUAL,
+    val mode: MainEnum.KioskMode = MainEnum.KioskMode.ASSIST,
     val isRecording: Boolean = true,
     val category: List<Category> = emptyList(),
 ) : BaseState

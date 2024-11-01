@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,7 +32,7 @@ fun MenuCategory(
     Box(
         modifier =
             Modifier
-                .width(360.dp)
+                .fillMaxWidth()
                 .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
                 .clip(RoundedCornerShape(20.dp)),
     ) {
@@ -59,10 +58,10 @@ fun MenuCategory(
                 )
             }
             Text(
-                modifier = Modifier.fillMaxWidth().padding(top = 14.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                 text = categoryName,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 84.sp),
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 64.sp),
             )
         }
     }
