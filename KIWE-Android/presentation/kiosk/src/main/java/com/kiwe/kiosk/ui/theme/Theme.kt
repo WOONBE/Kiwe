@@ -3,6 +3,7 @@ package com.kiwe.kiosk.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val LightColorScheme =
     lightColorScheme(
@@ -23,7 +24,10 @@ private val LightColorScheme =
 @Composable
 fun KIWEAndroidTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = LightColorScheme,
+        colorScheme =
+            LightColorScheme.copy(
+                background = Color.Transparent,
+            ),
         typography = Typography,
         content = content,
     )

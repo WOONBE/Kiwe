@@ -2,13 +2,13 @@ package com.kiwe.kiosk.ui.screen.menu.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,12 +29,15 @@ import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 fun MenuCategory(
     categoryImage: String,
     categoryName: String,
+    onCategoryClick: (String) -> Unit = {},
 ) {
     Box(
         modifier =
             Modifier
-                .width(360.dp)
-                .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
+                .fillMaxWidth()
+                .clickable {
+                    onCategoryClick(categoryName)
+                }.shadow(elevation = 10.dp, shape = RoundedCornerShape(20.dp))
                 .clip(RoundedCornerShape(20.dp)),
     ) {
         Column(
@@ -59,10 +62,10 @@ fun MenuCategory(
                 )
             }
             Text(
-                modifier = Modifier.fillMaxWidth().padding(top = 14.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                 text = categoryName,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 84.sp),
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 64.sp),
             )
         }
     }
