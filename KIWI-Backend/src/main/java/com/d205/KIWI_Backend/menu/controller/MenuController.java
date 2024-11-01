@@ -2,6 +2,7 @@ package com.d205.KIWI_Backend.menu.controller;
 
 import com.d205.KIWI_Backend.menu.dto.MenuRequest;
 import com.d205.KIWI_Backend.menu.dto.MenuResponse;
+import com.d205.KIWI_Backend.menu.dto.MenuViewResponse;
 import com.d205.KIWI_Backend.menu.service.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -64,5 +65,11 @@ public class MenuController {
     public ResponseEntity<List<MenuResponse>> getMenusByCategory(@RequestParam String category) {
         List<MenuResponse> responses = menuService.getMenusByCategory(category);
         return new ResponseEntity<>(responses, HttpStatus.OK);
+    }
+
+    @GetMapping("/view-counts") // 해당 메서드에 대한 GET 요청 경로
+    public ResponseEntity<List<MenuViewResponse>> getAllMenusWithViewCounts() {
+        List<MenuViewResponse> menuViewResponses = menuService.getAllMenusWithViewCounts();
+        return ResponseEntity.ok(menuViewResponses); // 200 OK 응답 반환
     }
 }

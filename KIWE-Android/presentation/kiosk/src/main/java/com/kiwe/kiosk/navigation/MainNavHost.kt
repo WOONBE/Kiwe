@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.intro.IntroScreen
 import com.kiwe.kiosk.ui.screen.main.ContainerScreen
+import com.kiwe.kiosk.ui.screen.order.OrderScreen
 import com.kiwe.kiosk.ui.screen.main.SpeechScreen
 import com.kiwe.kiosk.ui.screen.menu.MenuScreen
 import com.kiwe.kiosk.ui.screen.utils.rotatedScreenSize
@@ -45,6 +46,9 @@ fun MainNavHost() {
                             IntroScreen()
                         }
                     }
+                    composable(route = MainRoute.ORDER.route) {
+                        OrderScreen()
+                    }
                     composable(route = MainRoute.MENU.route) {
                         ContainerScreen(
                             viewModel = mainViewModel,
@@ -56,7 +60,7 @@ fun MainNavHost() {
                             MenuScreen(
                                 viewModel = mainViewModel,
                                 onCategoryClick = {
-                                    navController.navigate(MainRoute.MENU.route)
+                                    navController.navigate(MainRoute.ORDER.route)
                                 },
                             )
                         }

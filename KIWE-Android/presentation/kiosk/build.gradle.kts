@@ -102,7 +102,14 @@ dependencies {
     implementation(libs.detekt.gradle)
     detektPlugins(libs.detekt.formatting)
 
+    // timber
+    implementation(libs.jakewharton.timber)
+
+    // Compose Constraint Layout
+    implementation(libs.androidx.constraintlayout.compose.android)
+
     // lottie
     implementation(libs.lottie)
     implementation(libs.lottie.compose)
+
 }
