@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        CREWIN_ENV = credentials('jenkins_kiwi_android.env')
+        KIWI_ENV = credentials('jenkins_kiwi_android.env')
         JAVA_HOME = '/opt/java/openjdk'
         ANDROID_HOME = '/opt/android-sdk'
         PATH = "$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH"
@@ -10,7 +10,7 @@ pipeline {
         stage('Load Environment Variables') {
             steps {
                 script {
-                    def props = readProperties file: "${CREWIN_ENV}"
+                    def props = readProperties file: "${KIWI_ENV}"
                     env.MATTERMOST_CHANNEL_NAME = props.MATTERMOST_CHANNEL_NAME
                     env.MATTERMOST_WEBHOOK_URL = props.MATTERMOST_WEBHOOK_URL
                     env.NGINX_CONTAINER_NAME = props.NGINX_CONTAINER_NAME
@@ -78,8 +78,9 @@ pipeline {
         stage('Transfer') {
             steps {
                 script {
-                    // 전송 전 파일 존재 확인
+                    // 현재 작업 디렉토리 및 파일 확인
                     sh '''
+                        pwd
                         echo "Checking APK file before transfer:"
                         ls -l KIWE-Android/app/kiosk/build/outputs/apk/debug/
                     '''
@@ -90,9 +91,9 @@ pipeline {
                             configName: 'D205-Server',
                             transfers: [
                                 sshTransfer(
-                                    sourceFiles: "${env.DIST_PATH}",
-                                    removePrefix: "${env.REMOVE_PREFIX}",
-                                    remoteDirectory: "${env.HOST_PATH}",
+                                    sourceFiles: '**/kiosk-debug.apk',         // 수정된 부분
+                                    remoteDirectory: 'dev/nginx/android/apk',  // 수정된 부분
+                                    removePrefix: 'KIWE-Android/app/kiosk/build/outputs/apk/debug',
                                     execCommand: '''
                                         echo "Checking transferred APK file:"
                                         ls -l /home/ubuntu/dev/nginx/android/apk/
@@ -105,20 +106,6 @@ pipeline {
                         )
                     ]
                 )
-            }
-        }
-        stage('Deploy') {
-            steps {
-                script {
-                    // 컨테이너 상태 확인 후 재시작
-                    sh """
-                        echo "Checking nginx container status:"
-                        docker ps | grep ${env.NGINX_CONTAINER_NAME} || echo "Container not found"
-
-                        echo "Attempting to restart nginx container:"
-                        docker restart ${env.NGINX_CONTAINER_NAME} || echo "Failed to restart container"
-                    """
-                }
             }
         }
     }
