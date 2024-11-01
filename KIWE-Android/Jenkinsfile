@@ -1,0 +1,94 @@
+pipeline {
+    agent any
+    environment {
+        KIWI_ENV = credentials('jenkins_kiwi_android.env')
+        JAVA_HOME = '/opt/java/openjdk'
+        ANDROID_HOME = '/opt/android-sdk'
+        PATH = "$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH"
+    }
+    stages {
+        stage('Load Environment Variables') {
+            steps {
+                script {
+                    def props = readProperties file: "${KIWI_ENV}"
+                    // Mattermost 관련 환경변수 추가
+                    env.MATTERMOST_CHANNEL_NAME = props.MATTERMOST_CHANNEL_NAME
+                    env.MATTERMOST_WEBHOOK_URL = props.MATTERMOST_WEBHOOK_URL
+                    // 기존 환경변수들
+                    env.DIST_PATH = props.DIST_PATH
+                    env.REMOVE_PREFIX = props.REMOVE_PREFIX
+                    env.HOST_PATH = props.HOST_PATH
+                }
+            }
+        }
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Prepare Config') {
+            steps {
+                withCredentials([file(credentialsId: 'kiwi-android-properties', variable: 'CONFIG_FILE')]) {
+                    sh '''
+                        chmod -R 755 KIWE-Android
+                        cp $CONFIG_FILE KIWE-Android/local.properties
+                    '''
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                sh '''
+                    cd KIWE-Android
+                    chmod +x gradlew
+                    ./gradlew clean assembleDebug
+                '''
+            }
+        }
+        stage('Transfer') {
+            steps {
+                sshPublisher(
+                    publishers: [
+                        sshPublisherDesc(
+                            configName: 'D205-Server',
+                            transfers: [
+                                sshTransfer(
+                                    sourceFiles: '**/kiosk-debug.apk',
+                                    remoteDirectory: 'dev/nginx/android/apk',
+                                    removePrefix: 'KIWE-Android/app/kiosk/build/outputs/apk/debug'
+                                )
+                            ],
+                            usePromotionTimestamp: false,
+                            useWorkspaceInPromotion: false
+                        )
+                    ]
+                )
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+                def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+                def Build_Status = currentBuild.result ?: 'SUCCESS'
+                def Status_Color = Build_Status == 'SUCCESS' ? 'good' : (Build_Status == 'UNSTABLE' ? 'warning' : 'danger')
+                def Status_Text = Build_Status == 'SUCCESS' ? '빌드 성공' : (Build_Status == 'UNSTABLE' ? '빌드 불안정' : '빌드 실패')
+
+
+                def message = """
+                    #### 👨‍💻Android ${Status_Text}
+                    **APK 다운로드:** [apk-debug](http://k11d205.p.ssafy.io/android/apk/kiosk-debug.apk)
+                    **빌드 URL:** [Details](${env.BUILD_URL})
+                """.stripIndent()
+                mattermostSend(
+                    color: Status_Color,
+                    message: message,
+                    endpoint: "${env.MATTERMOST_WEBHOOK_URL}",
+                    channel: "${env.MATTERMOST_CHANNEL_NAME}",
+                    icon: 'https://jenkins.io/images/logos/jenkins/jenkins.png'
+                )
+            }
+        }
+    }
+}
