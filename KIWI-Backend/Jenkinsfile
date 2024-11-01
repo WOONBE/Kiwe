@@ -191,7 +191,6 @@ pipeline {
                 def message = """
                     #### 🌐BE $Status_Text
                     **빌드 번호** $env.JOB_NAME #$env.BUILD_NUMBER
-                    **브랜치:** $env.GIT_BRANCH
                     **작성자:** $Author_ID ($Author_Name)
                     **빌드 URL:** [Details]($env.BUILD_URL)
                     **포함된 커밋:**
