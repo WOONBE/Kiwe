@@ -79,7 +79,6 @@ pipeline {
                 def message = """
                     #### 👨‍💻Android ${Status_Text}
                     **APK 다운로드:** [apk-debug](http://k11d205.p.ssafy.io/android/apk/kiosk-debug.apk)
-                    **apk-debug:** ${env.JOB_NAME} #${env.BUILD_NUMBER}
                     **빌드 URL:** [Details](${env.BUILD_URL})
                 """.stripIndent()
                 mattermostSend(
