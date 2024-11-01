@@ -2,6 +2,7 @@ package com.kiwe.kiosk.ui.screen.menu.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -28,12 +29,15 @@ import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 fun MenuCategory(
     categoryImage: String,
     categoryName: String,
+    onCategoryClick: (String) -> Unit = {},
 ) {
     Box(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .shadow(elevation = 10.dp, shape = RoundedCornerShape(20.dp))
+                .clickable {
+                    onCategoryClick(categoryName)
+                }.shadow(elevation = 10.dp, shape = RoundedCornerShape(20.dp))
                 .clip(RoundedCornerShape(20.dp)),
     ) {
         Column(

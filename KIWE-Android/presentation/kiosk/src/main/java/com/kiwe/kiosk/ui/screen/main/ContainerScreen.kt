@@ -13,9 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,6 +25,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role.Companion.Button
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,12 +41,14 @@ import org.orbitmvi.orbit.compose.collectAsState
 @Composable
 fun ContainerScreen(
     viewModel: MainViewModel,
+    onBackClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
     ContainerScreen(
         page = state.page,
         mode = state.mode,
+        onBackClick = onBackClick,
         content = content,
     )
 }
@@ -52,6 +57,7 @@ fun ContainerScreen(
 private fun ContainerScreen(
     page: Int,
     mode: MainEnum.KioskMode,
+    onBackClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     Scaffold(
@@ -75,7 +81,7 @@ private fun ContainerScreen(
             }
         },
         content = {
-            Surface(
+            Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
@@ -87,9 +93,32 @@ private fun ContainerScreen(
             )
         },
         bottomBar = {
-            StepIndicator(page)
+            PreviousButton(onBackClick = onBackClick, page)
         },
     )
+}
+
+@Composable
+fun PreviousButton(
+    onBackClick: () -> Unit,
+    page: Int,
+) {
+    Button(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 120.dp, vertical = 20.dp),
+        onClick = onBackClick,
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF2e7d32),
+                contentColor = Color.White,
+            ),
+    ) {
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = "이전으로",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleLarge.copy(fontSize = 68.sp),
+        )
+    }
 }
 
 @Composable
@@ -164,6 +193,11 @@ fun StepItem(
 @Preview
 fun ContainerScreenPreview() {
     KIWEAndroidTheme {
-        ContainerScreen(0, MainEnum.KioskMode.ASSIST, content = {})
+        ContainerScreen(
+            page = 0,
+            mode = MainEnum.KioskMode.MANUAL,
+            onBackClick = {},
+            content = {},
+        )
     }
 }

@@ -33,6 +33,13 @@ class MainViewModel
                 }
             }
 
+        fun onBackBtnClick() =
+            intent {
+                reduce {
+                    state.copy(page = state.page - 1)
+                }
+            }
+
         fun getMenuCategory() =
             intent {
                 val category =

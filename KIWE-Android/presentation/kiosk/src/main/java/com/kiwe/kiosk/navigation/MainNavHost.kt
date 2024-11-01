@@ -40,6 +40,7 @@ fun MainNavHost() {
                     composable(route = MainRoute.INTRO.route) {
                         ContainerScreen(
                             viewModel = mainViewModel,
+                            onBackClick = {},
                         ) {
                             IntroScreen()
                         }
@@ -47,9 +48,17 @@ fun MainNavHost() {
                     composable(route = MainRoute.MENU.route) {
                         ContainerScreen(
                             viewModel = mainViewModel,
+                            onBackClick = {
+                                mainViewModel.onBackBtnClick()
+                                navController.navigateUp()
+                            },
                         ) {
                             MenuScreen(
                                 viewModel = mainViewModel,
+                                onCategoryClick = {
+                                    // String
+                                    navController.navigate(MainRoute.MENU.route)
+                                },
                             )
                         }
                     }

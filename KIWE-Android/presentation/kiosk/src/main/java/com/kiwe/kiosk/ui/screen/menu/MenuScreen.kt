@@ -1,20 +1,17 @@
 package com.kiwe.kiosk.ui.screen.menu
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kiwe.domain.model.Category
@@ -24,26 +21,31 @@ import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
-fun MenuScreen(viewModel: MainViewModel) {
+fun MenuScreen(
+    viewModel: MainViewModel,
+    onCategoryClick: (String) -> Unit,
+) {
     val state = viewModel.collectAsState().value
     MenuScreen(
         category = state.category,
+        onCategoryClick = onCategoryClick,
     )
 }
 
 @Composable
-private fun MenuScreen(category: List<Category>) {
-    Surface(
+private fun MenuScreen(
+    category: List<Category>,
+    onCategoryClick: (String) -> Unit,
+) {
+    Box(
         modifier =
             Modifier
-                .background(Color(0xFFF9F9F9))
                 .clip(RoundedCornerShape(30.dp))
                 .padding(horizontal = 40.dp),
     ) {
         Column(
             modifier =
                 Modifier
-                    .background(Color(0xFFF9F9F9))
                     .clip(RoundedCornerShape(30.dp)),
         ) {
             LazyVerticalGrid(
@@ -60,6 +62,7 @@ private fun MenuScreen(category: List<Category>) {
                     MenuCategory(
                         categoryImage = category[idx].categoryImage,
                         categoryName = category[idx].categoryName,
+                        onCategoryClick = onCategoryClick,
                     )
                 }
             }
@@ -71,6 +74,6 @@ private fun MenuScreen(category: List<Category>) {
 @Composable
 fun MenuScreenPreview() {
     KIWEAndroidTheme {
-        MenuScreen(emptyList())
+        MenuScreen(emptyList(), onCategoryClick = {})
     }
 }
