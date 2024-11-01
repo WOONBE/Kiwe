@@ -42,8 +42,6 @@ import com.kiwe.kiosk.R
 import com.kiwe.kiosk.model.ShoppingCartItem
 import org.orbitmvi.orbit.compose.collectAsState
 
-private const val TAG = "ShoppingCartDialog 싸피"
-
 @Composable
 fun ShoppingCartDialog(
     viewModel: ShoppingCartViewModel = hiltViewModel(),
