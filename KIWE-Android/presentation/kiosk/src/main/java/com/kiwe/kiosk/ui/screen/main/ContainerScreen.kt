@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainViewModel
+import com.kiwe.kiosk.ui.screen.main.component.ImageButton
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import com.kiwe.kiosk.utils.MainEnum
@@ -97,7 +99,22 @@ private fun ContainerScreen(
             )
         },
         bottomBar = {
-            if (page > 0) {
+            if (page == 2) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                ) {
+                    ImageButton(
+                        modifier = Modifier.weight(1F),
+                        "이전으로",
+                        R.drawable.arrow_square_left,
+                        R.color.KIWE_gray1,
+                    )
+                    Spacer(Modifier.width(5.dp))
+                    ImageButton(modifier = Modifier.weight(1F), "장바구니", R.drawable.shopping_cart, R.color.KIWE_orange1)
+                    Spacer(Modifier.width(5.dp))
+                    ImageButton(modifier = Modifier.weight(1F), "결제하기", R.drawable.card_pos, R.color.KIWE_green5)
+                }
+            } else if (page > 0) {
                 PreviousButton(onBackClick = onBackClick)
             }
         },
