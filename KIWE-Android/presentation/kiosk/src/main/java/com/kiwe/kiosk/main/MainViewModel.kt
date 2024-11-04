@@ -79,7 +79,7 @@ class MainViewModel
     }
 
 data class MainState(
-    val page: Int = 0, // 아직 0이 메뉴로 되어있는데, 시작화면이 생기면 그걸 0으로 설정한다
+    val page: Int = 0,
     val mode: MainEnum.KioskMode = MainEnum.KioskMode.ASSIST,
     val isRecording: Boolean = true,
     val category: List<Category> = emptyList(),

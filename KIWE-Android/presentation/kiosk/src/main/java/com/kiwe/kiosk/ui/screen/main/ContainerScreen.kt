@@ -64,19 +64,23 @@ private fun ContainerScreen(
     Scaffold(
         topBar = {
             mode // TODO
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                StepIndicator(page)
-                Box(modifier = Modifier.clip(CircleShape).size(68.dp).padding(vertical = 8.dp)) {
-                    Image(
-                        modifier =
-                            Modifier.fillMaxSize(),
-                        painter =
-                            rememberAsyncImagePainter(
-                                model = R.drawable.ic_launcher_playstore,
-                                contentScale = ContentScale.Crop,
-                            ),
-                        contentDescription = "logo",
-                    )
+            if (page > 0) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    StepIndicator(page)
+                    Box(
+                        modifier = Modifier.clip(CircleShape).size(68.dp).padding(vertical = 8.dp),
+                    ) {
+                        Image(
+                            modifier =
+                                Modifier.fillMaxSize(),
+                            painter =
+                                rememberAsyncImagePainter(
+                                    model = R.drawable.ic_launcher_playstore_nobg,
+                                    contentScale = ContentScale.Crop,
+                                ),
+                            contentDescription = "logo",
+                        )
+                    }
                 }
             }
         },
@@ -93,7 +97,9 @@ private fun ContainerScreen(
             )
         },
         bottomBar = {
-            PreviousButton(onBackClick = onBackClick)
+            if (page > 0) {
+                PreviousButton(onBackClick = onBackClick)
+            }
         },
     )
 }
@@ -121,7 +127,7 @@ fun PreviousButton(onBackClick: () -> Unit) {
 @Composable
 fun StepIndicator(currentStep: Int) {
     val steps = listOf("메뉴", "주문", "결제", "확인")
-    if (currentStep >= 0) {
+    if (currentStep > 0) {
         Row(
             modifier =
                 Modifier
@@ -134,7 +140,7 @@ fun StepIndicator(currentStep: Int) {
             steps.forEachIndexed { index, step ->
                 StepItem(
                     title = step,
-                    isActive = index == currentStep,
+                    isActive = index == currentStep - 1,
                     isFirst = index == 0,
                     isLast = index == steps.size - 1,
                     modifier = Modifier.weight(1f),

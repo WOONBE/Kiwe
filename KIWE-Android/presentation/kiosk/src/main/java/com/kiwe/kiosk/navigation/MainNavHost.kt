@@ -17,12 +17,13 @@ import com.kiwe.kiosk.ui.screen.main.ContainerScreen
 import com.kiwe.kiosk.ui.screen.menu.MenuScreen
 import com.kiwe.kiosk.ui.screen.order.OrderScreen
 import com.kiwe.kiosk.ui.screen.speech.SpeechScreen
+import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 fun MainNavHost() {
     val navController = rememberNavController()
     val mainViewModel: MainViewModel = viewModel()
-
+    val state = mainViewModel.collectAsState().value
     Surface {
         Scaffold(
             content = { padding ->
@@ -35,12 +36,16 @@ fun MainNavHost() {
                             Modifier
                                 .padding(padding),
                         navController = navController,
-                        startDestination = MainRoute.MENU.route,
+                        startDestination = MainRoute.INTRO.route,
                         exitTransition = { ExitTransition.None },
                         enterTransition = { EnterTransition.None },
                     ) {
                         composable(route = MainRoute.INTRO.route) {
-                            IntroScreen()
+                            IntroScreen(viewModel = mainViewModel, onEnterScreen = { page ->
+                                mainViewModel.setPage(page)
+                            }, onComfortClick = {}, onHelpClick = {
+                                navController.navigate(MainRoute.MENU.route)
+                            })
                         }
                         composable(route = MainRoute.ORDER.route) {
                             OrderScreen { page ->
@@ -60,8 +65,10 @@ fun MainNavHost() {
                 }
             },
         )
-        SpeechScreen(
-            viewModel = mainViewModel,
-        )
+        if (state.page > 0) {
+            SpeechScreen(
+                viewModel = mainViewModel,
+            )
+        }
     }
 }
