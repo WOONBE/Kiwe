@@ -51,7 +51,8 @@ fun OrderScreen(
         })
     var isDialogOpen by remember { mutableStateOf(true) }
     if (isDialogOpen) {
-        ShoppingCartDialog(onClose = { isDialogOpen = false })
+//        ShoppingCartDialog(onClose = { isDialogOpen = false })
+        OrderListDialog(onClose = { isDialogOpen = false })
     }
 
     val buttonState by remember {
