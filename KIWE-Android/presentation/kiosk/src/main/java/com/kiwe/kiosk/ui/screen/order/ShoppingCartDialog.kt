@@ -97,6 +97,7 @@ fun ShoppingCartDialog(
                         Text(
                             text = "상품을 추가해주세요",
                             textAlign = TextAlign.Center,
+                            color = colorResource(R.color.KIWE_gray1),
                         )
                     }
                 } else {
