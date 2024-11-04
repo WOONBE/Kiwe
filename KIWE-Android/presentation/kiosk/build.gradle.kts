@@ -112,4 +112,6 @@ dependencies {
     implementation(libs.lottie)
     implementation(libs.lottie.compose)
 
+//    // SystemUi
+//    implementation("com.google.accompanist:accompanist-insets:1.0.0")
 }

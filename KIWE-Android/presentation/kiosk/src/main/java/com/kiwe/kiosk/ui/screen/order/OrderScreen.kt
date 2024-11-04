@@ -69,7 +69,7 @@ fun OrderScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1F),
