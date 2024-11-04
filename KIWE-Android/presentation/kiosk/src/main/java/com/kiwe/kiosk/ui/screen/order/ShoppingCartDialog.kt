@@ -30,10 +30,16 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
@@ -41,6 +47,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.model.ShoppingCartItem
+import com.kiwe.kiosk.ui.theme.Typography
+import com.kiwe.kiosk.ui.theme.letterSpacing
 import com.kiwe.kiosk.utils.dropShadow
 import org.orbitmvi.orbit.compose.collectAsState
 
@@ -86,8 +94,10 @@ fun ShoppingCartDialog(
                     ),
             ) {
                 Text(
+                    modifier = Modifier.padding(top = 10.dp),
                     textAlign = TextAlign.Center,
                     text = "장바구니",
+                    style = Typography.titleLarge,
                 )
                 if (state.shoppingCartItem.isEmpty()) {
                     Box(
@@ -147,7 +157,10 @@ fun ShoppingCartDialog(
                                     disabledContentColor = Color.White,
                                 ),
                         ) {
-                            Text("닫기")
+                            Text(
+                                text = "닫기",
+                                style = Typography.bodyLarge,
+                            )
                         }
                         Spacer(modifier = Modifier.weight(0.3F))
                         Button(
@@ -163,7 +176,10 @@ fun ShoppingCartDialog(
                                     disabledContentColor = Color.White,
                                 ),
                         ) {
-                            Text("결제")
+                            Text(
+                                text = "결제",
+                                style = Typography.bodyLarge,
+                            )
                         }
                     }
                 }
@@ -239,18 +255,20 @@ private fun ShoppingCartDataInfo(
     onMinusItem: (String) -> Unit,
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(start = 15.dp),
         verticalArrangement = Arrangement.Top,
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = item.menuTitle,
+                style = Typography.titleSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                color = Color.Black,
             )
             Image(
                 painter = painterResource(R.drawable.close),
@@ -263,25 +281,58 @@ private fun ShoppingCartDataInfo(
                 contentDescription = "삭제 버튼",
             )
         }
-        var menuOption = ""
-        item.option.onEachIndexed { index, entry ->
-            menuOption += "${entry.key}:${entry.value}"
-            if (index != item.option.size - 1) {
-                menuOption += " | "
-            }
-        }
         Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = menuOption,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+            text =
+                buildAnnotatedString {
+                    item.option.onEachIndexed { index, entry ->
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    fontFamily = FontFamily(Font(R.font.pretendard_regular)),
+                                    fontSize = 16.sp,
+                                    letterSpacing = letterSpacing,
+                                ),
+                        ) {
+                            append(entry.key + ":")
+                        }
+
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    fontFamily = FontFamily(Font(R.font.pretendard_semibold)),
+                                    fontSize = 16.sp,
+                                    letterSpacing = letterSpacing,
+                                ),
+                        ) {
+                            append(entry.value)
+                        }
+                        if (index != item.option.size - 1) {
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        fontFamily = FontFamily(Font(R.font.pretendard_regular)),
+                                        fontSize = 16.sp,
+                                        letterSpacing = letterSpacing,
+                                    ),
+                            ) {
+                                append(" | ")
+                            }
+                        }
+                    }
+                },
         )
 
         Row(
+            modifier = Modifier.padding(bottom = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 modifier = Modifier.weight(1F),
                 text = "${item.menuPrice * item.count}원",
+                style = Typography.bodyMedium,
+                color = Color.Black,
             )
             Row(
                 modifier = Modifier.weight(1F),
@@ -311,6 +362,8 @@ private fun ShoppingCartDataInfo(
                 }
                 Text(
                     text = item.count.toString(),
+                    style = Typography.bodySmall,
+                    color = Color.Black,
                 )
                 Image(
                     modifier =
