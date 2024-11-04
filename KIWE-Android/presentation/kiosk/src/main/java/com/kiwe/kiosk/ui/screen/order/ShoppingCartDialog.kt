@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,10 +30,16 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
@@ -40,6 +47,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.model.ShoppingCartItem
+import com.kiwe.kiosk.ui.theme.Typography
+import com.kiwe.kiosk.ui.theme.letterSpacing
+import com.kiwe.kiosk.utils.dropShadow
 import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
@@ -67,6 +77,7 @@ fun ShoppingCartDialog(
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween,
                 modifier =
                     Modifier.background(
                         brush =
@@ -83,16 +94,95 @@ fun ShoppingCartDialog(
                     ),
             ) {
                 Text(
+                    modifier = Modifier.padding(top = 10.dp),
                     textAlign = TextAlign.Center,
                     text = "장바구니",
+                    style = Typography.titleLarge,
                 )
-                ShoppingCartDialog(
-                    state.shoppingCartItem,
-                    onClose,
-                    viewModel::onDeleteItem,
-                    viewModel::onAddItem,
-                    viewModel::onMinusItem,
-                )
+                if (state.shoppingCartItem.isEmpty()) {
+                    Box(
+                        modifier = Modifier.height(LocalConfiguration.current.screenHeightDp.dp * 0.6F),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "상품을 추가해주세요",
+                            textAlign = TextAlign.Center,
+                            color = colorResource(R.color.KIWE_gray1),
+                        )
+                    }
+                } else {
+                    ShoppingCartDialog(
+                        state.shoppingCartItem,
+                        viewModel::onDeleteItem,
+                        viewModel::onAddItem,
+                        viewModel::onMinusItem,
+                    )
+                }
+                Column {
+                    var cost = 0
+                    for (shoppingCartItem in state.shoppingCartItem) {
+                        cost += shoppingCartItem.count * shoppingCartItem.menuPrice
+                    }
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp, vertical = 5.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            "총 ${state.shoppingCartItem.size}건",
+                        )
+
+                        Text("${cost}원")
+                    }
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp, vertical = 5.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Button(
+                            modifier = Modifier.weight(1F),
+                            shape = RoundedCornerShape(10.dp),
+                            onClick = {
+                                onClose()
+                            },
+                            colors =
+                                ButtonColors(
+                                    contentColor = Color.White,
+                                    containerColor = colorResource(R.color.KIWE_gray1),
+                                    disabledContainerColor = colorResource(R.color.KIWE_gray1),
+                                    disabledContentColor = Color.White,
+                                ),
+                        ) {
+                            Text(
+                                text = "닫기",
+                                style = Typography.bodyLarge,
+                            )
+                        }
+                        Spacer(modifier = Modifier.weight(0.3F))
+                        Button(
+                            modifier = Modifier.weight(1F),
+                            enabled = state.shoppingCartItem.isNotEmpty(),
+                            shape = RoundedCornerShape(10.dp),
+                            onClick = {},
+                            colors =
+                                ButtonColors(
+                                    contentColor = Color.White,
+                                    containerColor = colorResource(R.color.KIWE_green5),
+                                    disabledContainerColor = colorResource(R.color.KIWE_silver1),
+                                    disabledContentColor = Color.White,
+                                ),
+                        ) {
+                            Text(
+                                text = "결제",
+                                style = Typography.bodyLarge,
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -101,7 +191,6 @@ fun ShoppingCartDialog(
 @Composable
 private fun ShoppingCartDialog(
     shoppingCartItemList: List<ShoppingCartItem>,
-    onClose: () -> Unit,
     onDeleteItem: (String) -> Unit,
     onAddItem: (String) -> Unit,
     onMinusItem: (String) -> Unit,
@@ -118,76 +207,40 @@ private fun ShoppingCartDialog(
                 ),
         ) {
             items(shoppingCartItemList.size) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                Card(
+                    modifier =
+                        Modifier
+                            .background(Color.Transparent)
+                            .padding(vertical = 10.dp, horizontal = 10.dp)
+                            .dropShadow(
+                                shape = RoundedCornerShape(10.dp),
+                                color = Color.Black.copy(alpha = 0.25F),
+                                offsetX = 2.dp,
+                                offsetY = (2).dp,
+                                spread = 0.dp,
+                            ).clip(RoundedCornerShape(10.dp)),
                 ) {
-                    AsyncImage(
-                        model = shoppingCartItemList[it].menuImgUrl,
-                        contentDescription = "메뉴 이미지 주소",
-                        modifier = Modifier.weight(1F),
-                    )
-                    ShoppingCartDataInfo(
-                        shoppingCartItemList[it],
-                        modifier = Modifier.weight(2F),
-                        onDeleteItem = onDeleteItem,
-                        onAddItem = onAddItem,
-                        onMinusItem = onMinusItem,
-                    )
+                    Row(
+                        modifier =
+                            Modifier
+                                .background(Color.White)
+                                .padding(horizontal = 10.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        AsyncImage(
+                            model = shoppingCartItemList[it].menuImgUrl,
+                            contentDescription = "메뉴 이미지 주소",
+                            modifier = Modifier.weight(1F),
+                        )
+                        ShoppingCartDataInfo(
+                            shoppingCartItemList[it],
+                            modifier = Modifier.weight(2F),
+                            onDeleteItem = onDeleteItem,
+                            onAddItem = onAddItem,
+                            onMinusItem = onMinusItem,
+                        )
+                    }
                 }
-            }
-        }
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp, vertical = 5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                "총 ${shoppingCartItemList.size}건",
-            )
-
-            Text("${cost}원")
-        }
-
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp, vertical = 5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Button(
-                modifier = Modifier.weight(1F),
-                shape = RoundedCornerShape(10.dp),
-                onClick = {
-                    onClose()
-                },
-                colors =
-                    ButtonColors(
-                        contentColor = Color.White,
-                        containerColor = colorResource(R.color.KIWE_gray1),
-                        disabledContainerColor = colorResource(R.color.KIWE_gray1),
-                        disabledContentColor = Color.White,
-                    ),
-            ) {
-                Text("닫기")
-            }
-            Spacer(modifier = Modifier.weight(0.3F))
-            Button(
-                modifier = Modifier.weight(1F),
-                shape = RoundedCornerShape(10.dp),
-                onClick = {},
-                colors =
-                    ButtonColors(
-                        contentColor = Color.White,
-                        containerColor = colorResource(R.color.KIWE_green5),
-                        disabledContainerColor = colorResource(R.color.KIWE_green5),
-                        disabledContentColor = Color.White,
-                    ),
-            ) {
-                Text("결제")
             }
         }
     }
@@ -202,18 +255,20 @@ private fun ShoppingCartDataInfo(
     onMinusItem: (String) -> Unit,
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(start = 15.dp),
         verticalArrangement = Arrangement.Top,
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = item.menuTitle,
+                style = Typography.titleSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                color = Color.Black,
             )
             Image(
                 painter = painterResource(R.drawable.close),
@@ -226,25 +281,58 @@ private fun ShoppingCartDataInfo(
                 contentDescription = "삭제 버튼",
             )
         }
-        var menuOption = ""
-        item.option.onEachIndexed { index, entry ->
-            menuOption += "${entry.key}:${entry.value}"
-            if (index != item.option.size - 1) {
-                menuOption += " | "
-            }
-        }
         Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = menuOption,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+            text =
+                buildAnnotatedString {
+                    item.option.onEachIndexed { index, entry ->
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    fontFamily = FontFamily(Font(R.font.pretendard_regular)),
+                                    fontSize = 16.sp,
+                                    letterSpacing = letterSpacing,
+                                ),
+                        ) {
+                            append(entry.key + ":")
+                        }
+
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    fontFamily = FontFamily(Font(R.font.pretendard_semibold)),
+                                    fontSize = 16.sp,
+                                    letterSpacing = letterSpacing,
+                                ),
+                        ) {
+                            append(entry.value)
+                        }
+                        if (index != item.option.size - 1) {
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        fontFamily = FontFamily(Font(R.font.pretendard_regular)),
+                                        fontSize = 16.sp,
+                                        letterSpacing = letterSpacing,
+                                    ),
+                            ) {
+                                append(" | ")
+                            }
+                        }
+                    }
+                },
         )
 
         Row(
+            modifier = Modifier.padding(bottom = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 modifier = Modifier.weight(1F),
                 text = "${item.menuPrice * item.count}원",
+                style = Typography.bodyMedium,
+                color = Color.Black,
             )
             Row(
                 modifier = Modifier.weight(1F),
@@ -274,6 +362,8 @@ private fun ShoppingCartDataInfo(
                 }
                 Text(
                     text = item.count.toString(),
+                    style = Typography.bodySmall,
+                    color = Color.Black,
                 )
                 Image(
                     modifier =
@@ -317,7 +407,6 @@ fun ShoppingCartDialogPreview() {
                 option = mapOf("당도" to "추가", "샷" to "연하게", "얼음" to "추가", "테이크 아웃" to "Oz"),
             ),
         ),
-        {},
         {},
         {},
         {},
