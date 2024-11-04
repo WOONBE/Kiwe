@@ -63,6 +63,7 @@ private fun ContainerScreen(
 ) {
     Scaffold(
         topBar = {
+            mode // TODO
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 StepIndicator(page)
                 Box(modifier = Modifier.clip(CircleShape).size(68.dp).padding(vertical = 8.dp)) {
@@ -92,16 +93,13 @@ private fun ContainerScreen(
             )
         },
         bottomBar = {
-            PreviousButton(onBackClick = onBackClick, page)
+            PreviousButton(onBackClick = onBackClick)
         },
     )
 }
 
 @Composable
-fun PreviousButton(
-    onBackClick: () -> Unit,
-    page: Int,
-) {
+fun PreviousButton(onBackClick: () -> Unit) {
     Button(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 120.dp, vertical = 20.dp),
         onClick = onBackClick,
@@ -154,6 +152,7 @@ fun StepItem(
     isLast: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    isFirst and isLast // TODO
     // 색상조정 필요
     val backgroundColor = if (isActive) Color(0xFF7b4f3f) else Color(0xFFede0d4)
     val textColor = if (isActive) Color.White else Color.Gray

@@ -38,11 +38,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
-import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.WavyAnimation
 import com.kiwe.kiosk.ui.screen.utils.containsMenuItem
@@ -145,9 +140,13 @@ private fun SpeechScreen(
                     Timber.tag("STT").d("Event params: $params")
                 }
 
-                override fun onRmsChanged(rmsdB: Float) {}
+                override fun onRmsChanged(rmsdB: Float) {
+                    Timber.tag("STT").d("RMS: $rmsdB")
+                }
 
-                override fun onBufferReceived(buffer: ByteArray?) {}
+                override fun onBufferReceived(buffer: ByteArray?) {
+                    Timber.tag("STT").d("Buffer received")
+                }
             }
 
         DisposableEffect(Unit) {
@@ -185,11 +184,11 @@ private fun SpeechScreen(
                     ).clickable { onDismissRequest() },
             color = Color.Transparent,
         ) {
-            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.anim_kiwe_dynamic_recording))
-            val progress by animateLottieCompositionAsState(
-                composition = composition,
-                iterations = LottieConstants.IterateForever,
-            )
+//            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.anim_kiwe_dynamic_recording))
+//            val progress by animateLottieCompositionAsState(
+//                composition = composition,
+//                iterations = LottieConstants.IterateForever,
+//            )
 
             Box(
                 modifier = Modifier.fillMaxSize(),
