@@ -62,7 +62,7 @@ private fun ContainerScreen(
             if (page > 0) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     StepIndicator(page)
-                    AnimatedImageSwitcher(120.dp)
+                    AnimatedImageSwitcher(100.dp)
                 }
             }
         },
