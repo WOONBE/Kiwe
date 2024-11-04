@@ -9,8 +9,6 @@ import com.kiwe.kiosk.navigation.MainNavHost
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-private const val TAG = "MainActivity 싸피"
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
