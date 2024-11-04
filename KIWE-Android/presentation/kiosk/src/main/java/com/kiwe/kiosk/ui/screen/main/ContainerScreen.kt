@@ -21,13 +21,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.semantics.Role.Companion.Button
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,6 +39,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.ImageButton
+import com.kiwe.kiosk.ui.screen.order.OrderListDialog
+import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import com.kiwe.kiosk.utils.MainEnum
@@ -48,10 +53,23 @@ fun ContainerScreen(
     content: @Composable () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
+    var isShoppingCartDialogOpen by remember { mutableStateOf(false) }
+    var isOrderListDialogOpen by remember { mutableStateOf(false) }
+
+    if (isShoppingCartDialogOpen) {
+        ShoppingCartDialog(onClose = { isShoppingCartDialogOpen = false })
+    }
+
+    if (isOrderListDialogOpen) {
+        OrderListDialog(onClose = { isOrderListDialogOpen = false })
+    }
+
     ContainerScreen(
         page = state.page,
         mode = state.mode,
         onBackClick = onBackClick,
+        onShoppingCartDialogClick = { isShoppingCartDialogOpen = true },
+        onOrderListDialogClick = { isOrderListDialogOpen = true },
         content = content,
     )
 }
@@ -61,6 +79,8 @@ private fun ContainerScreen(
     page: Int,
     mode: MainEnum.KioskMode,
     onBackClick: () -> Unit,
+    onShoppingCartDialogClick: () -> Unit,
+    onOrderListDialogClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     Scaffold(
@@ -101,18 +121,24 @@ private fun ContainerScreen(
         bottomBar = {
             if (page == 2) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 10.dp)
+                    modifier = Modifier.padding(horizontal = 10.dp),
                 ) {
                     ImageButton(
                         modifier = Modifier.weight(1F),
                         "이전으로",
                         R.drawable.arrow_square_left,
                         R.color.KIWE_gray1,
-                    )
+                    ) {
+                        onBackClick()
+                    }
                     Spacer(Modifier.width(5.dp))
-                    ImageButton(modifier = Modifier.weight(1F), "장바구니", R.drawable.shopping_cart, R.color.KIWE_orange1)
+                    ImageButton(modifier = Modifier.weight(1F), "장바구니", R.drawable.shopping_cart, R.color.KIWE_orange1) {
+                        onShoppingCartDialogClick()
+                    }
                     Spacer(Modifier.width(5.dp))
-                    ImageButton(modifier = Modifier.weight(1F), "결제하기", R.drawable.card_pos, R.color.KIWE_green5)
+                    ImageButton(modifier = Modifier.weight(1F), "결제하기", R.drawable.card_pos, R.color.KIWE_green5) {
+                        onOrderListDialogClick()
+                    }
                 }
             } else if (page > 0) {
                 PreviousButton(onBackClick = onBackClick)
@@ -220,6 +246,8 @@ fun ContainerScreenPreview() {
             page = 0,
             mode = MainEnum.KioskMode.MANUAL,
             onBackClick = {},
+            onShoppingCartDialogClick = {},
+            onOrderListDialogClick = {},
             content = {},
         )
     }

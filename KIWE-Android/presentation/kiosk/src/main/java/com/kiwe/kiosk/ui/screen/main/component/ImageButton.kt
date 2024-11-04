@@ -28,6 +28,7 @@ fun ImageButton(
     text: String,
     icon: Int,
     color: Int,
+    onClick: () -> Unit,
 ) {
     Button(
         colors =
@@ -38,8 +39,7 @@ fun ImageButton(
         modifier = modifier,
         shape = RoundedCornerShape(10.dp),
         contentPadding = PaddingValues(0.dp),
-        onClick = {
-        },
+        onClick = onClick,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -62,5 +62,5 @@ fun ImageButton(
 @Preview
 @Composable
 fun ImageButtonPreview() {
-    ImageButton(Modifier, "ss", R.drawable.shopping_cart, R.color.KIWE_gray1)
+    ImageButton(Modifier, "ss", R.drawable.shopping_cart, R.color.KIWE_gray1, {})
 }
