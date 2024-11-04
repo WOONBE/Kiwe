@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -49,10 +48,6 @@ fun OrderScreen(
         rememberPagerState(pageCount = {
             orderList.size
         })
-    var isDialogOpen by remember { mutableStateOf(true) }
-    if (isDialogOpen) {
-        ShoppingCartDialog(onClose = { isDialogOpen = false })
-    }
 
     val buttonState by remember {
         derivedStateOf {
@@ -68,7 +63,7 @@ fun OrderScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1F),

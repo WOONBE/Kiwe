@@ -1,12 +1,11 @@
 package com.kiwe.kiosk.navigation
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,6 +18,7 @@ import com.kiwe.kiosk.ui.screen.order.OrderScreen
 import com.kiwe.kiosk.ui.screen.speech.SpeechScreen
 import org.orbitmvi.orbit.compose.collectAsState
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainNavHost() {
     val navController = rememberNavController()
@@ -26,15 +26,12 @@ fun MainNavHost() {
     val state = mainViewModel.collectAsState().value
     Surface {
         Scaffold(
-            content = { padding ->
+            content = {
                 ContainerScreen(
                     viewModel = mainViewModel,
                     onBackClick = { navController.navigateUp() },
                 ) {
                     NavHost(
-                        modifier =
-                            Modifier
-                                .padding(padding),
                         navController = navController,
                         startDestination = MainRoute.INTRO.route,
                         exitTransition = { ExitTransition.None },
