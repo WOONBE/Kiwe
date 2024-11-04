@@ -33,13 +33,6 @@ class MainViewModel
                 }
             }
 
-        fun onBackBtnClick() =
-            intent {
-                reduce {
-                    state.copy(page = state.page - 1)
-                }
-            }
-
         fun getMenuCategory() =
             intent {
                 val category =
@@ -65,10 +58,19 @@ class MainViewModel
                     state.copy(category = category)
                 }
             }
+
+        fun setPage(page: Int) =
+            intent {
+                reduce {
+                    state.copy(
+                        page = page,
+                    )
+                }
+            }
     }
 
 data class MainState(
-    val page: Int = 0,
+    val page: Int = 0, // 아직 0이 메뉴로 되어있는데, 시작화면이 생기면 그걸 0으로 설정한다
     val mode: MainEnum.KioskMode = MainEnum.KioskMode.ASSIST,
     val isRecording: Boolean = true,
     val category: List<Category> = emptyList(),

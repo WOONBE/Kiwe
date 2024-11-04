@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,25 +30,24 @@ import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 fun MenuCategory(
     categoryImage: String,
     categoryName: String,
-    onCategoryClick: (String) -> Unit = {},
+    onCategoryClick: (String, Int) -> Unit,
 ) {
     Box(
         modifier =
             Modifier
-                .fillMaxWidth()
+                .width(140.dp)
                 .clickable {
-                    onCategoryClick(categoryName)
+                    onCategoryClick(categoryName, 1)
                 }.shadow(elevation = 10.dp, shape = RoundedCornerShape(20.dp))
                 .clip(RoundedCornerShape(20.dp)),
     ) {
         Column(
-            modifier = Modifier.background(Color.White).padding(16.dp),
+            modifier = Modifier.background(Color.White).padding(8.dp),
         ) {
             Box(
                 modifier =
                     Modifier
                         .aspectRatio(1f)
-                        .padding(8.dp)
                         .clip(RoundedCornerShape(20.dp)),
             ) {
                 Image(
@@ -65,7 +65,7 @@ fun MenuCategory(
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                 text = categoryName,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 64.sp),
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 32.sp),
             )
         }
     }
@@ -75,6 +75,6 @@ fun MenuCategory(
 @Composable
 fun MenuCategoryPreview() {
     KIWEAndroidTheme {
-        MenuCategory(categoryImage = "suspendisse", categoryName = "카테고리")
+        MenuCategory(categoryImage = "suspendisse", categoryName = "카테고리", { _, _ -> })
     }
 }

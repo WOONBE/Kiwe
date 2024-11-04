@@ -3,15 +3,14 @@ package com.kiwe.kiosk.ui.screen.menu
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kiwe.domain.model.Category
@@ -23,9 +22,12 @@ import org.orbitmvi.orbit.compose.collectAsState
 @Composable
 fun MenuScreen(
     viewModel: MainViewModel,
-    onCategoryClick: (String) -> Unit,
+    onCategoryClick: (String, Int) -> Unit,
 ) {
     val state = viewModel.collectAsState().value
+    LaunchedEffect(Unit) {
+        viewModel.setPage(0)
+    }
     MenuScreen(
         category = state.category,
         onCategoryClick = onCategoryClick,
@@ -35,36 +37,48 @@ fun MenuScreen(
 @Composable
 private fun MenuScreen(
     category: List<Category>,
-    onCategoryClick: (String) -> Unit,
+    onCategoryClick: (String, Int) -> Unit,
 ) {
     Box(
         modifier =
             Modifier
-                .clip(RoundedCornerShape(30.dp))
                 .padding(horizontal = 40.dp),
     ) {
         Column(
-            modifier =
-                Modifier
-                    .clip(RoundedCornerShape(30.dp)),
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceEvenly,
         ) {
-            LazyVerticalGrid(
-                GridCells.Fixed(2),
-                modifier =
-                    Modifier
-                        .padding(12.dp)
-                        .fillMaxSize()
-                        .wrapContentSize(),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                items(category.size) { idx ->
-                    MenuCategory(
-                        categoryImage = category[idx].categoryImage,
-                        categoryName = category[idx].categoryName,
-                        onCategoryClick = onCategoryClick,
-                    )
-                }
+                MenuCategory(
+                    categoryImage = category[0].categoryImage,
+                    categoryName = category[0].categoryName,
+                    onCategoryClick = onCategoryClick,
+                )
+                MenuCategory(
+                    categoryImage = category[1].categoryImage,
+                    categoryName = category[1].categoryName,
+                    onCategoryClick = onCategoryClick,
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                MenuCategory(
+                    categoryImage = category[2].categoryImage,
+                    categoryName = category[2].categoryName,
+                    onCategoryClick = onCategoryClick,
+                )
+                MenuCategory(
+                    categoryImage = category[3].categoryImage,
+                    categoryName = category[3].categoryName,
+                    onCategoryClick = onCategoryClick,
+                )
             }
         }
     }
@@ -74,6 +88,6 @@ private fun MenuScreen(
 @Composable
 fun MenuScreenPreview() {
     KIWEAndroidTheme {
-        MenuScreen(emptyList(), onCategoryClick = {})
+        MenuScreen(emptyList(), onCategoryClick = { _, _ -> })
     }
 }
