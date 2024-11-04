@@ -14,9 +14,9 @@ import androidx.navigation.compose.rememberNavController
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.intro.IntroScreen
 import com.kiwe.kiosk.ui.screen.main.ContainerScreen
-import com.kiwe.kiosk.ui.screen.main.SpeechScreen
 import com.kiwe.kiosk.ui.screen.menu.MenuScreen
 import com.kiwe.kiosk.ui.screen.order.OrderScreen
+import com.kiwe.kiosk.ui.screen.speech.SpeechScreen
 
 @Composable
 fun MainNavHost() {
