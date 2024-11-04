@@ -63,19 +63,24 @@ private fun ContainerScreen(
 ) {
     Scaffold(
         topBar = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                StepIndicator(page)
-                Box(modifier = Modifier.clip(CircleShape).size(68.dp).padding(vertical = 8.dp)) {
-                    Image(
-                        modifier =
-                            Modifier.fillMaxSize(),
-                        painter =
-                            rememberAsyncImagePainter(
-                                model = R.drawable.ic_launcher_playstore,
-                                contentScale = ContentScale.Crop,
-                            ),
-                        contentDescription = "logo",
-                    )
+            mode // TODO
+            if (page > 0) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    StepIndicator(page)
+                    Box(
+                        modifier = Modifier.clip(CircleShape).size(68.dp).padding(vertical = 8.dp),
+                    ) {
+                        Image(
+                            modifier =
+                                Modifier.fillMaxSize(),
+                            painter =
+                                rememberAsyncImagePainter(
+                                    model = R.drawable.ic_launcher_playstore_nobg,
+                                    contentScale = ContentScale.Crop,
+                                ),
+                            contentDescription = "logo",
+                        )
+                    }
                 }
             }
         },
@@ -92,16 +97,15 @@ private fun ContainerScreen(
             )
         },
         bottomBar = {
-            PreviousButton(onBackClick = onBackClick, page)
+            if (page > 0) {
+                PreviousButton(onBackClick = onBackClick)
+            }
         },
     )
 }
 
 @Composable
-fun PreviousButton(
-    onBackClick: () -> Unit,
-    page: Int,
-) {
+fun PreviousButton(onBackClick: () -> Unit) {
     Button(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 120.dp, vertical = 20.dp),
         onClick = onBackClick,
@@ -123,7 +127,7 @@ fun PreviousButton(
 @Composable
 fun StepIndicator(currentStep: Int) {
     val steps = listOf("메뉴", "주문", "결제", "확인")
-    if (currentStep >= 0) {
+    if (currentStep > 0) {
         Row(
             modifier =
                 Modifier
@@ -136,7 +140,7 @@ fun StepIndicator(currentStep: Int) {
             steps.forEachIndexed { index, step ->
                 StepItem(
                     title = step,
-                    isActive = index == currentStep,
+                    isActive = index == currentStep - 1,
                     isFirst = index == 0,
                     isLast = index == steps.size - 1,
                     modifier = Modifier.weight(1f),
@@ -154,6 +158,7 @@ fun StepItem(
     isLast: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    isFirst and isLast // TODO
     // 색상조정 필요
     val backgroundColor = if (isActive) Color(0xFF7b4f3f) else Color(0xFFede0d4)
     val textColor = if (isActive) Color.White else Color.Gray

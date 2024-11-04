@@ -43,7 +43,7 @@ fun OrderScreen(
     val orderList = itemStatus.value.orderItem.chunked(6)
     val animationScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
-        onEnterScreen(1)
+        onEnterScreen(2)
     }
     val pagerState =
         rememberPagerState(pageCount = {

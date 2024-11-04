@@ -34,3 +34,5 @@ fun Modifier.rotatedScreenSize(
         .requiredHeight(screenHeight)
         .rotate(rotationAngle)
 }
+
+fun String.containsMenuItem(): Boolean = menuRegex.containsMatchIn(this)
