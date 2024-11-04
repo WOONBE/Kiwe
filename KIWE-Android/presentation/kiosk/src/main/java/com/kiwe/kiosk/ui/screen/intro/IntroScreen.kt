@@ -26,16 +26,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainSideEffect
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.Typography
-import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
@@ -66,6 +63,7 @@ private fun IntroScreen(
     onComfortClick: () -> Unit,
     onHelpClick: () -> Unit,
 ) {
+    onComfortClick
     Box(
         modifier =
             Modifier
@@ -78,12 +76,12 @@ private fun IntroScreen(
         ) {
             Image(
                 modifier =
-                Modifier.size(200.dp).clip(CircleShape).padding(bottom = 20.dp),
+                    Modifier.size(200.dp).clip(CircleShape).padding(bottom = 20.dp),
                 painter =
-                rememberAsyncImagePainter(
-                    model = R.drawable.ic_launcher_playstore_nobg,
-                    contentScale = ContentScale.Crop,
-                ),
+                    rememberAsyncImagePainter(
+                        model = R.drawable.ic_launcher_playstore_nobg,
+                        contentScale = ContentScale.Crop,
+                    ),
                 contentDescription = "logo",
             )
             Text(
@@ -146,7 +144,7 @@ private fun IntroScreen(
 fun IntroScreenPreview() {
     KIWEAndroidTheme {
         Surface {
-            IntroScreen({},{})
+            IntroScreen({}, {})
         }
     }
 }
