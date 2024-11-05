@@ -127,7 +127,7 @@ pipeline {
                                                 # 블루 컨테이너 상태를 확인
                                                 CONTAINER_STATUS=\$(docker inspect -f '{{.State.Status}}' $CONTAINER_NAME_BLUE)
 
-                                                if [[ "$CONTAINER_STATUS" == "exited" ]]; then
+                                                if [[ "\$CONTAINER_STATUS" == "exited" ]]; then
                                                     # exited 상태일 경우, 블루 컨테이너를 새 컨테이너로 지정
                                                     NEW_PORT=$BLUE_PORT
                                                     NEW_NAME=$CONTAINER_NAME_BLUE
