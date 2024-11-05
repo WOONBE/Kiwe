@@ -120,45 +120,41 @@ pipeline {
                                     sshTransfer(
                                         execCommand: """
                                             set -x  # 디버깅 모드 활성화
-                                            exec > >(tee $DEPLOY_LOG_PATH) 2>&1
-                                            docker pull $DOCKER_IMAGE
+                                            exec > >(tee \$DEPLOY_LOG_PATH) 2>&1
+                                            docker pull \$DOCKER_IMAGE
 
                                             # 중지된 컨테이너를 기준으로 새 컨테이너 설정
-                                            if [[ $(docker ps -aq -f "name=$CONTAINER_NAME_BLUE" -f "status=exited") ]]; then
-                                                NEW_PORT=$BLUE_PORT
-                                                NEW_NAME=$CONTAINER_NAME_BLUE
-                                                OLD_NAME=$CONTAINER_NAME_GREEN
-                                                CURRENT_PORT=$GREEN_PORT
-                                            elif [[ $(docker ps -aq -f "name=$CONTAINER_NAME_GREEN" -f "status=exited") ]]; then
-                                                NEW_PORT=$GREEN_PORT
-                                                NEW_NAME=$CONTAINER_NAME_GREEN
-                                                OLD_NAME=$CONTAINER_NAME_BLUE
-                                                CURRENT_PORT=$BLUE_PORT
+                                            if [[ \$(docker ps -aq -f "name=\$CONTAINER_NAME_BLUE" -f "status=exited") ]]; then
+                                                NEW_PORT=\$BLUE_PORT
+                                                NEW_NAME=\$CONTAINER_NAME_BLUE
+                                                OLD_NAME=\$CONTAINER_NAME_GREEN
+                                                CURRENT_PORT=\$GREEN_PORT
+                                            elif [[ \$(docker ps -aq -f "name=\$CONTAINER_NAME_GREEN" -f "status=exited") ]]; then
+                                                NEW_PORT=\$GREEN_PORT
+                                                NEW_NAME=\$CONTAINER_NAME_GREEN
+                                                OLD_NAME=\$CONTAINER_NAME_BLUE
+                                                CURRENT_PORT=\$BLUE_PORT
                                             else
                                                 echo "Error: 중지된 컨테이너를 찾을 수 없습니다. Blue와 Green 상태를 확인하세요."
                                                 exit 1
                                             fi
 
-                                            echo "새 버전의 컨테이너: $NEW_NAME (포트: $NEW_PORT)"
-                                            echo "기존 버전의 컨테이너: $OLD_NAME (포트: $CURRENT_PORT)"
+                                            echo "새 버전의 컨테이너: \$NEW_NAME (포트: \$NEW_PORT)"
+                                            echo "기존 버전의 컨테이너: \$OLD_NAME (포트: \$CURRENT_PORT)"
 
                                             # 새 컨테이너가 이미 존재하는지 확인
                                             if [[ \$(docker ps -aq --filter name=\$NEW_NAME) ]]; then
-                                                # 기존 컨테이너 중지 후 제거
                                                 docker stop \$NEW_NAME
                                                 docker rm \$NEW_NAME
                                             fi
-                                            # 새 이미지로 컨테이너 생성
-                                            docker run -d --name \$NEW_NAME --network $DOCKER_NETWORK -p \$NEW_PORT:8080 $DOCKER_IMAGE
+
+                                            docker run -d --name \$NEW_NAME --network \$DOCKER_NETWORK -p \$NEW_PORT:8080 \$DOCKER_IMAGE
 
                                             sleep 30
                                             if curl -sf -m 10 http://localhost:\$NEW_PORT/actuator/health > /dev/null; then
-                                                # Update Nginx config
-                                                sed -i "s/server \$NEW_NAME:8080 down;/server \$NEW_NAME:8080;/" $NGINX_CONFIG_PATH
-                                                sed -i "s/server \$OLD_NAME:8080;/server \$OLD_NAME:8080 down;/" $NGINX_CONFIG_PATH
-                                                # Restart Nginx container
-                                                docker restart $NGINX_CONTAINER_NAME
-                                                # Stop old container (not remove)
+                                                sed -i "s/server \$NEW_NAME:8080 down;/server \$NEW_NAME:8080;/" \$NGINX_CONFIG_PATH
+                                                sed -i "s/server \$OLD_NAME:8080;/server \$OLD_NAME:8080 down;/" \$NGINX_CONFIG_PATH
+                                                docker restart \$NGINX_CONTAINER_NAME
                                                 docker stop \$OLD_NAME
                                                 echo "Switched to new version on port \$NEW_PORT and updated Nginx"
                                                 exit 0
