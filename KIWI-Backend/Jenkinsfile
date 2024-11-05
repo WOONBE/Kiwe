@@ -46,8 +46,9 @@ pipeline {
                         **브랜치:** $env.GIT_BRANCH
                         **작성자:** $Author_ID ($Author_Name)
                         **빌드 URL:** [Details]($env.BUILD_URL)
-                        **포함된 커밋:**
-                        $formattedCommits
+                        **포함된 커밋 요약:**
+                        ${allCommits.take(3).collect { line -> "• ${line}" }.join('\\n')}
+                        *...and more*
                     """.stripIndent()
 
                     mattermostSend(
@@ -121,19 +122,25 @@ pipeline {
                                             set -x  # 디버깅 모드 활성화
                                             exec > >(tee $DEPLOY_LOG_PATH) 2>&1
                                             docker pull $DOCKER_IMAGE
-                                            container_id=\$(docker ps -q --filter name=$CONTAINER_NAME_BLUE)
-                                            echo "컨테이너 ID: \$container_id"
-                                            if [[ \$(docker ps -q --filter name=$CONTAINER_NAME_BLUE) ]]; then
+
+                                            # 중지된 컨테이너를 기준으로 새 컨테이너 설정
+                                            if [[ $(docker ps -aq -f "name=$CONTAINER_NAME_BLUE" -f "status=exited") ]]; then
+                                                NEW_PORT=$BLUE_PORT
+                                                NEW_NAME=$CONTAINER_NAME_BLUE
+                                                OLD_NAME=$CONTAINER_NAME_GREEN
+                                                CURRENT_PORT=$GREEN_PORT
+                                            elif [[ $(docker ps -aq -f "name=$CONTAINER_NAME_GREEN" -f "status=exited") ]]; then
                                                 NEW_PORT=$GREEN_PORT
                                                 NEW_NAME=$CONTAINER_NAME_GREEN
                                                 OLD_NAME=$CONTAINER_NAME_BLUE
                                                 CURRENT_PORT=$BLUE_PORT
                                             else
-                                                NEW_PORT=$BLUE_PORT
-                                                NEW_NAME=$CONTAINER_NAME_BLUE
-                                                OLD_NAME=$CONTAINER_NAME_GREEN
-                                                CURRENT_PORT=$GREEN_PORT
+                                                echo "Error: 중지된 컨테이너를 찾을 수 없습니다. Blue와 Green 상태를 확인하세요."
+                                                exit 1
                                             fi
+
+                                            echo "새 버전의 컨테이너: $NEW_NAME (포트: $NEW_PORT)"
+                                            echo "기존 버전의 컨테이너: $OLD_NAME (포트: $CURRENT_PORT)"
 
                                             # 새 컨테이너가 이미 존재하는지 확인
                                             if [[ \$(docker ps -aq --filter name=\$NEW_NAME) ]]; then
@@ -190,11 +197,8 @@ pipeline {
 
                 def message = """
                     #### 🌐BE $Status_Text
-                    **빌드 번호** $env.JOB_NAME #$env.BUILD_NUMBER
                     **작성자:** $Author_ID ($Author_Name)
                     **빌드 URL:** [Details]($env.BUILD_URL)
-                    **포함된 커밋:**
-                    $formattedCommits
                 """.stripIndent()
                 mattermostSend(
                     color: Status_Color,
