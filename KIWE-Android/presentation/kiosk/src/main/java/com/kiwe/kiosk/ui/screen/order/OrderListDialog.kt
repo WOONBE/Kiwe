@@ -1,5 +1,6 @@
 package com.kiwe.kiosk.ui.screen.order
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,10 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -37,15 +42,33 @@ private const val TAG = "OrderListDialog 싸피"
 fun OrderListDialog(
     viewModel: ShoppingCartViewModel = hiltViewModel(),
     onClose: () -> Unit,
+    onClickPayment: () -> Unit = {},
 ) {
     val state = viewModel.collectAsState().value
-    OrderListDialog(state, onClose)
+    OrderListDialog(state, onClose, onClickPayment)
+    var isDialogOpen by remember { mutableStateOf(true) } // 다이얼로그 표시 상태 관리
+
+    if (isDialogOpen) {
+        OrderListDialog(
+            state = state,
+            onClose = {
+                isDialogOpen = false // 닫기 버튼 클릭 시 다이얼로그 닫음
+                onClose()
+            },
+            onClickPayment = {
+                isDialogOpen = false // 결제 버튼 클릭 시 다이얼로그 닫음
+                onClickPayment()
+                onClose()
+            }
+        )
+    }
 }
 
 @Composable
 fun OrderListDialog(
     state: ShoppingCartState,
     onClose: () -> Unit,
+    onClickPayment: () -> Unit = {},
 ) {
     OrderDialog {
         Text(
@@ -125,7 +148,9 @@ fun OrderListDialog(
                             modifier = Modifier.weight(1F),
                             enabled = state.shoppingCartItem.isNotEmpty(),
                             shape = RoundedCornerShape(10.dp),
-                            onClick = {},
+                            onClick = {
+                                onClickPayment()
+                            },
                             colors =
                                 ButtonColors(
                                     contentColor = Color.White,
