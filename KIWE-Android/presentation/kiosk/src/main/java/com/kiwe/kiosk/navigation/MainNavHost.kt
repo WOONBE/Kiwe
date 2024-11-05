@@ -1,59 +1,71 @@
 package com.kiwe.kiosk.navigation
 
-import android.content.res.Configuration
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.padding
+import android.annotation.SuppressLint
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.intro.IntroScreen
-import com.kiwe.kiosk.ui.screen.main.SpeechScreen
+import com.kiwe.kiosk.ui.screen.main.ContainerScreen
 import com.kiwe.kiosk.ui.screen.menu.MenuScreen
-import com.kiwe.kiosk.ui.screen.utils.rotatedScreenSize
-import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
+import com.kiwe.kiosk.ui.screen.order.OrderScreen
+import com.kiwe.kiosk.ui.screen.speech.SpeechScreen
+import org.orbitmvi.orbit.compose.collectAsState
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainNavHost() {
     val navController = rememberNavController()
     val mainViewModel: MainViewModel = viewModel()
-    val configuration = LocalConfiguration.current
-    val rotationAngle =
-        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) -90f else 0f
-
+    val state = mainViewModel.collectAsState().value
     Surface {
         Scaffold(
-            content = { padding ->
-                NavHost(
-                    modifier =
-                        Modifier
-                            .rotatedScreenSize(rotationAngle, configuration)
-                            .background(KioskBackgroundBrush)
-                            .padding(padding),
-                    navController = navController,
-                    startDestination = MainRoute.MENU.route,
+            content = {
+                ContainerScreen(
+                    viewModel = mainViewModel,
+                    onBackClick = { navController.navigateUp() },
                 ) {
-                    composable(route = MainRoute.INTRO.route) {
-                        IntroScreen()
-                    }
-                    composable(route = MainRoute.MENU.route) {
-                        MenuScreen(
-                            viewModel = mainViewModel,
-                        )
+                    NavHost(
+                        navController = navController,
+                        startDestination = MainRoute.INTRO.route,
+                        exitTransition = { ExitTransition.None },
+                        enterTransition = { EnterTransition.None },
+                    ) {
+                        composable(route = MainRoute.INTRO.route) {
+                            IntroScreen(viewModel = mainViewModel, onEnterScreen = { page ->
+                                mainViewModel.setPage(page)
+                            }, onComfortClick = {}, onHelpClick = {
+                                navController.navigate(MainRoute.MENU.route)
+                            })
+                        }
+                        composable(route = MainRoute.ORDER.route) {
+                            OrderScreen { page ->
+                                mainViewModel.setPage(page)
+                            }
+                        }
+                        composable(route = MainRoute.MENU.route) {
+                            MenuScreen(
+                                viewModel = mainViewModel,
+                                onCategoryClick = { category, page ->
+                                    navController.navigate(MainRoute.ORDER.route)
+                                    mainViewModel.setPage(page)
+                                },
+                            )
+                        }
                     }
                 }
-                SpeechScreen(
-                    viewModel = mainViewModel,
-                    rotationAngle = rotationAngle,
-                    configuration = configuration,
-                )
             },
         )
+        if (state.page > 0) {
+            SpeechScreen(
+                viewModel = mainViewModel,
+            )
+        }
     }
 }

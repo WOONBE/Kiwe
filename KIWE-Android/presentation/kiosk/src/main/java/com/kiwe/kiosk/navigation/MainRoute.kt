@@ -5,5 +5,6 @@ enum class MainRoute(
     val contentDescription: String,
 ) {
     INTRO(route = "IntroScreen", contentDescription = "시작화면"),
+    ORDER(route = "OrderScreen", contentDescription = "주문선택"),
     MENU(route = "MenuScreen", contentDescription = "메뉴"),
 }

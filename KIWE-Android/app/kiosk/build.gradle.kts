@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.kiwe.kiosk"
-        minSdk = 28
+        minSdk = 30
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -41,4 +41,6 @@ dependencies {
     implementation(project(":presentation:kiosk"))
     implementation(project(":domain"))
     implementation(project(":data"))
+    // timber
+    implementation(libs.jakewharton.timber)
 }

@@ -7,4 +7,11 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="KIWE_orange1">#FFE14700</color>
+    <color name="KIWE_gray1">#FF6D6D6D</color>
+    <color name="KIWE_green5">#FF2E7D32</color>
+    <color name="KIWE_brown1">#FFEDE0D4</color>
+    <color name="KIWE_brown2">#FFD2B48C</color>
+    <color name="KIWE_silver1">#FFD6D6D6</color>
+    <color name="KIWE_white_transparent_half">#80FFFFFF</color>
 </resources>

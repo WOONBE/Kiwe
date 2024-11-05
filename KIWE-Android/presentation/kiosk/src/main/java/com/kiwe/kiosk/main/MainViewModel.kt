@@ -6,6 +6,7 @@ import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
 import com.kiwe.kiosk.utils.MainEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
+import timber.log.Timber
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -29,6 +30,14 @@ class MainViewModel
         fun onDismissSpeechDialog() =
             intent {
                 reduce {
+                    state.copy(isRecording = false)
+                }
+            }
+
+        fun onSpeechRecevied(text: String) =
+            intent {
+                reduce {
+                    Timber.tag("MainViewModel").d(text)
                     state.copy(isRecording = false)
                 }
             }
@@ -58,11 +67,20 @@ class MainViewModel
                     state.copy(category = category)
                 }
             }
+
+        fun setPage(page: Int) =
+            intent {
+                reduce {
+                    state.copy(
+                        page = page,
+                    )
+                }
+            }
     }
 
 data class MainState(
     val page: Int = 0,
-    val mode: MainEnum.KioskMode = MainEnum.KioskMode.MANUAL,
+    val mode: MainEnum.KioskMode = MainEnum.KioskMode.ASSIST,
     val isRecording: Boolean = true,
     val category: List<Category> = emptyList(),
 ) : BaseState
