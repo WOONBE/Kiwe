@@ -136,11 +136,20 @@ pipeline {
                                             fi
 
                                             # 새 컨테이너가 이미 존재하는지 확인
-                                            if [[ \$(docker ps -aq --filter name=\$NEW_NAME) ]]; then
-                                                # 기존 컨테이너 중지 후 제거
-                                                docker stop \$NEW_NAME
-                                                docker rm \$NEW_NAME
+                                            if [[ $(docker ps -aq --filter name=$NEW_NAME) ]]; then
+                                                # 컨테이너 상태를 확인
+                                                CONTAINER_STATUS=$(docker inspect -f '{{.State.Status}}' $NEW_NAME)
+
+                                                if [[ "$CONTAINER_STATUS" == "exited" ]]; then
+                                                    # exited 상태일 경우, 제거
+                                                    docker rm $NEW_NAME
+                                                else
+                                                    # 실행 중인 경우 중지 후 제거
+                                                    docker stop $NEW_NAME
+                                                    docker rm $NEW_NAME
+                                                fi
                                             fi
+
                                             # 새 이미지로 컨테이너 생성
                                             docker run -d --name \$NEW_NAME --network $DOCKER_NETWORK -p \$NEW_PORT:8080 $DOCKER_IMAGE
 
