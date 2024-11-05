@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -36,10 +38,14 @@ import org.orbitmvi.orbit.compose.collectAsState
 @Composable
 fun OrderScreen(
     viewModel: OrderViewModel = hiltViewModel(),
+    shoppingCartViewModel: ShoppingCartViewModel,
     onEnterScreen: (Int) -> Unit,
 ) {
-    val itemStatus = viewModel.collectAsState()
-    val orderList = itemStatus.value.orderItem.chunked(6)
+    val itemStatus = viewModel.collectAsState().value
+    var isOrderOptionDialogOpen by remember { mutableStateOf(false) }
+    var orderDialogMenuTitle by remember { mutableStateOf("") }
+    var orderDialogMenuCost by remember { mutableIntStateOf(0) }
+    val orderList = itemStatus.orderItem.chunked(6)
     val animationScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         onEnterScreen(2)
@@ -62,13 +68,31 @@ fun OrderScreen(
             }
         }
     }
+    if (isOrderOptionDialogOpen) {
+//        Timber.tag(TAG).d("OrderScreen: 다이얼로그 실행")
+        OptionDialog(
+            shoppingCartViewModel = shoppingCartViewModel,
+            onClose = { isOrderOptionDialogOpen = false },
+            menuTitle = orderDialogMenuTitle,
+            menuCost = orderDialogMenuCost,
+        )
+    }
 
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
+    ) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1F),
         ) { index ->
-            OrderListScreen(orderItemList = orderList[index].chunked(3))
+            OrderListScreen(orderItemList = orderList[index].chunked(3), onItemClick = { title, cost ->
+                orderDialogMenuTitle = title
+                orderDialogMenuCost = cost
+                isOrderOptionDialogOpen = true
+            })
         }
         Row(
             Modifier
@@ -84,7 +108,11 @@ fun OrderScreen(
                 IconButton(
                     onClick = {
                         animationScope.launch {
-                            pagerState.animateScrollToPage((pagerState.currentPage - 1).coerceAtMost(0))
+                            pagerState.animateScrollToPage(
+                                (pagerState.currentPage - 1).coerceAtMost(
+                                    0,
+                                ),
+                            )
                         }
                     },
                     modifier = Modifier.weight(1F),
@@ -108,7 +136,11 @@ fun OrderScreen(
             } else {
                 IconButton(onClick = {
                     animationScope.launch {
-                        pagerState.animateScrollToPage((pagerState.currentPage + 1).coerceAtMost(pagerState.pageCount - 1))
+                        pagerState.animateScrollToPage(
+                            (pagerState.currentPage + 1).coerceAtMost(
+                                pagerState.pageCount - 1,
+                            ),
+                        )
                     }
                 }, modifier = Modifier.weight(1F)) {
                     Icon(
@@ -122,7 +154,10 @@ fun OrderScreen(
 }
 
 @Composable
-private fun OrderListScreen(orderItemList: List<List<OrderItem>>) {
+private fun OrderListScreen(
+    orderItemList: List<List<OrderItem>>,
+    onItemClick: (String, Int) -> Unit,
+) {
     val firstRowList = orderItemList[0]
     val secondRowList =
         if (orderItemList.size > 1) {
@@ -134,8 +169,9 @@ private fun OrderListScreen(orderItemList: List<List<OrderItem>>) {
     Column {
         Row(modifier = Modifier.weight(1F)) {
             firstRowList.forEach {
-                OrderItem(orderItem = it, modifier = Modifier.weight(1F))
+                OrderItem(orderItem = it, modifier = Modifier.weight(1F), onClick = onItemClick)
             }
+            // 개수가 3개보다 적을 때 채울 빈칸
             (firstRowList.size until 3).forEach { _ ->
                 Spacer(modifier = Modifier.weight(1F))
             }
@@ -143,7 +179,7 @@ private fun OrderListScreen(orderItemList: List<List<OrderItem>>) {
         Spacer(modifier = Modifier.padding(10.dp))
         Row(modifier = Modifier.weight(1F)) {
             secondRowList.forEach {
-                OrderItem(orderItem = it, modifier = Modifier.weight(1F))
+                OrderItem(orderItem = it, modifier = Modifier.weight(1F), onClick = onItemClick)
             }
             (secondRowList.size until 3).forEach { _ ->
                 Spacer(modifier = Modifier.weight(1F))
@@ -155,5 +191,9 @@ private fun OrderListScreen(orderItemList: List<List<OrderItem>>) {
 @Preview
 @Composable
 private fun OrderScreenPreview() {
-    OrderScreen(viewModel = hiltViewModel(), onEnterScreen = {})
+    OrderScreen(
+        viewModel = hiltViewModel(),
+        shoppingCartViewModel = hiltViewModel(),
+        onEnterScreen = {},
+    )
 }
