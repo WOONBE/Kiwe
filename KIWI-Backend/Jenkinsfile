@@ -48,7 +48,6 @@ pipeline {
                         **빌드 URL:** [Details]($env.BUILD_URL)
                         **포함된 커밋:**
                         $formattedCommits
-                        *...and more*
                     """.stripIndent()
 
                     mattermostSend(

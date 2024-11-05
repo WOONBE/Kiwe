@@ -13,25 +13,16 @@
           <timeZone>UTC</timeZone>
         </timestamp>
         <pattern>
-          <pattern>{"timestamp": "%date", "level": "%level", "thread": "%thread", "logger": "%logger", "message": "%message", "requestURI": "%X{requestURI}"}</pattern>
+          <pattern>{"timestamp": "%date", "level": "%level", "thread": "%thread", "logger":
+            "%logger", "message": "%message", "requestURI": "%X{requestURI}"}
+          </pattern>
         </pattern>
       </providers>
     </encoder>
   </appender>
 
-  <!-- test 프로필일 때는 console appender만 사용 -->
-  <springProfile name="test">
-    <root level="INFO">
-      <appender-ref ref="console"/>
-    </root>
-  </springProfile>
-
-  <!-- test 프로필이 아닐 때는 console과 logstash appender 모두 사용 -->
-  <springProfile name="!test">
-    <root level="INFO">
-      <appender-ref ref="console"/>
-      <appender-ref ref="logstash"/>
-    </root>
-  </springProfile>
-
+  <root level="INFO">
+    <appender-ref ref="console"/>
+    <appender-ref ref="logstash"/>
+  </root>
 </configuration>
