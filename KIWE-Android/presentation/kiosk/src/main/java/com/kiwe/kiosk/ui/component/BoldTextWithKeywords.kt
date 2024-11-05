@@ -21,6 +21,7 @@ import com.kiwe.kiosk.ui.theme.KiweBlack1
 import com.kiwe.kiosk.ui.theme.KiweOrange1
 import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.ui.theme.fixedWidthStyle
+import java.util.Locale
 
 /**
  * TODO
@@ -138,7 +139,7 @@ fun PreviewBoldTextWithKeywords1() {
 fun PreviewBoldTextWithKeywords2() {
     KIWEAndroidTheme {
         val price = 4500
-        val priceText = String.format("%,d", price)
+        val priceText = String.format(Locale.KOREAN, "%,d", price)
         val text = "${priceText}${stringResource(id = R.string.kiwe_won)}"
         val boldKeywords = listOf(priceText)
         val brushFlag = listOf(true)
@@ -159,7 +160,7 @@ fun PreviewBoldTextWithKeywords2() {
 fun PreviewBoldTextWithKeywords3() {
     KIWEAndroidTheme {
         val price = 1110
-        val priceText = String.format("%,d", price)
+        val priceText = String.format(Locale.KOREAN, "%,d", price)
         val text = "${priceText}${stringResource(id = R.string.kiwe_won)}"
         val boldKeywords = listOf(priceText)
         val brushFlag = listOf(true)
@@ -168,8 +169,16 @@ fun PreviewBoldTextWithKeywords3() {
             fullText = text,
             keywords = boldKeywords,
             brushFlag,
-            boldStyle = Typography.fixedWidthStyle.copy(fontSize = 16.sp, fontFeatureSettings = "tnum"),
-            normalStyle = Typography.labelMedium.copy(fontSize = 16.sp, fontFeatureSettings = "tnum"),
+            boldStyle =
+                Typography.fixedWidthStyle.copy(
+                    fontSize = 16.sp,
+                    fontFeatureSettings = "tnum",
+                ),
+            normalStyle =
+                Typography.labelMedium.copy(
+                    fontSize = 16.sp,
+                    fontFeatureSettings = "tnum",
+                ),
             textColor = null,
         )
     }

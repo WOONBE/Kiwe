@@ -8,23 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.kiwe.kiosk.main.MainViewModel
-
-enum class PaymentStatus(
-    val page: Int,
-) {
-    TAKEOUT(0),
-    POINT(1),
-    CARD(2),
-}
 
 @Composable
-fun PaymentScreen(
-    modifier: Modifier = Modifier,
-    viewModel: MainViewModel = hiltViewModel(),
-    onBackClick: () -> Unit = {},
-) {
+fun PaymentScreen(modifier: Modifier = Modifier) {
     var showDialog by remember { mutableStateOf(false) }
 
     val pagerState =
@@ -63,4 +49,10 @@ fun PaymentScreen(
             }
         }
     }
+}
+
+enum class PaymentStatus {
+    TAKEOUT,
+    POINT,
+    CARD,
 }

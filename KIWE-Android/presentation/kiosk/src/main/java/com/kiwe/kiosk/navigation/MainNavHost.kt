@@ -52,16 +52,13 @@ fun MainNavHost() {
                             MenuScreen(
                                 viewModel = mainViewModel,
                                 onCategoryClick = { category, page ->
-                                    navController.navigate(MainRoute.ORDER.route)
+                                    navController.navigate(MainRoute.PAYMENT.route)
                                     mainViewModel.setPage(page)
                                 },
                             )
                         }
                         composable(route = MainRoute.PAYMENT.route) {
-                            PaymentScreen(
-                                viewModel = mainViewModel,
-                                onBackClick = { navController.navigateUp() },
-                            )
+                            PaymentScreen()
                         }
                     }
                 }
