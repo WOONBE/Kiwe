@@ -7,4 +7,5 @@ enum class MainRoute(
     INTRO(route = "IntroScreen", contentDescription = "시작화면"),
     ORDER(route = "OrderScreen", contentDescription = "주문선택"),
     MENU(route = "MenuScreen", contentDescription = "메뉴"),
+    PAYMENT(route = "PaymentScreen", contentDescription = "결제"),
 }

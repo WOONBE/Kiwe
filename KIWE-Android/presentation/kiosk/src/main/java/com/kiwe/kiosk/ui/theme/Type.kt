@@ -66,3 +66,12 @@ val Typography =
                 letterSpacing = letterSpacing,
             ),
     )
+
+val Typography.fixedWidthStyle: TextStyle
+    get() =
+        TextStyle(
+            fontFamily = FontFamily(Font(R.font.pretendard_semibold)),
+            fontSize = 16.sp,
+            letterSpacing = letterSpacing,
+            fontFeatureSettings = "tnum",
+        )
