@@ -31,6 +31,9 @@ fun MainNavHost() {
                 ContainerScreen(
                     viewModel = mainViewModel,
                     onBackClick = { navController.navigateUp() },
+                    onClickPayment = {
+                        navController.navigate(MainRoute.PAYMENT.route)
+                    },
                 ) {
                     NavHost(
                         navController = navController,

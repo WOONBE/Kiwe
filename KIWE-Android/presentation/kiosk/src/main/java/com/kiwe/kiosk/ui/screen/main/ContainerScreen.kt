@@ -50,6 +50,7 @@ import org.orbitmvi.orbit.compose.collectAsState
 fun ContainerScreen(
     viewModel: MainViewModel,
     onBackClick: () -> Unit,
+    onClickPayment: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
@@ -61,7 +62,7 @@ fun ContainerScreen(
     }
 
     if (isOrderListDialogOpen) {
-        OrderListDialog(onClose = { isOrderListDialogOpen = false })
+        OrderListDialog(onClose = { isOrderListDialogOpen = false }, onClickPayment = onClickPayment)
     }
 
     ContainerScreen(
