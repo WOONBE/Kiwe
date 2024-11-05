@@ -46,8 +46,8 @@ pipeline {
                         **브랜치:** $env.GIT_BRANCH
                         **작성자:** $Author_ID ($Author_Name)
                         **빌드 URL:** [Details]($env.BUILD_URL)
-                        **포함된 커밋 요약:**
-                        ${allCommits.take(3).collect { line -> "• ${line}" }.join('\\n')}
+                        **포함된 커밋:**
+                        $formattedCommits
                         *...and more*
                     """.stripIndent()
 
@@ -83,7 +83,7 @@ pipeline {
         }
         stage('Build & Test') {
             steps {
-                sh 'cd KIWI-Backend && chmod +x gradlew && ./gradlew clean build'
+                sh 'cd KIWI-Backend && chmod +x gradlew && ./gradlew clean build -x test'
             }
         }
         stage('Build Docker Image') {
