@@ -16,7 +16,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 28
+        minSdk = 30
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -112,4 +112,6 @@ dependencies {
     implementation(libs.lottie)
     implementation(libs.lottie.compose)
 
+//    // SystemUi
+//    implementation("com.google.accompanist:accompanist-insets:1.0.0")
 }

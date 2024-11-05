@@ -1,14 +1,16 @@
 package com.d205.KIWI_Backend.log.dto;
 
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class RequestUrlCount {
-
-    private int doc_count_error_upper_bound;
-    private int sum_other_doc_count;
     private List<Bucket> buckets;
 
-    // Getters and Setters
+    @Data
+    public static class Bucket {
+        private String key;
+        private long doc_count;
+    }
 }

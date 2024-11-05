@@ -1,8 +1,6 @@
 package com.kiwe.kiosk.ui.screen.order.component
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -15,12 +13,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.model.OrderItem
+import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.utils.dropShadow
+import java.util.Locale
 
 @Composable
 fun OrderItem(
@@ -43,28 +44,27 @@ fun OrderItem(
         Column(
             modifier =
                 Modifier
-                    .border(
-                        border = BorderStroke(0.dp, Color.Transparent),
-                        RoundedCornerShape(20.dp),
-                    ).clip(
-                        RoundedCornerShape(20.dp),
-                    ),
+                    .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             AsyncImage(
                 modifier =
                     Modifier
-                        .weight(1F),
+                        .weight(1F)
+                        .padding(bottom = 10.dp),
                 model = orderItem.menuImgUrl,
                 contentScale = ContentScale.Crop,
                 contentDescription = "Translated description of what the image contains",
             )
             Text(
                 text = orderItem.menuTitle,
+                style = Typography.bodySmall,
+                textAlign = TextAlign.Center,
             )
             Text(
-                text = "${orderItem.menuPrice}원",
+                text = String.format(Locale.getDefault(), "%,d원", orderItem.menuPrice),
                 color = colorResource(R.color.KIWE_orange1),
+                textAlign = TextAlign.Center,
             )
         }
     }

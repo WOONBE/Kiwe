@@ -26,7 +26,7 @@ fun MenuScreen(
 ) {
     val state = viewModel.collectAsState().value
     LaunchedEffect(Unit) {
-        viewModel.setPage(0)
+        viewModel.setPage(1)
     }
     MenuScreen(
         category = state.category,
