@@ -54,7 +54,7 @@ fun MainNavHost() {
                             MenuScreen(
                                 viewModel = mainViewModel,
                                 onCategoryClick = { category, page ->
-                                    navController.navigate(MainRoute.PAYMENT.route)
+                                    navController.navigate(MainRoute.ORDER.route)
                                     mainViewModel.setPage(page)
                                 },
                             )
