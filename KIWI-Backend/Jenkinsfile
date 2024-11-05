@@ -133,14 +133,14 @@ pipeline {
                                                     NEW_NAME=$CONTAINER_NAME_BLUE
                                                     OLD_NAME=$CONTAINER_NAME_GREEN
                                                     CURRENT_PORT=$GREEN_PORT
-                                                    docker rm $NEW_NAME
+                                                    docker rm \$NEW_NAME
                                                 else
                                                     # 그린 컨테이너를 새 컨테이너로 지정
                                                     NEW_PORT=$GREEN_PORT
                                                     NEW_NAME=$CONTAINER_NAME_GREEN
                                                     OLD_NAME=$CONTAINER_NAME_BLUE
                                                     CURRENT_PORT=$BLUE_PORT
-                                                    docker rm $NEW_NAME
+                                                    docker rm \$NEW_NAME
                                                 fi
                                             fi
 
