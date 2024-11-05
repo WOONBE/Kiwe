@@ -40,24 +40,6 @@ public class MenuService {
     @Value("${server.image.base-url}")
     private String defaultUrl;
 
-    // 메뉴 단건 등록
-//    @Transactional
-//    @CacheEvict(cacheNames = "menusByCategory", key = "#request.category", cacheManager = "rcm")
-//    public MenuResponse createMenu(MenuRequest request) {
-//        Menu menu = Menu.builder()
-//            .category(request.getCategory())
-//            .categoryNumber(request.getCategoryNumber())
-//            .hotOrIce(request.getHotOrIce())
-//            .name(request.getName())
-//            .price(request.getPrice())
-//            .description(request.getDescription())
-//            .imgPath(request.getImgPath())
-//            .build();
-//
-//        menu = menuRepository.save(menu);
-//        return MenuResponse.fromMenu(menu);
-//    }
-
     @Transactional
 //    @CachePut(cacheNames = "menusByCategory", key = "#request.category", cacheManager = "rcm")
     public MenuResponse createMenu(MenuRequest request) {
@@ -93,7 +75,7 @@ public class MenuService {
             .orElseThrow(() -> new BadRequestException(NOT_FOUND_MENU));
 
         // 로그 기록
-        logger.info("메뉴 조회: ID={}, 이름={}", menu.getId(), menu.getName());
+        logger.info("menu_view_event: ID={}, Name={}, Category={}", menu.getId(), menu.getName(), menu.getCategory());
 
         // MenuResponse로 변환
         return MenuResponse.fromMenu(menu); // 수정된 부분
@@ -154,25 +136,4 @@ public class MenuService {
             .map(MenuResponse::fromMenu)
             .collect(Collectors.toList());
     }
-
-    @Transactional(readOnly = true)
-    public List<MenuViewResponse> getAllMenusWithViewCounts() { // 수정된 부분
-        List<Menu> menus = menuRepository.findAll();
-
-        // MenuStatisticsService에서 조회 수를 가져옴
-        List<ViewCount> viewCounts = menuStatisticsService.getMenuViewCounts();
-
-        // ViewCounts를 요청 URI에 따라 맵핑하여 접근 용이하게 함
-        Map<String, Integer> viewCountMap = viewCounts.stream()
-            .collect(Collectors.toMap(ViewCount::getRequestURI, ViewCount::getViewCount));
-
-        return menus.stream()
-            .map(menu -> {
-                int viewCount = viewCountMap.getOrDefault(defaultUrl+menu.getImgPath(), 0);
-                return MenuViewResponse.fromMenuWithViewCount(menu, viewCount); // 수정된 부분
-            })
-            .collect(Collectors.toList());
-    }
-
-
 }

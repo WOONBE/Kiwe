@@ -67,9 +67,4 @@ public class MenuController {
         return new ResponseEntity<>(responses, HttpStatus.OK);
     }
 
-    @GetMapping("/view-counts") // 해당 메서드에 대한 GET 요청 경로
-    public ResponseEntity<List<MenuViewResponse>> getAllMenusWithViewCounts() {
-        List<MenuViewResponse> menuViewResponses = menuService.getAllMenusWithViewCounts();
-        return ResponseEntity.ok(menuViewResponses); // 200 OK 응답 반환
-    }
 }
