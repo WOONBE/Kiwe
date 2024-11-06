@@ -16,6 +16,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE orders SET status = 'COMPLETED' WHERE id = (SELECT id FROM orders WHERE kiosk_id = :kioskId ORDER BY order_date DESC LIMIT 1)", nativeQuery = true)
+    @Query(value = "UPDATE orders o JOIN (SELECT id FROM orders WHERE kiosk_id = :kioskId ORDER BY order_date DESC LIMIT 1) latest_order ON o.id = latest_order.id SET o.status = 'COMPLETED'", nativeQuery = true)
     int updateOrderStatusToCompleted(@Param("kioskId") Long kioskId);
 }
