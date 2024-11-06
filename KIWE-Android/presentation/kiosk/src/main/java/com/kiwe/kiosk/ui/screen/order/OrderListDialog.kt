@@ -1,6 +1,5 @@
 package com.kiwe.kiosk.ui.screen.order
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -59,7 +58,7 @@ fun OrderListDialog(
                 isDialogOpen = false // 결제 버튼 클릭 시 다이얼로그 닫음
                 onClickPayment()
                 onClose()
-            }
+            },
         )
     }
 }
