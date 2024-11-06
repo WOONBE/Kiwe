@@ -8,9 +8,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun PaymentScreen(modifier: Modifier = Modifier) {
+fun PaymentScreen(
+    modifier: Modifier = Modifier,
+    viewModel: PaymentViewModel = hiltViewModel(),
+) {
     var showDialog by remember { mutableStateOf(false) }
 
     val pagerState =
@@ -27,7 +31,10 @@ fun PaymentScreen(modifier: Modifier = Modifier) {
             PaymentStatus.TAKEOUT -> {
                 TakeOutChoiceScreen(
                     modifier = Modifier,
-                    onClick = { showDialog = true },
+                    onClick = {
+                        showDialog = true
+                        viewModel.postOrder()
+                    },
                 )
                 if (showDialog) {
                     CardCreditDialog(
