@@ -1,5 +1,6 @@
 package com.kiwe.data.di
 
+import com.kiwe.data.network.service.OrderService
 import com.kiwe.data.network.service.UserService
 import dagger.Module
 import dagger.Provides
@@ -14,4 +15,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideUserService(httpClient: HttpClient): UserService = UserService(httpClient)
+
+    @Provides
+    @Singleton
+    fun provideOrderService(httpClient: HttpClient): OrderService = OrderService(httpClient)
 }
