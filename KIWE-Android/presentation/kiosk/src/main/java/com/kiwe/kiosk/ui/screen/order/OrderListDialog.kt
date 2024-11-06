@@ -15,10 +15,6 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,22 +46,17 @@ fun OrderListDialog(
 ) {
     val state = viewModel.collectAsState().value
     OrderListDialog(state, onClose, onClickPayment)
-    var isDialogOpen by remember { mutableStateOf(true) } // 다이얼로그 표시 상태 관리
 
-    if (isDialogOpen) {
-        OrderListDialog(
-            state = state,
-            onClose = {
-                isDialogOpen = false // 닫기 버튼 클릭 시 다이얼로그 닫음
-                onClose()
-            },
-            onClickPayment = {
-                isDialogOpen = false // 결제 버튼 클릭 시 다이얼로그 닫음
-                onClickPayment()
-                onClose()
-            },
-        )
-    }
+    OrderListDialog(
+        state = state,
+        onClose = {
+            onClose()
+        },
+        onClickPayment = {
+            onClickPayment()
+            onClose()
+        },
+    )
 }
 
 @Composable
