@@ -1,6 +1,7 @@
 package com.kiwe.kiosk.ui.screen.order.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -27,6 +28,7 @@ import java.util.Locale
 fun OrderItem(
     orderItem: OrderItem,
     modifier: Modifier = Modifier,
+    onClick: (String, Int) -> Unit,
 ) {
     Box(
         modifier =
@@ -39,7 +41,8 @@ fun OrderItem(
                     offsetX = 4.dp,
                     spread = 0.dp,
                 ).clip(RoundedCornerShape(20.dp))
-                .background(color = Color.White),
+                .background(color = Color.White)
+                .clickable { onClick(orderItem.menuTitle, orderItem.menuPrice) },
     ) {
         Column(
             modifier =
@@ -79,5 +82,6 @@ fun OrderItemPreview() {
             menuPrice = 4500,
             menuImgUrl = "https://example.com/image.jpg",
         ),
+        onClick = { _, _ -> },
     )
 }

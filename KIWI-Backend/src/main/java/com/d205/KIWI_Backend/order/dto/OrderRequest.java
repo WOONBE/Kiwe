@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderRequest {
+    private Integer kioskId;
     private List<MenuOrderRequest> menuOrders;  // 여러 메뉴에 대한 주문 정보
 
     @Getter

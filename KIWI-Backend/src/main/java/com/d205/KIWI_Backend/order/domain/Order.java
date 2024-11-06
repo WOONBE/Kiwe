@@ -26,6 +26,11 @@ public class Order {
     @Builder.Default
     private List<OrderMenu> orderMenus =  new ArrayList<>();;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<KioskOrder> kioskOrders = new ArrayList<>(); // 주문과 관련된 키오스크 목록
+
+
     // 연관관계 편의 메서드
     public void addOrderMenu(OrderMenu orderMenu) {
         this.orderMenus.add(orderMenu);
@@ -46,30 +51,22 @@ public class Order {
             this.orderMenus.clear(); // Order에 연관된 모든 메뉴 항목 제거
         }
     }
-    // 기존 메뉴 삭제
-//    public void removeOrderMenu(OrderMenu orderMenu) {
-//        if (orderMenus.contains(orderMenu)) {
-//            orderMenus.remove(orderMenu);
-//        } else {
-//            throw new IllegalArgumentException("Menu not found in the order.");
-//        }
-//    }
-//    // 기존 메뉴를 삭제하는 메서드
-//    public void clearOrderMenus() {
-//        this.orderMenus.clear();  // 메뉴 리스트 초기화
-//    }
-//
-//    // 새 메뉴 항목들을 추가하는 메서드
-//    public void addOrderMenus(List<OrderMenu> orderMenus) {
-//        this.orderMenus.addAll(orderMenus);  // 새 메뉴 항목들을 리스트에 추가
-//    }
-//
-////    // 메뉴 추가 메서드
-//    public void addOrderMenu(OrderMenu orderMenu) {
-//        this.orderMenus.add(orderMenu);  // 단일 메뉴 항목 추가
-//    }
     public void updateStatus(String status) {
         this.status = status;
     }
+    public void addKioskOrder(KioskOrder kioskOrder) {
+        this.kioskOrders.add(kioskOrder);
+        if (kioskOrder.getOrder() != this) {
+            kioskOrder.updateOrder(this);
+        }
+    }
+
+    public Integer getKioskId() {
+        if (kioskOrders != null && !kioskOrders.isEmpty()) {
+            return kioskOrders.get(0).getKiosk().getId();  // 첫 번째 KioskOrder에서 KioskId 추출
+        }
+        return null;
+    }
+
 
 }

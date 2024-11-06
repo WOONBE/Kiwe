@@ -6,13 +6,22 @@ import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_ORD
 import com.d205.KIWI_Backend.global.exception.BadRequestException;
 import com.d205.KIWI_Backend.global.exception.BusinessException;
 import com.d205.KIWI_Backend.global.exception.ExceptionCode;
+import com.d205.KIWI_Backend.kiosk.domain.Kiosk;
+import com.d205.KIWI_Backend.kiosk.repository.KioskRepository;
 import com.d205.KIWI_Backend.menu.domain.Menu;
 import com.d205.KIWI_Backend.menu.repository.MenuRepository;
+import com.d205.KIWI_Backend.menu.service.MenuService;
+import com.d205.KIWI_Backend.order.domain.KioskOrder;
 import com.d205.KIWI_Backend.order.domain.Order;
 import com.d205.KIWI_Backend.order.domain.OrderMenu;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
 import com.d205.KIWI_Backend.order.repository.OrderRepository;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,15 +37,20 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final MenuRepository menuRepository;
+    private final KioskRepository kioskRepository;
+    private final Logger logger = LoggerFactory.getLogger(MenuService.class);
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, MenuRepository menuRepository) {
+    public OrderService(OrderRepository orderRepository, MenuRepository menuRepository, KioskRepository kioskRepository) {
         this.orderRepository = orderRepository;
         this.menuRepository = menuRepository;
+        this.kioskRepository = kioskRepository;
     }
 
     @Transactional
     public OrderResponse createOrder(OrderRequest orderRequest) {
+
+
         // 주문 객체 생성 (빌더 패턴 사용)
         Order order = Order.builder()
             .orderDate(LocalDateTime.now())
@@ -44,13 +58,15 @@ public class OrderService {
             .build();
 
         int totalPrice = 0;
+        List<OrderMenu> orderMenus = new ArrayList<>();
 
         // 메뉴 주문 항목 처리
-        List<OrderMenu> orderMenus = new ArrayList<>();
         for (OrderRequest.MenuOrderRequest menuOrderRequest : orderRequest.getMenuOrders()) {
             Optional<Menu> menuOptional = menuRepository.findById(menuOrderRequest.getMenuId());
             if (menuOptional.isPresent()) {
                 Menu menu = menuOptional.get();
+
+                logger.info("menu_view_event: ID={}, Name={}, Category={}", menu.getId(), menu.getName(), menu.getCategory());
                 OrderMenu orderMenu = OrderMenu.builder()
                     .menu(menu)
                     .quantity(menuOrderRequest.getQuantity())
@@ -63,6 +79,21 @@ public class OrderService {
             }
         }
 
+        // 키오스크 ID 설정
+        Optional<Kiosk> kioskOptional = kioskRepository.findById(orderRequest.getKioskId());
+        if (kioskOptional.isPresent()) {
+            Kiosk kiosk = kioskOptional.get();
+
+            // KioskOrder 객체 생성 후 주문에 연결
+            KioskOrder kioskOrder = KioskOrder.builder()
+                .kiosk(kiosk)  // 키오스크 연결
+                .order(order)   // 주문 연결
+                .assignedTime(LocalDateTime.now())  // 주문이 키오스크에 배정된 시간
+                .build();
+
+            order.addKioskOrder(kioskOrder);  // 주문에 KioskOrder 추가
+        }
+
         // 주문 저장
         Order savedOrder = orderRepository.save(order);
 
@@ -71,12 +102,15 @@ public class OrderService {
             .orderId(savedOrder.getId())
             .orderDate(savedOrder.getOrderDate())
             .status(savedOrder.getStatus())
-            .menuOrders(createMenuOrderResponses(orderMenus,totalPrice))
+            .menuOrders(createMenuOrderResponses(orderMenus))  // 주문 메뉴 항목 응답 리스트 생성
             .totalPrice(totalPrice)
+            .kioskId(orderRequest.getKioskId())  // 요청받은 키오스크 ID
             .build();
 
         return orderResponse;
     }
+
+
     @Transactional
     public OrderResponse getOrderById(Long orderId) {
         Optional<Order> existingOrder = orderRepository.findById(orderId);
@@ -96,7 +130,8 @@ public class OrderService {
             .orderId(order.getId())
             .orderDate(order.getOrderDate())
             .status(order.getStatus())
-            .menuOrders(createMenuOrderResponses(orderMenus,totalPrice))
+            .menuOrders(createMenuOrderResponses(orderMenus))
+            .kioskId(order.getKioskOrders().get(0).getKiosk().getId())  // 첫 번째 키오스크 정보 가져오기
             .totalPrice(totalPrice)
             .build();
     }
@@ -119,7 +154,8 @@ public class OrderService {
                 .orderId(order.getId())
                 .orderDate(order.getOrderDate())
                 .status(order.getStatus())
-                .menuOrders(createMenuOrderResponses(orderMenus,totalPrice))
+                .menuOrders(createMenuOrderResponses(orderMenus))
+                .kioskId(order.getKioskOrders().get(0).getKiosk().getId())  // 첫 번째 키오스크 정보 가져오기
                 .totalPrice(totalPrice)
                 .build();
 
@@ -169,7 +205,7 @@ public class OrderService {
             .orderId(updatedOrder.getId())
             .orderDate(updatedOrder.getOrderDate())
             .status(updatedOrder.getStatus())
-            .menuOrders(createMenuOrderResponses(orderMenus, totalPrice))  // totalPrice 포함
+            .menuOrders(createMenuOrderResponses(orderMenus))  // totalPrice 포함
             .totalPrice(totalPrice)
             .build();
 
@@ -185,8 +221,21 @@ public class OrderService {
         orderRepository.delete(existingOrder.get());  // 주문 삭제
     }
 
-    // 메뉴 주문 응답 리스트를 생성하는 메서드 (공통 메서드로 분리)
-    private List<OrderResponse.MenuOrderResponse> createMenuOrderResponses(List<OrderMenu> orderMenus, int totalPrice) {
+//    // 메뉴 주문 응답 리스트를 생성하는 메서드 (공통 메서드로 분리)
+//    private List<OrderResponse.MenuOrderResponse> createMenuOrderResponses(List<OrderMenu> orderMenus, int totalPrice) {
+//        List<OrderResponse.MenuOrderResponse> menuOrderResponses = new ArrayList<>();
+//        for (OrderMenu orderMenu : orderMenus) {
+//            OrderResponse.MenuOrderResponse menuOrderResponse = OrderResponse.MenuOrderResponse.builder()
+//                .menuId(orderMenu.getMenu().getId())
+//                .name(orderMenu.getMenu().getName())
+//                .quantity(orderMenu.getQuantity())
+//                .price(orderMenu.getMenu().getPrice())
+//                .build();
+//            menuOrderResponses.add(menuOrderResponse);
+//        }
+//        return menuOrderResponses;
+//    }
+    private List<OrderResponse.MenuOrderResponse> createMenuOrderResponses(List<OrderMenu> orderMenus) {
         List<OrderResponse.MenuOrderResponse> menuOrderResponses = new ArrayList<>();
         for (OrderMenu orderMenu : orderMenus) {
             OrderResponse.MenuOrderResponse menuOrderResponse = OrderResponse.MenuOrderResponse.builder()
@@ -225,4 +274,5 @@ public class OrderService {
         }
         return "SUCCESS";
     }
+
 }
