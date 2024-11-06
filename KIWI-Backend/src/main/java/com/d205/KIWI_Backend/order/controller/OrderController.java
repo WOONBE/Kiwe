@@ -57,4 +57,11 @@ public class OrderController {
         orderService.deleteOrder(orderId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/{kioskId}")
+    @Operation(summary = "주문 상태 확인", description = "주문의 진행 상태를 반환하는 API")
+    public ResponseEntity<String> getOrderStatus(@PathVariable Long kioskId) {
+        String status = orderService.getOrderStatus(kioskId);
+        return ResponseEntity.ok(status);
+    }
 }

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -194,5 +195,11 @@ public class OrderService {
             menuOrderResponses.add(menuOrderResponse);
         }
         return menuOrderResponses;
+    }
+
+    // 주문에 대해 결제 상황을 반환
+    public String getOrderStatus(Long kioskId) {
+        String status = orderRepository.findLatestStatusByKioskId(kioskId);
+        return Objects.requireNonNullElse(status, "ORDER_NOT_FOUND");
     }
 }
