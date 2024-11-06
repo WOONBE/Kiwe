@@ -17,6 +17,7 @@ import com.kiwe.kiosk.ui.screen.main.ContainerScreen
 import com.kiwe.kiosk.ui.screen.menu.MenuScreen
 import com.kiwe.kiosk.ui.screen.order.OrderScreen
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
+import com.kiwe.kiosk.ui.screen.payment.PaymentScreen
 import com.kiwe.kiosk.ui.screen.speech.SpeechScreen
 import org.orbitmvi.orbit.compose.collectAsState
 
@@ -63,6 +64,9 @@ fun MainNavHost() {
                                     mainViewModel.setPage(page)
                                 },
                             )
+                        }
+                        composable(route = MainRoute.PAYMENT.route) {
+                            PaymentScreen()
                         }
                     }
                 }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">KIWE-Android</string>
+    <string name="kiwe_won">원</string>
 </resources>
