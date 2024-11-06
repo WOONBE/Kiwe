@@ -1,11 +1,15 @@
 package com.d205.KIWI_Backend.menu.domain;
 
 import com.d205.KIWI_Backend.global.common.BaseEntity;
+import com.d205.KIWI_Backend.order.domain.OrderMenu;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,13 +49,14 @@ public class Menu extends BaseEntity {
     @Column(name = "MENU_IMG")
     private String imgPath; // 이미지 경로
 
+    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
+    private List<OrderMenu> orderMenus;
 
-
-
-
-
-
-
-
-
+    // 연관관계 편의 메서드
+    public void addOrderMenu(OrderMenu orderMenu) {
+        this.orderMenus.add(orderMenu);
+        if (orderMenu.getMenu() != this) {
+            orderMenu.updateMenu(this);
+        }
+    }
 }
