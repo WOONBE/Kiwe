@@ -1,10 +1,12 @@
 package com.d205.KIWI_Backend.order.controller;
 
+import com.d205.KIWI_Backend.global.exception.BadRequestException;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
 import com.d205.KIWI_Backend.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,4 +59,12 @@ public class OrderController {
         orderService.deleteOrder(orderId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+//    @GetMapping("/check/{kioskId}")
+//    @Operation(summary = "주문 상태 확인", description = "주문의 진행 상태를 반환하는 API")
+//    public ResponseEntity<String> getOrderStatus(@PathVariable Long kioskId) {
+//        Map status = orderService.getOrderStatus(kioskId);
+//        return ResponseEntity.ok(status);
+//    }
+
 }
