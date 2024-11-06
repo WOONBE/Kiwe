@@ -60,11 +60,22 @@ public class OrderController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-//    @GetMapping("/check/{kioskId}")
-//    @Operation(summary = "주문 상태 확인", description = "주문의 진행 상태를 반환하는 API")
-//    public ResponseEntity<String> getOrderStatus(@PathVariable Long kioskId) {
-//        Map status = orderService.getOrderStatus(kioskId);
-//        return ResponseEntity.ok(status);
-//    }
+    @GetMapping("payment/{kioskId}")
+    @Operation(summary = "주문 상태 확인", description = "주문의 진행 상태를 반환하는 API")
+    public ResponseEntity<String> getOrderStatus(@PathVariable Long kioskId) {
+        String status = orderService.getOrderStatus(kioskId);
+        return ResponseEntity.ok(status);
+    }
+
+    @PutMapping("payment/{kioskId}")
+    @Operation(summary = "주문 결제 처리", description = "키오스크의 마지막 주문을 결제 처리하는 API")
+    public ResponseEntity<String> updateOrderStatusToCompleted(@PathVariable Long kioskId) {
+        try {
+            String status = orderService.updateOrderStatusToCompleted(kioskId);
+            return ResponseEntity.ok(status);
+        } catch (BadRequestException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
 }

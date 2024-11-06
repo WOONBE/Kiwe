@@ -4,6 +4,8 @@ import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_KIO
 import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_ORDER;
 
 import com.d205.KIWI_Backend.global.exception.BadRequestException;
+import com.d205.KIWI_Backend.global.exception.BusinessException;
+import com.d205.KIWI_Backend.global.exception.ExceptionCode;
 import com.d205.KIWI_Backend.kiosk.domain.Kiosk;
 import com.d205.KIWI_Backend.kiosk.repository.KioskRepository;
 import com.d205.KIWI_Backend.menu.domain.Menu;
@@ -27,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -245,11 +248,31 @@ public class OrderService {
         }
         return menuOrderResponses;
     }
-//    private Integer getNextOrderNumberForKiosk(Integer kioskId) {
-//        Integer lastOrderNumber = orderRepository.findTopByKioskIdOrderByOrderNumberDesc(kioskId);
-//        return (lastOrderNumber != null) ? lastOrderNumber + 1 : 1;
-//    }
 
+    // 주문에 대해 결제 상황을 반환
+    public String getOrderStatus(Long kioskId) {
+        String status = orderRepository.findLatestStatusByKioskId(kioskId);
+        return Objects.requireNonNullElse(status, "ORDER_NOT_FOUND");
+    }
 
+    // 주문에 대해 결제 상황을 반환
+    public String updateOrderStatusToCompleted(Long kioskId) {
+
+        // 가장 최근 주문 상태가 "PENDING"인 경우에만 결제 처리
+        String latestStatus = orderRepository.findLatestStatusByKioskId(kioskId);
+
+        if (latestStatus == null || !latestStatus.equals("PENDING")) {
+            // 결제할 주문이 존재하지 않거나, 주문 상태가 "PENDING"이 아닌 경우
+            throw new BadRequestException(NOT_FOUND_ORDER);
+        }
+
+        int updatedCount = orderRepository.updateOrderStatusToCompleted(kioskId);
+
+        // 주문이 없을 경우
+        if (updatedCount == 0) {
+            throw new BadRequestException(NOT_FOUND_KIOSK_ID);
+        }
+        return "SUCCESS";
+    }
 
 }
