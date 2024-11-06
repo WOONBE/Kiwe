@@ -41,6 +41,7 @@ import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.ImageButton
 import com.kiwe.kiosk.ui.screen.order.OrderListDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
+import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import com.kiwe.kiosk.utils.MainEnum
@@ -49,6 +50,7 @@ import org.orbitmvi.orbit.compose.collectAsState
 @Composable
 fun ContainerScreen(
     viewModel: MainViewModel,
+    shoppingCartViewModel: ShoppingCartViewModel,
     onBackClick: () -> Unit,
     onClickPayment: () -> Unit,
     content: @Composable () -> Unit,
@@ -58,11 +60,22 @@ fun ContainerScreen(
     var isOrderListDialogOpen by remember { mutableStateOf(false) }
 
     if (isShoppingCartDialogOpen) {
-        ShoppingCartDialog(onClose = { isShoppingCartDialogOpen = false })
+        ShoppingCartDialog(
+            viewModel = shoppingCartViewModel,
+            goOrderList = {
+                isShoppingCartDialogOpen = false
+                isOrderListDialogOpen = true
+            },
+            onClose = { isShoppingCartDialogOpen = false },
+        )
     }
 
     if (isOrderListDialogOpen) {
         OrderListDialog(onClose = { isOrderListDialogOpen = false }, onClickPayment = onClickPayment)
+        OrderListDialog(
+            viewModel = shoppingCartViewModel,
+            onClose = { isOrderListDialogOpen = false },
+        )
     }
 
     ContainerScreen(
@@ -133,11 +146,21 @@ private fun ContainerScreen(
                         onBackClick()
                     }
                     Spacer(Modifier.width(5.dp))
-                    ImageButton(modifier = Modifier.weight(1F), "장바구니", R.drawable.shopping_cart, R.color.KIWE_orange1) {
+                    ImageButton(
+                        modifier = Modifier.weight(1F),
+                        "장바구니",
+                        R.drawable.shopping_cart,
+                        R.color.KIWE_orange1,
+                    ) {
                         onShoppingCartDialogClick()
                     }
                     Spacer(Modifier.width(5.dp))
-                    ImageButton(modifier = Modifier.weight(1F), "결제하기", R.drawable.card_pos, R.color.KIWE_green5) {
+                    ImageButton(
+                        modifier = Modifier.weight(1F),
+                        "결제하기",
+                        R.drawable.card_pos,
+                        R.color.KIWE_green5,
+                    ) {
                         onOrderListDialogClick()
                     }
                 }

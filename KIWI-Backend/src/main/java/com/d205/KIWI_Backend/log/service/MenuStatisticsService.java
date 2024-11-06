@@ -48,7 +48,7 @@ public class MenuStatisticsService {
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
 
         ElasticResponse response = webClient.post() // POST 메서드 사용
-            .uri(url + "/_search") // _search 엔드포인트
+            .uri(url + "/menu_views-*/_search") // _search 엔드포인트
             .header("Authorization", "Basic " + encodedCredentials)
             .header("Content-Type", "application/json") // JSON 형식으로 요청 본문 설정
             .header("Accept", "application/json") // 응답으로 JSON 형식을 요청
@@ -69,34 +69,6 @@ public class MenuStatisticsService {
                 .build())
             .collect(Collectors.toList());
     }
-
-
-//    public List<ViewCount> getTop10Ids() {
-//        String credentials = username + ":" + password;
-//        String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
-//
-//        ElasticResponse response = webClient.post() // POST 메서드 사용
-//            .uri(url + "/_search") // _search 엔드포인트
-//            .header("Authorization", "Basic " + encodedCredentials)
-//            .header("Content-Type", "application/json") // JSON 형식으로 요청 본문 설정
-//            .header("Accept", "application/json") // 응답으로 JSON 형식을 요청
-////            .bodyValue(buildViewCountQuery()) // 쿼리 본문 추가
-//            .bodyValue(viewIdQuery)
-//            .retrieve()
-//            .bodyToMono(ElasticResponse.class)
-//            .block();
-//
-//        if (response == null || response.getAggregations() == null || response.getAggregations().getRequest_url_count() == null) {
-//            return Collections.emptyList();
-//        }
-//
-//        return response.getAggregations().getRequest_url_count().getBuckets().stream()
-//            .map(bucket -> ViewCount.builder()
-//                .requestURI(bucket.getKey())
-//                .viewCount((int) bucket.getDoc_count())
-//                .build())
-//            .collect(Collectors.toList());
-//    }
     public List<MenuResponse> suggestedMenus() {
         String credentials = username + ":" + password;
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
@@ -133,23 +105,5 @@ public class MenuStatisticsService {
             .orElseThrow(() -> new BadRequestException(NOT_FOUND_MENU));
         return MenuResponse.fromMenu(menu);
     }
-
-
-//    private String buildViewCountQuery() {
-//        return "{\n" +
-//            "  \"size\": 10,\n" +
-//            "  \"query\": {\n" +
-//            "    \"match_all\": {}\n" +
-//            "  },\n" +
-//            "  \"aggs\": {\n" +
-//            "    \"request_url_count\": {\n" +
-//            "      \"terms\": {\n" +
-//            "        \"field\": \"menu_name.keyword\",\n" +
-//            "        \"size\": 10\n" +
-//            "      }\n" +
-//            "    }\n" +
-//            "  }\n" +
-//            "}";
-//    }
 
 }

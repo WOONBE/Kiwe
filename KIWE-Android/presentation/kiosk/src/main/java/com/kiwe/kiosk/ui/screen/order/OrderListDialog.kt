@@ -19,23 +19,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.model.ShoppingCartItem
 import com.kiwe.kiosk.ui.screen.order.component.OrderDialog
 import com.kiwe.kiosk.ui.theme.Typography
 import org.orbitmvi.orbit.compose.collectAsState
-import timber.log.Timber
 import java.util.Locale
-
-private const val TAG = "OrderListDialog 싸피"
 
 @Composable
 fun OrderListDialog(
@@ -87,10 +92,14 @@ fun OrderListDialog(
                     listOf("메뉴명", "수량", "금액(원)"),
                 ).plus(
                     state.shoppingCartItem.map {
+                        var title = it.menuTitle
+                        it.menuRadioOption.forEach { option ->
+                            title += "\n${option.key} : ${option.value.first}"
+                        }
                         listOf(
-                            it.menuTitle,
+                            title,
                             it.count.toString(),
-                            it.menuPrice.toString(),
+                            it.totalPrice.toString(),
                         )
                     },
                 ),
@@ -106,7 +115,11 @@ fun OrderListDialog(
                 Column {
                     var cost = 0
                     for (shoppingCartItem in state.shoppingCartItem) {
-                        cost += shoppingCartItem.count * shoppingCartItem.menuPrice
+                        var menuPrice = shoppingCartItem.defaultPrice
+                        shoppingCartItem.menuRadioOption.forEach {
+                            menuPrice += it.value.second
+                        }
+                        cost += shoppingCartItem.count * menuPrice
                     }
                     Row(
                         modifier =
@@ -173,49 +186,127 @@ fun OrderListDialog(
 @Composable
 fun TableHeader(tableHeader: List<String>) {
     Row {
-        tableHeader.forEach {
-            Text(
-                text = it,
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .padding(4.dp),
-                color = Color.Black,
-                style = Typography.titleSmall,
-                textAlign = TextAlign.Center,
-            )
+        tableHeader.forEachIndexed { index, text ->
+            when (index) {
+                0 -> {
+                    Text(
+                        text = text,
+                        modifier =
+                            Modifier
+                                .weight(5f)
+                                .padding(4.dp),
+                        color = Color.Black,
+                        style = Typography.titleSmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+
+                1 -> {
+                    Text(
+                        text = text,
+                        modifier =
+                            Modifier
+                                .weight(2f)
+                                .padding(4.dp),
+                        color = Color.Black,
+                        style = Typography.titleSmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+
+                else -> {
+                    Text(
+                        text = text,
+                        modifier =
+                            Modifier
+                                .weight(3f)
+                                .padding(4.dp),
+                        color = Color.Black,
+                        style = Typography.titleSmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
 fun TableBody(tableBody: List<String>) {
-    Timber.tag(TAG).d("TableBody: ${tableBody.size}")
-    Row {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         tableBody.forEachIndexed { index, data ->
-            if (index == 2) {
-                Text(
-                    text =
-                        String.format(Locale.getDefault(), "%,d", data.toInt()),
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .padding(8.dp),
-                    color = Color.Black,
-                    style = Typography.bodySmall,
-                    textAlign = TextAlign.Center,
-                )
-            } else {
-                Text(
-                    text = data,
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .padding(8.dp),
-                    color = Color.Black,
-                    style = Typography.bodySmall,
-                    textAlign = TextAlign.Center,
-                )
+            when (index) {
+                0 -> {
+                    val parts = data.split("\n")
+                    val title = parts.firstOrNull() ?: ""
+                    val option = parts.drop(1).joinToString("\n")
+                    Text(
+                        text =
+                            buildAnnotatedString {
+                                withStyle(
+                                    style =
+                                        SpanStyle(
+                                            color = Color.Black,
+                                            fontFamily = FontFamily(Font(R.font.pretendard_extrabold)),
+                                            fontSize = 16.sp,
+                                            letterSpacing = (-0.03).em,
+                                        ),
+                                ) {
+                                    append(title)
+                                }
+                                if (option.isNotEmpty()) {
+                                    append("\n")
+                                }
+                                withStyle(
+                                    style =
+                                        SpanStyle(
+                                            color = Color.Black,
+                                            fontFamily = FontFamily(Font(R.font.pretendard_regular)),
+                                            fontSize = 12.sp,
+                                            letterSpacing = (-0.03).em,
+                                        ),
+                                ) {
+                                    append(option)
+                                }
+                            },
+                        modifier =
+                            Modifier
+                                .weight(5f)
+                                .padding(8.dp),
+                        color = Color.Black,
+                        style = Typography.labelSmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+
+                2 -> {
+                    Text(
+                        text =
+                            String.format(Locale.getDefault(), "%,d", data.toInt()),
+                        modifier =
+                            Modifier
+                                .weight(3F)
+                                .padding(8.dp),
+                        color = Color.Black,
+                        style = Typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+
+                else -> {
+                    Text(
+                        text = data,
+                        modifier =
+                            Modifier
+                                .weight(2f)
+                                .padding(8.dp),
+                        color = Color.Black,
+                        style = Typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
     }
@@ -234,9 +325,7 @@ fun CenterAlignedTable(data: List<List<String>>) {
             TableHeader(data[0])
             HorizontalDivider(thickness = 2.dp, color = Color.Black)
         }
-        Timber.tag(TAG).d("CenterAlignedTable: $data")
         items(data.drop(1).size) {
-            Timber.tag(TAG).d("CenterAlignedTable: ${data.drop(1)[it]}")
             TableBody(data.drop(1)[it])
             HorizontalDivider(thickness = 0.5.dp, color = Color.Black)
         }
@@ -252,57 +341,50 @@ fun OrderListDialogPreview() {
                 listOf(
                     ShoppingCartItem(
                         menuTitle = "디카페인 카페모카",
-                        menuPrice = 4500,
-                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                        menuPrice = 4500,
+//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         count = 2,
-                        option = mapOf("샷" to "연하게", "당도" to "추가"),
                     ),
                     ShoppingCartItem(
                         menuTitle = "콜드브루디카페인",
-                        menuPrice = 3500,
-                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                        menuPrice = 3500,
+//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         count = 1,
-                        option = mapOf("샷" to "연하게"),
                     ),
                     ShoppingCartItem(
                         menuTitle = "딸기쿠키프라페",
-                        menuPrice = 5000,
-                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                        menuPrice = 5000,
+//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         count = 99,
-                        option = mapOf("당도" to "추가"),
                     ),
                     ShoppingCartItem(
                         menuTitle = "딸기쿠키프라페11111",
-                        menuPrice = 5000,
-                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                        menuPrice = 5000,
+//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         count = 99,
-                        option = mapOf("당도" to "추가"),
                     ),
                     ShoppingCartItem(
                         menuTitle = "딸111기쿠키프라페1111",
-                        menuPrice = 5000,
-                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                        menuPrice = 5000,
+//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         count = 99,
-                        option = mapOf("당도" to "추가", "샷" to "연하게", "얼음" to "추가", "테이크 아웃" to "O"),
                     ),
                     ShoppingCartItem(
                         menuTitle = "딸111기쿠키프라페111",
-                        menuPrice = 5000,
-                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                        menuPrice = 5000,
+//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         count = 99,
-                        option = mapOf("당도" to "추가", "샷" to "연하게", "얼음" to "추가", "테이크 아웃" to "O"),
                     ),
                     ShoppingCartItem(
                         menuTitle = "딸111기쿠키프라페11",
-                        menuPrice = 5000,
-                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                        menuPrice = 5000,
+//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         count = 99,
-                        option = mapOf("당도" to "추가", "샷" to "연하게", "얼음" to "추가", "테이크 아웃" to "O"),
                     ),
                     ShoppingCartItem(
                         menuTitle = "딸111기쿠키프라페1",
-                        menuPrice = 5000,
-                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                        menuPrice = 5000,
+//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         count = 99,
                     ),
                 ),
