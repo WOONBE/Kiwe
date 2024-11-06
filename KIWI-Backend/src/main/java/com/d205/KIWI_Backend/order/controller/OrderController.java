@@ -59,14 +59,14 @@ public class OrderController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/{kioskId}")
+    @GetMapping("payment/{kioskId}")
     @Operation(summary = "주문 상태 확인", description = "주문의 진행 상태를 반환하는 API")
     public ResponseEntity<String> getOrderStatus(@PathVariable Long kioskId) {
         String status = orderService.getOrderStatus(kioskId);
         return ResponseEntity.ok(status);
     }
 
-    @PutMapping("/{kioskId}")
+    @PutMapping("payment/{kioskId}")
     @Operation(summary = "주문 결제 처리", description = "키오스크의 마지막 주문을 결제 처리하는 API")
     public ResponseEntity<String> updateOrderStatusToCompleted(@PathVariable Long kioskId) {
         try {
