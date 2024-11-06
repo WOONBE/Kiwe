@@ -36,13 +36,14 @@ pipeline {
                     // 이전 커밋을 확인하고 기본값을 설정
                     def previousCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT ?: 'HEAD'
                     def allCommits = sh(script: "git log --pretty=format:'%h - %s (%an)' ${previousCommit}..HEAD", returnStdout: true).trim()
-                    def formattedCommits = allCommits.split('\\n').collect { line ->
+                    def formattedCommits = allCommits.split('\n').collect { line ->
                         def escapedLine = line.replaceAll("([\\[\\]\\(\\)])", '\\\\$1')
                         "• ${escapedLine}"
-                    }.join('\\n')
+                    }.join('\n')  // 실제 줄바꿈 사용
+
                     def message = """
                         #### 🌐BE 빌드 시작
-                        **빌드 번호** $env.JOB_NAME #$env.BUILD_NUMBER
+                        **빌드 번호:** $env.JOB_NAME #$env.BUILD_NUMBER
                         **브랜치:** $env.GIT_BRANCH
                         **작성자:** $Author_ID ($Author_Name)
                         **빌드 URL:** [Details]($env.BUILD_URL)
