@@ -1,5 +1,6 @@
 package com.d205.KIWI_Backend.order.controller;
 
+import com.d205.KIWI_Backend.global.exception.BadRequestException;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
 import com.d205.KIWI_Backend.order.service.OrderService;
@@ -63,5 +64,16 @@ public class OrderController {
     public ResponseEntity<String> getOrderStatus(@PathVariable Long kioskId) {
         String status = orderService.getOrderStatus(kioskId);
         return ResponseEntity.ok(status);
+    }
+
+    @PutMapping("/{kioskId}")
+    @Operation(summary = "주문 결제 처리", description = "키오스크의 마지막 주문을 결제 처리하는 API")
+    public ResponseEntity<String> updateOrderStatusToCompleted(@PathVariable Long kioskId) {
+        try {
+            String status = orderService.updateOrderStatusToCompleted(kioskId);
+            return ResponseEntity.ok(status);
+        } catch (BadRequestException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

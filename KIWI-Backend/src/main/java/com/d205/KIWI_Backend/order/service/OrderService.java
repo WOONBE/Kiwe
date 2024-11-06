@@ -1,8 +1,11 @@
 package com.d205.KIWI_Backend.order.service;
 
+import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_KIOSK_ID;
 import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_ORDER;
 
 import com.d205.KIWI_Backend.global.exception.BadRequestException;
+import com.d205.KIWI_Backend.global.exception.BusinessException;
+import com.d205.KIWI_Backend.global.exception.ExceptionCode;
 import com.d205.KIWI_Backend.menu.domain.Menu;
 import com.d205.KIWI_Backend.menu.repository.MenuRepository;
 import com.d205.KIWI_Backend.order.domain.Order;
@@ -201,5 +204,25 @@ public class OrderService {
     public String getOrderStatus(Long kioskId) {
         String status = orderRepository.findLatestStatusByKioskId(kioskId);
         return Objects.requireNonNullElse(status, "ORDER_NOT_FOUND");
+    }
+
+    // 주문에 대해 결제 상황을 반환
+    public String updateOrderStatusToCompleted(Long kioskId) {
+
+        // 가장 최근 주문 상태가 "PENDING"인 경우에만 결제 처리
+        String latestStatus = orderRepository.findLatestStatusByKioskId(kioskId);
+
+        if (latestStatus == null || !latestStatus.equals("PENDING")) {
+            // 결제할 주문이 존재하지 않거나, 주문 상태가 "PENDING"이 아닌 경우
+            throw new BadRequestException(NOT_FOUND_ORDER);
+        }
+
+        int updatedCount = orderRepository.updateOrderStatusToCompleted(kioskId);
+
+        // 주문이 없을 경우
+        if (updatedCount == 0) {
+            throw new BadRequestException(NOT_FOUND_KIOSK_ID);
+        }
+        return "SUCCESS";
     }
 }
