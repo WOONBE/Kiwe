@@ -26,7 +26,7 @@ public enum ExceptionCode {
 
     NOT_FOUND_KIOSK_ID(1007, "요청한 ID에 해당하는 키오스크가 없습니다"),
     NOT_CORRECT_PASSWORD(1008, "입력한 비밀번호가 일치하지 않습니다."),
-    NOT_FOUND_CURRENCY_DATA(1009, "요청한 날짜에 해당하는 환율 정보가 존재하지 않습니다."),
+    NOT_FOUND_ORDER(1009, "존재하지 않는 주문입니다."),
 
     NOT_VALID_REFRESH_TOKEN(1011, "유효한 refresh token이 아닙니다."),
 
