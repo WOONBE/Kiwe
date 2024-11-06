@@ -15,6 +15,7 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -161,24 +162,56 @@ fun OrderListDialog(
 @Composable
 fun TableHeader(tableHeader: List<String>) {
     Row {
-        tableHeader.forEach {
-            Text(
-                text = it,
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .padding(4.dp),
-                color = Color.Black,
-                style = Typography.titleSmall,
-                textAlign = TextAlign.Center,
-            )
+        tableHeader.forEachIndexed { index, text ->
+            when (index) {
+                0 -> {
+                    Text(
+                        text = text,
+                        modifier =
+                            Modifier
+                                .weight(5f)
+                                .padding(4.dp),
+                        color = Color.Black,
+                        style = Typography.titleSmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+
+                1 -> {
+                    Text(
+                        text = text,
+                        modifier =
+                            Modifier
+                                .weight(2f)
+                                .padding(4.dp),
+                        color = Color.Black,
+                        style = Typography.titleSmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+
+                else -> {
+                    Text(
+                        text = text,
+                        modifier =
+                            Modifier
+                                .weight(3f)
+                                .padding(4.dp),
+                        color = Color.Black,
+                        style = Typography.titleSmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
 fun TableBody(tableBody: List<String>) {
-    Row {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         tableBody.forEachIndexed { index, data ->
             when (index) {
                 0 -> {
@@ -199,7 +232,9 @@ fun TableBody(tableBody: List<String>) {
                                 ) {
                                     append(title)
                                 }
-                                append("\n")
+                                if (option.isNotEmpty()) {
+                                    append("\n")
+                                }
                                 withStyle(
                                     style =
                                         SpanStyle(
@@ -214,32 +249,34 @@ fun TableBody(tableBody: List<String>) {
                             },
                         modifier =
                             Modifier
-                                .weight(1f)
+                                .weight(5f)
                                 .padding(8.dp),
                         color = Color.Black,
                         style = Typography.labelSmall,
                         textAlign = TextAlign.Center,
                     )
                 }
+
                 2 -> {
                     Text(
                         text =
                             String.format(Locale.getDefault(), "%,d", data.toInt()),
                         modifier =
                             Modifier
-                                .weight(1f)
+                                .weight(3F)
                                 .padding(8.dp),
                         color = Color.Black,
                         style = Typography.bodySmall,
                         textAlign = TextAlign.Center,
                     )
                 }
+
                 else -> {
                     Text(
                         text = data,
                         modifier =
                             Modifier
-                                .weight(1f)
+                                .weight(2f)
                                 .padding(8.dp),
                         color = Color.Black,
                         style = Typography.bodySmall,
