@@ -52,6 +52,7 @@ fun ContainerScreen(
     viewModel: MainViewModel,
     shoppingCartViewModel: ShoppingCartViewModel,
     onBackClick: () -> Unit,
+    onClickPayment: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
@@ -73,6 +74,7 @@ fun ContainerScreen(
         OrderListDialog(
             viewModel = shoppingCartViewModel,
             onClose = { isOrderListDialogOpen = false },
+            onClickPayment = onClickPayment,
         )
     }
 

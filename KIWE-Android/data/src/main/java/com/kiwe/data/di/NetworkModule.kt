@@ -1,6 +1,7 @@
 package com.kiwe.data.di
 
 import android.util.Log
+import com.kiwe.data.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,8 +30,9 @@ private const val TAG = "NetworkModule"
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    private const val BASE_URL =
-        "702bb8b6-4cfb-4bd5-8e8c-33553ee83b0c.mock.pstmn.io" // Postman Mock Server
+    private const val BASE_URL = BuildConfig.BASE_URL
+    private const val BASE_IMAGE_URL = BuildConfig.BASE_IMAGE_URL
+
     private const val NETWORK_TIMEOUT = 5000L
 
     @Provides

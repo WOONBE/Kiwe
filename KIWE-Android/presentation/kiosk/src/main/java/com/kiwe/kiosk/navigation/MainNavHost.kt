@@ -35,6 +35,9 @@ fun MainNavHost() {
                     viewModel = mainViewModel,
                     shoppingCartViewModel = shoppingCartViewModel,
                     onBackClick = { navController.navigateUp() },
+                    onClickPayment = {
+                        navController.navigate(MainRoute.PAYMENT.route)
+                    },
                 ) {
                     NavHost(
                         navController = navController,

@@ -42,15 +42,28 @@ import java.util.Locale
 fun OrderListDialog(
     viewModel: ShoppingCartViewModel = hiltViewModel(),
     onClose: () -> Unit,
+    onClickPayment: () -> Unit = {},
 ) {
     val state = viewModel.collectAsState().value
-    OrderListDialog(state, onClose)
+    OrderListDialog(state, onClose, onClickPayment)
+
+    OrderListDialog(
+        state = state,
+        onClose = {
+            onClose()
+        },
+        onClickPayment = {
+            onClickPayment()
+            onClose()
+        },
+    )
 }
 
 @Composable
 fun OrderListDialog(
     state: ShoppingCartState,
     onClose: () -> Unit,
+    onClickPayment: () -> Unit = {},
 ) {
     OrderDialog {
         Text(
@@ -138,7 +151,9 @@ fun OrderListDialog(
                             modifier = Modifier.weight(1F),
                             enabled = state.shoppingCartItem.isNotEmpty(),
                             shape = RoundedCornerShape(10.dp),
-                            onClick = {},
+                            onClick = {
+                                onClickPayment()
+                            },
                             colors =
                                 ButtonColors(
                                     contentColor = Color.White,

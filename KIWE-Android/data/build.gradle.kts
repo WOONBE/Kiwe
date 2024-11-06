@@ -1,6 +1,7 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.DetektCreateBaselineTask
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.library)
@@ -11,6 +12,9 @@ plugins {
     alias(libs.plugins.detekt)
 }
 
+val properties = Properties()
+properties.load(rootProject.file("local.properties").inputStream())
+
 android {
     namespace = "com.kiwe.data"
     compileSdk = 34
@@ -20,6 +24,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField("String", "BASE_URL", properties["BASE_URL"] as String)
+        buildConfigField("String", "BASE_IMAGE_URL", properties["BASE_IMAGE_URL"] as String)
     }
 
     buildTypes {
