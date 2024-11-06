@@ -36,7 +36,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.model.ShoppingCartItem
@@ -49,7 +48,8 @@ import java.util.Locale
 
 @Composable
 fun ShoppingCartDialog(
-    viewModel: ShoppingCartViewModel = hiltViewModel(),
+    viewModel: ShoppingCartViewModel,
+    goOrderList: () -> Unit,
     onClose: () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
@@ -82,7 +82,7 @@ fun ShoppingCartDialog(
         Column {
             var cost = 0
             for (shoppingCartItem in state.shoppingCartItem) {
-                cost += shoppingCartItem.count * shoppingCartItem.menuPrice
+                cost += shoppingCartItem.count * shoppingCartItem.totalPrice
             }
             Row(
                 modifier =
@@ -129,7 +129,7 @@ fun ShoppingCartDialog(
                     modifier = Modifier.weight(1F),
                     enabled = state.shoppingCartItem.isNotEmpty(),
                     shape = RoundedCornerShape(10.dp),
-                    onClick = {},
+                    onClick = goOrderList,
                     colors =
                         ButtonColors(
                             contentColor = Color.White,
@@ -152,13 +152,13 @@ fun ShoppingCartDialog(
 private fun ShoppingCartDialog(
     shoppingCartItemList: List<ShoppingCartItem>,
     onDeleteItem: (String) -> Unit,
-    onAddItem: (String) -> Unit,
-    onMinusItem: (String) -> Unit,
+    onAddItem: (String, Map<String, Pair<String, Int>>) -> Unit,
+    onMinusItem: (String, Map<String, Pair<String, Int>>) -> Unit,
 ) {
     Column {
         var cost = 0
         shoppingCartItemList.forEach {
-            cost += it.menuPrice * it.count
+            cost += it.totalPrice * it.count
         }
         LazyColumn(
             modifier =
@@ -188,7 +188,7 @@ private fun ShoppingCartDialog(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AsyncImage(
-                            model = shoppingCartItemList[it].menuImgUrl,
+                            model = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                             contentDescription = "메뉴 이미지 주소",
                             modifier = Modifier.weight(1F),
                         )
@@ -211,15 +211,18 @@ private fun ShoppingCartDataInfo(
     item: ShoppingCartItem,
     modifier: Modifier = Modifier,
     onDeleteItem: (String) -> Unit,
-    onAddItem: (String) -> Unit,
-    onMinusItem: (String) -> Unit,
+    onAddItem: (String, Map<String, Pair<String, Int>>) -> Unit,
+    onMinusItem: (String, Map<String, Pair<String, Int>>) -> Unit,
 ) {
     Column(
         modifier = modifier.padding(start = 15.dp),
         verticalArrangement = Arrangement.Top,
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -242,10 +245,13 @@ private fun ShoppingCartDataInfo(
             )
         }
         Text(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
             text =
                 buildAnnotatedString {
-                    item.option.onEachIndexed { index, entry ->
+                    item.menuRadioOption.onEachIndexed { index, entry ->
                         withStyle(
                             style =
                                 SpanStyle(
@@ -265,9 +271,9 @@ private fun ShoppingCartDataInfo(
                                     letterSpacing = letterSpacing,
                                 ),
                         ) {
-                            append(entry.value)
+                            append(entry.value.first)
                         }
-                        if (index != item.option.size - 1) {
+                        if (index != item.menuRadioOption.size - 1) {
                             withStyle(
                                 style =
                                     SpanStyle(
@@ -290,7 +296,7 @@ private fun ShoppingCartDataInfo(
         ) {
             Text(
                 modifier = Modifier.weight(1F),
-                text = String.format(Locale.getDefault(), "%,d원", item.menuPrice * item.count),
+                text = String.format(Locale.getDefault(), "%,d원", item.totalPrice * item.count),
                 style = Typography.bodyMedium,
                 color = Color.Black,
             )
@@ -305,7 +311,7 @@ private fun ShoppingCartDataInfo(
                             Modifier
                                 .height(20.dp)
                                 .clickable {
-                                    onMinusItem(item.menuTitle)
+                                    onMinusItem(item.menuTitle, item.menuRadioOption)
                                 },
                         painter = painterResource(R.drawable.minus),
                         contentDescription = "감소 버튼",
@@ -330,7 +336,7 @@ private fun ShoppingCartDataInfo(
                         Modifier
                             .height(20.dp)
                             .clickable {
-                                onAddItem(item.menuTitle)
+                                onAddItem(item.menuTitle, item.menuRadioOption)
                             },
                     painter = painterResource(R.drawable.plus),
                     contentDescription = "추가 버튼",
@@ -347,28 +353,25 @@ fun ShoppingCartDialogPreview() {
         listOf(
             ShoppingCartItem(
                 menuTitle = "딸111기쿠키프라페",
-                menuPrice = 5000,
-                menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                menuPrice = 5000,
+//                menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                 count = 99,
-                option = mapOf("당도" to "추가", "샷" to "연하게", "얼음" to "추가", "테이크 아웃" to "Oz"),
             ),
             ShoppingCartItem(
                 menuTitle = "딸111기쿠키프라페",
-                menuPrice = 5000,
-                menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                menuPrice = 5000,
+//                menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                 count = 99,
-                option = mapOf("당도" to "추가", "샷" to "연하게", "얼음" to "추가", "테이크 아웃" to "Oz"),
             ),
             ShoppingCartItem(
                 menuTitle = "딸111기쿠키프라페",
-                menuPrice = 5000,
-                menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                menuPrice = 5000,
+//                menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                 count = 99,
-                option = mapOf("당도" to "추가", "샷" to "연하게", "얼음" to "추가", "테이크 아웃" to "Oz"),
             ),
         ),
         {},
-        {},
-        {},
+        { _, _ -> },
+        { _, _ -> },
     )
 }

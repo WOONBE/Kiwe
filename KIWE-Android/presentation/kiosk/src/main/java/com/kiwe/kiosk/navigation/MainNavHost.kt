@@ -6,6 +6,7 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,6 +16,7 @@ import com.kiwe.kiosk.ui.screen.intro.IntroScreen
 import com.kiwe.kiosk.ui.screen.main.ContainerScreen
 import com.kiwe.kiosk.ui.screen.menu.MenuScreen
 import com.kiwe.kiosk.ui.screen.order.OrderScreen
+import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import com.kiwe.kiosk.ui.screen.payment.PaymentScreen
 import com.kiwe.kiosk.ui.screen.speech.SpeechScreen
 import org.orbitmvi.orbit.compose.collectAsState
@@ -24,12 +26,14 @@ import org.orbitmvi.orbit.compose.collectAsState
 fun MainNavHost() {
     val navController = rememberNavController()
     val mainViewModel: MainViewModel = viewModel()
+    val shoppingCartViewModel: ShoppingCartViewModel = hiltViewModel()
     val state = mainViewModel.collectAsState().value
     Surface {
         Scaffold(
             content = {
                 ContainerScreen(
                     viewModel = mainViewModel,
+                    shoppingCartViewModel = shoppingCartViewModel,
                     onBackClick = { navController.navigateUp() },
                 ) {
                     NavHost(
@@ -46,7 +50,9 @@ fun MainNavHost() {
                             })
                         }
                         composable(route = MainRoute.ORDER.route) {
-                            OrderScreen { page ->
+                            OrderScreen(
+                                shoppingCartViewModel = shoppingCartViewModel,
+                            ) { page ->
                                 mainViewModel.setPage(page)
                             }
                         }
