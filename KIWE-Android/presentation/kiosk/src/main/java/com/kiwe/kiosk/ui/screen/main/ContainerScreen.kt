@@ -71,10 +71,10 @@ fun ContainerScreen(
     }
 
     if (isOrderListDialogOpen) {
-        OrderListDialog(onClose = { isOrderListDialogOpen = false }, onClickPayment = onClickPayment)
         OrderListDialog(
             viewModel = shoppingCartViewModel,
             onClose = { isOrderListDialogOpen = false },
+            onClickPayment = onClickPayment,
         )
     }
 
