@@ -69,7 +69,11 @@ fun MainNavHost() {
                             )
                         }
                         composable(route = MainRoute.PAYMENT.route) {
-                            PaymentScreen()
+                            PaymentScreen(
+                                shoppingCartViewModel = shoppingCartViewModel,
+                            ) { page ->
+                                mainViewModel.setPage(page)
+                            }
                         }
                     }
                 }
