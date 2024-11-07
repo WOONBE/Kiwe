@@ -270,7 +270,7 @@ public class OrderService {
             throw new BadRequestException(NOT_FOUND_ORDER);
         }
 
-        Long orderId = orderRepository.findLatestOrderIdByKioskId(kioskId);
+        Long orderId = orderRepository.findLatestOrderIdByKioskId2(kioskId);
         Optional<Order> existingOrder = orderRepository.findById(orderId);
         if (existingOrder.isEmpty()) {
             throw new BadRequestException(NOT_FOUND_ORDER);

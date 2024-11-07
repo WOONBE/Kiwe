@@ -4,6 +4,7 @@ import com.d205.KIWI_Backend.order.domain.Order;
 import io.lettuce.core.dynamic.annotation.Param;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -50,5 +51,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Transactional
     @Query(value = "SELECT id FROM orders WHERE kiosk_id = :kioskId ORDER BY order_date DESC LIMIT 1", nativeQuery = true)
     Long findLatestOrderIdByKioskId(@Param("kioskId") Long kioskId);
+
+    @Transactional
+    @Query(value = "SELECT o.id FROM orders o " +
+        "JOIN kiosk_order ko ON o.id = ko.order_id " +
+        "WHERE ko.kiosk_id = :kioskId " +
+        "ORDER BY o.order_date DESC LIMIT 1", nativeQuery = true)
+    Long findLatestOrderIdByKioskId2(@Param("kioskId") Long kioskId);
 
 }
