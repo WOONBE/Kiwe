@@ -139,7 +139,7 @@ fun OrderScreen(
                 modifier = Modifier.weight(1F),
             ) { index ->
                 OrderListScreen(
-                    orderItemList = categoryStatus.menuList[index].chunked(3),
+                    orderItemList = categoryStatus.menuList[index].chunked(4),
                     onItemClick = { title, cost ->
                         orderDialogMenuTitle = title
                         orderDialogMenuCost = cost
@@ -220,13 +220,20 @@ private fun OrderListScreen(
             emptyList()
         }
 
+    val thirdRowList =
+        if (orderItemList.size > 2) {
+            orderItemList[2]
+        } else {
+            emptyList()
+        }
+
     Column {
         Row(modifier = Modifier.weight(1F)) {
             firstRowList.forEach {
                 OrderItem(orderItem = it, modifier = Modifier.weight(1F), onClick = onItemClick)
             }
             // 개수가 3개보다 적을 때 채울 빈칸
-            (firstRowList.size until 3).forEach { _ ->
+            (firstRowList.size until 4).forEach { _ ->
                 Spacer(modifier = Modifier.weight(1F))
             }
         }
@@ -235,7 +242,16 @@ private fun OrderListScreen(
             secondRowList.forEach {
                 OrderItem(orderItem = it, modifier = Modifier.weight(1F), onClick = onItemClick)
             }
-            (secondRowList.size until 3).forEach { _ ->
+            (secondRowList.size until 4).forEach { _ ->
+                Spacer(modifier = Modifier.weight(1F))
+            }
+        }
+        Spacer(modifier = Modifier.padding(10.dp))
+        Row(modifier = Modifier.weight(1F)) {
+            thirdRowList.forEach {
+                OrderItem(orderItem = it, modifier = Modifier.weight(1F), onClick = onItemClick)
+            }
+            (thirdRowList.size until 4).forEach { _ ->
                 Spacer(modifier = Modifier.weight(1F))
             }
         }

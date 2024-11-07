@@ -48,7 +48,7 @@ class OrderViewModel
                 reduce {
                     state.copy(
                         selectedCategory = selectCategory,
-                        menuList = menuList.chunked(6),
+                        menuList = menuList.chunked(12),
                     )
                 }
             }

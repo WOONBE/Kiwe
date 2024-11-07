@@ -63,8 +63,14 @@ fun OrderItem(
                 contentScale = ContentScale.Crop,
                 contentDescription = "Translated description of what the image contains",
             )
+            val title: String =
+                if (orderItem.hotOrIce.isNotEmpty()) {
+                    "[" + orderItem.hotOrIce + "]\n" + orderItem.name
+                } else {
+                    orderItem.name
+                }
             Text(
-                text = "[" + orderItem.hotOrIce + "]\n" + orderItem.name,
+                text = title,
                 style = Typography.bodySmall,
                 textAlign = TextAlign.Center,
             )
