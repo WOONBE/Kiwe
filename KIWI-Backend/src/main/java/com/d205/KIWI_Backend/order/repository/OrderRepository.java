@@ -31,4 +31,19 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByOrderDateAfter(LocalDateTime date);
 
+    @Transactional
+    @Query(value = "SELECT o.status FROM ORDERS o " +
+        "JOIN KIOSK_ORDER k ON o.id = k.ORDER_ID " +
+        "WHERE k.KIOSK_ID = :kioskId " +
+        "ORDER BY o.ORDER_DATE DESC LIMIT 1", nativeQuery = true)
+    String findLatestStatusByKioskId2(@Param("kioskId") Long kioskId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE ORDERS o " +
+        "JOIN (SELECT order_id FROM KIOSK_ORDER WHERE kiosk_id = :kioskId ORDER BY order_id DESC LIMIT 1) latest_order " +
+        "ON o.id = latest_order.order_id " +
+        "SET o.status = 'COMPLETED'", nativeQuery = true)
+    int updateOrderStatusToCompleted2(@Param("kioskId") Long kioskId);
+
 }
