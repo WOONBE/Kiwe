@@ -1,5 +1,7 @@
 package com.kiwe.kiosk.ui.screen.order
 
+import com.kiwe.domain.exception.APIException
+import com.kiwe.domain.usecase.GetCategoryListUseCase
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
@@ -11,18 +13,35 @@ import kotlin.coroutines.CoroutineContext
 @HiltViewModel
 class OrderViewModel
     @Inject
-    constructor() : BaseViewModel<OrderState, OrderSideEffect>(OrderState()) {
+    constructor(
+        private val getCategoryListUseCase: GetCategoryListUseCase,
+    ) : BaseViewModel<OrderState, OrderSideEffect>(OrderState()) {
         override fun handleExceptionIntent(
             coroutineContext: CoroutineContext,
             throwable: Throwable,
         ) {
             intent {
-                postSideEffect(OrderSideEffect.Toast(throwable.message ?: "알수 없는 에러"))
+                if (throwable is APIException) {
+                    postSideEffect(
+                        OrderSideEffect.Toast(
+                            "${throwable.code} : " +
+                                (throwable.message ?: "알수 없는 에러"),
+                        ),
+                    )
+                } else {
+                    postSideEffect(OrderSideEffect.Toast(throwable.message ?: "알수 없는 에러"))
+                }
             }
         }
+
+        fun getCategoryList(category: String) =
+            intent {
+                getCategoryListUseCase(category).getOrThrow()
+            }
     }
 
 data class OrderState(
+    val category: String = "",
     val orderItem: List<OrderItem> =
         listOf(
             OrderItem(

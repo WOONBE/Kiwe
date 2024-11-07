@@ -1,5 +1,7 @@
 package com.kiwe.kiosk.ui.screen.order
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +37,9 @@ import com.kiwe.kiosk.model.OrderItem
 import com.kiwe.kiosk.ui.screen.order.component.OrderItem
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
+
+private const val TAG = "OrderScreen 싸피"
 
 @Composable
 fun OrderScreen(
@@ -48,6 +54,28 @@ fun OrderScreen(
     val orderList by remember {
         derivedStateOf {
             itemStatus.orderItem.chunked(6)
+        }
+    }
+    val context = LocalContext.current
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is OrderSideEffect.Toast ->
+                Toast
+                    .makeText(
+                        context,
+                        sideEffect.message,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+
+            OrderSideEffect.NavigateToNextScreen -> {
+            }
+        }
+    }
+
+    val coroutine = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        coroutine.launch {
+            Log.d(TAG, "OrderScreen: ${viewModel.getCategoryList("디카페sss인")}")
         }
     }
     val animationScope = rememberCoroutineScope()
