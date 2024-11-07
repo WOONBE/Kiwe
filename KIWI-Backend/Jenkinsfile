@@ -36,10 +36,13 @@ pipeline {
                     // 이전 커밋을 확인하고 기본값을 설정
                     def previousCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT ?: 'HEAD'
                     def allCommits = sh(script: "git log --pretty=format:'%h - %s (%an)' ${previousCommit}..HEAD", returnStdout: true).trim()
+
+                    // 커밋 메시지 이스케이프 처리
                     def formattedCommits = allCommits.split('\n').collect { line ->
-                        def escapedLine = line.replaceAll("([\\[\\]\\(\\)])", '\\\\$1')
+                        // 이스케이프 문자를 제거하거나 제대로 처리
+                        def escapedLine = line.replaceAll("([\\[\\]\\(\\)])", '\\$1')  // 괄호를 이스케이프하지 않음
                         "• ${escapedLine}"
-                    }.join('\n')  // 실제 줄바꿈 사용
+                    }.join('\n')  // 실제 줄바꿈을 사용
 
                     def message = """
                         #### 🌐BE 빌드 시작

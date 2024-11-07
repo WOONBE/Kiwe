@@ -16,6 +16,7 @@ class OrderUseCaseImpl
         override suspend fun invoke(order: Order): Result<String> {
             val orderRequest =
                 OrderRequest(
+                    kioskId = 1,
                     menuOrders = order.menuOrders.map { it.toRequest() },
                 )
             val response = orderService.order(requestBody = orderRequest)
