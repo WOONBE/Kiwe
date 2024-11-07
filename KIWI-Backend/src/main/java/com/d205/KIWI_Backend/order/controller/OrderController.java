@@ -61,14 +61,14 @@ public class OrderController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("payment/{kioskId}")
+    @GetMapping("/payment/{kioskId}")
     @Operation(summary = "주문 상태 확인", description = "주문의 진행 상태를 반환하는 API")
     public ResponseEntity<String> getOrderStatus(@PathVariable Long kioskId) {
         String status = orderService.getOrderStatus(kioskId);
         return ResponseEntity.ok(status);
     }
 
-    @PutMapping("payment/{kioskId}")
+    @PutMapping("/payment/{kioskId}")
     @Operation(summary = "주문 결제 처리", description = "키오스크의 마지막 주문을 결제 처리하는 API")
     public ResponseEntity<String> updateOrderStatusToCompleted(@PathVariable Long kioskId) {
         try {
@@ -78,6 +78,18 @@ public class OrderController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @DeleteMapping("/payment/{kioskId}")
+    @Operation(summary = "키오스크 최근 주문 삭제", description = "키오스크의 최근 주문을 삭제하는 API")
+    public ResponseEntity<Void> cancelKioskOrder(@PathVariable Long kioskId) {
+        try {
+            orderService.cancelKioskOrder(kioskId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (BadRequestException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
 
     @GetMapping("/total-price/last-month")
     @Operation(summary = "한달 간 총 주문금액", description = "한달 간 총 주문금액을 리턴하는 API")
