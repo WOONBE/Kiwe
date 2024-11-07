@@ -36,13 +36,14 @@ pipeline {
                     // 이전 커밋을 확인하고 기본값을 설정
                     def previousCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT ?: 'HEAD'
                     def allCommits = sh(script: "git log --pretty=format:'%h - %s (%an)' ${previousCommit}..HEAD", returnStdout: true).trim()
-                    def formattedCommits = allCommits.split('\\n').collect { line ->
+                    def formattedCommits = allCommits.split('\n').collect { line ->
                         def escapedLine = line.replaceAll("([\\[\\]\\(\\)])", '\\\\$1')
                         "• ${escapedLine}"
-                    }.join('\\n')
+                    }.join('\n')  // 실제 줄바꿈 사용
+
                     def message = """
                         #### 🌐BE 빌드 시작
-                        **빌드 번호** $env.JOB_NAME #$env.BUILD_NUMBER
+                        **빌드 번호:** $env.JOB_NAME #$env.BUILD_NUMBER
                         **브랜치:** $env.GIT_BRANCH
                         **작성자:** $Author_ID ($Author_Name)
                         **빌드 URL:** [Details]($env.BUILD_URL)
@@ -121,26 +122,29 @@ pipeline {
                                             set -x  # 디버깅 모드 활성화
                                             exec > >(tee $DEPLOY_LOG_PATH) 2>&1
                                             docker pull $DOCKER_IMAGE
-                                            container_id=\$(docker ps -q --filter name=$CONTAINER_NAME_BLUE)
-                                            echo "컨테이너 ID: \$container_id"
-                                            if [[ \$(docker ps -q --filter name=$CONTAINER_NAME_BLUE) ]]; then
-                                                NEW_PORT=$GREEN_PORT
-                                                NEW_NAME=$CONTAINER_NAME_GREEN
-                                                OLD_NAME=$CONTAINER_NAME_BLUE
-                                                CURRENT_PORT=$BLUE_PORT
-                                            else
-                                                NEW_PORT=$BLUE_PORT
-                                                NEW_NAME=$CONTAINER_NAME_BLUE
-                                                OLD_NAME=$CONTAINER_NAME_GREEN
-                                                CURRENT_PORT=$GREEN_PORT
+
+                                            # 새로 배포할 컨테이너 지정
+                                            if [[ \$(docker ps -aq --filter name=$CONTAINER_NAME_BLUE) ]]; then
+                                                # 블루 컨테이너 상태를 확인
+                                                CONTAINER_STATUS=\$(docker inspect -f '{{.State.Status}}' $CONTAINER_NAME_BLUE)
+
+                                                if [[ "\$CONTAINER_STATUS" == "exited" ]]; then
+                                                    # exited 상태일 경우, 블루 컨테이너를 새 컨테이너로 지정
+                                                    NEW_PORT=$BLUE_PORT
+                                                    NEW_NAME=$CONTAINER_NAME_BLUE
+                                                    OLD_NAME=$CONTAINER_NAME_GREEN
+                                                    CURRENT_PORT=$GREEN_PORT
+                                                    docker rm \$NEW_NAME
+                                                else
+                                                    # 그린 컨테이너를 새 컨테이너로 지정
+                                                    NEW_PORT=$GREEN_PORT
+                                                    NEW_NAME=$CONTAINER_NAME_GREEN
+                                                    OLD_NAME=$CONTAINER_NAME_BLUE
+                                                    CURRENT_PORT=$BLUE_PORT
+                                                    docker rm \$NEW_NAME
+                                                fi
                                             fi
 
-                                            # 새 컨테이너가 이미 존재하는지 확인
-                                            if [[ \$(docker ps -aq --filter name=\$NEW_NAME) ]]; then
-                                                # 기존 컨테이너 중지 후 제거
-                                                docker stop \$NEW_NAME
-                                                docker rm \$NEW_NAME
-                                            fi
                                             # 새 이미지로 컨테이너 생성
                                             docker run -d --name \$NEW_NAME --network $DOCKER_NETWORK -p \$NEW_PORT:8080 $DOCKER_IMAGE
 

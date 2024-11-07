@@ -2,8 +2,14 @@ package com.kiwe.kiosk.model
 
 data class ShoppingCartItem(
     val menuTitle: String,
-    val menuPrice: Int,
-    val menuImgUrl: String,
-    val count: Int,
-    val option: Map<String, String> = mapOf(),
-)
+    val menuRadioOption: MutableMap<String, Pair<String, Int>> = mutableMapOf(),
+    val defaultPrice: Int = 0,
+    var count: Int,
+) {
+    val totalPrice
+        get() =
+            defaultPrice +
+                menuRadioOption.values.sumOf {
+                    it.second
+                }
+}

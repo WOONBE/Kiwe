@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +19,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,14 +42,40 @@ import org.orbitmvi.orbit.compose.collectAsState
 @Composable
 fun ContainerScreen(
     viewModel: MainViewModel,
+    shoppingCartViewModel: ShoppingCartViewModel,
     onBackClick: () -> Unit,
+    onClickPayment: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
+    var isShoppingCartDialogOpen by remember { mutableStateOf(false) }
+    var isOrderListDialogOpen by remember { mutableStateOf(false) }
+
+    if (isShoppingCartDialogOpen) {
+        ShoppingCartDialog(
+            viewModel = shoppingCartViewModel,
+            goOrderList = {
+                isShoppingCartDialogOpen = false
+                isOrderListDialogOpen = true
+            },
+            onClose = { isShoppingCartDialogOpen = false },
+        )
+    }
+
+    if (isOrderListDialogOpen) {
+        OrderListDialog(
+            viewModel = shoppingCartViewModel,
+            onClose = { isOrderListDialogOpen = false },
+            onClickPayment = onClickPayment,
+        )
+    }
+
     ContainerScreen(
         page = state.page,
         mode = state.mode,
         onBackClick = onBackClick,
+        onShoppingCartDialogClick = { isShoppingCartDialogOpen = true },
+        onOrderListDialogClick = { isOrderListDialogOpen = true },
         content = content,
     )
 }
@@ -54,6 +85,8 @@ private fun ContainerScreen(
     page: Int,
     mode: MainEnum.KioskMode,
     onBackClick: () -> Unit,
+    onShoppingCartDialogClick: () -> Unit,
+    onOrderListDialogClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     Scaffold(
@@ -79,7 +112,38 @@ private fun ContainerScreen(
             )
         },
         bottomBar = {
-            if (page > 0) {
+            if (page == 2) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp),
+                ) {
+                    ImageButton(
+                        modifier = Modifier.weight(1F),
+                        "이전으로",
+                        R.drawable.arrow_square_left,
+                        R.color.KIWE_gray1,
+                    ) {
+                        onBackClick()
+                    }
+                    Spacer(Modifier.width(5.dp))
+                    ImageButton(
+                        modifier = Modifier.weight(1F),
+                        "장바구니",
+                        R.drawable.shopping_cart,
+                        R.color.KIWE_orange1,
+                    ) {
+                        onShoppingCartDialogClick()
+                    }
+                    Spacer(Modifier.width(5.dp))
+                    ImageButton(
+                        modifier = Modifier.weight(1F),
+                        "결제하기",
+                        R.drawable.card_pos,
+                        R.color.KIWE_green5,
+                    ) {
+                        onOrderListDialogClick()
+                    }
+                }
+            } else if (page > 0) {
                 PreviousButton(onBackClick = onBackClick)
             }
         },
@@ -185,6 +249,8 @@ fun ContainerScreenPreview() {
             page = 0,
             mode = MainEnum.KioskMode.MANUAL,
             onBackClick = {},
+            onShoppingCartDialogClick = {},
+            onOrderListDialogClick = {},
             content = {},
         )
     }

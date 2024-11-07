@@ -55,8 +55,8 @@
 #예시: S11P31D205-89 #comment API 호출 시간 개선
 #time: 작업 시간을 로그로 기록 (시간 추적 활성화된 경우)
 #예시: S11P31D205-89 #time 2h
-#start-progress: 이슈를 "진행 중(In Progress)" 상태로 변경
-#예시: S11P31D205-89 #start-progress
+#in-progress: 이슈를 "진행 중(In Progress)" 상태로 변경
+#예시: S11P31D205-89 #in-progress
 #done: 이슈를 "완료(Done)" 상태로 변경
 #예시: S11P31D205-89 #done
 #transition: 특정 상태로 이슈를 전환 (Jira 워크플로우에 따라 설정된 상태 이름 사용)
