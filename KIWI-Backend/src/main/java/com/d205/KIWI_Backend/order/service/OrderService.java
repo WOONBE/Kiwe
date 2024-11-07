@@ -80,24 +80,6 @@ public class OrderService {
                 totalPrice += menu.getPrice() * menuOrderRequest.getQuantity();
             }
         }
-
-//        // 키오스크 ID 설정
-//        Optional<Kiosk> kioskOptional = kioskRepository.findById(orderRequest.getKioskId());
-//        if (kioskOptional.isPresent()) {
-//            Kiosk kiosk = kioskOptional.get();
-//
-//            // KioskOrder 객체 생성 후 주문에 연결
-//            KioskOrder kioskOrder = KioskOrder.builder()
-//                .kiosk(kiosk)  // 키오스크 연결
-//                .order(order)   // 주문 연결
-//                .assignedTime(LocalDateTime.now())  // 주문이 키오스크에 배정된 시간
-//                .build();
-//
-//            order.addKioskOrder(kioskOrder);  // 주문에 KioskOrder 추가
-//        }else if(kioskOptional.isEmpty()) {
-//            throw new BadRequestException(NOT_FOUND_KIOSK_ID);
-//        }
-
         // 키오스크 ID 설정
         Optional<Kiosk> kioskOptional = kioskRepository.findById(orderRequest.getKioskId());
         if (kioskOptional.isEmpty()) {
@@ -106,14 +88,14 @@ public class OrderService {
 
         Kiosk kiosk = kioskOptional.get();
 
-        // KioskOrder 객체 생성 후 주문에 연결
+
         KioskOrder kioskOrder = KioskOrder.builder()
-            .kiosk(kiosk)  // 키오스크 연결
-            .order(order)   // 주문 연결
-            .assignedTime(LocalDateTime.now())  // 주문이 키오스크에 배정된 시간
+            .kiosk(kiosk)
+            .order(order)
+            .assignedTime(LocalDateTime.now())
             .build();
 
-        order.addKioskOrder(kioskOrder);  // 주문에 KioskOrder 추가
+        order.addKioskOrder(kioskOrder);
         // 주문 저장
         Order savedOrder = orderRepository.save(order);
 
@@ -241,20 +223,6 @@ public class OrderService {
         orderRepository.delete(existingOrder.get());  // 주문 삭제
     }
 
-//    // 메뉴 주문 응답 리스트를 생성하는 메서드 (공통 메서드로 분리)
-//    private List<OrderResponse.MenuOrderResponse> createMenuOrderResponses(List<OrderMenu> orderMenus, int totalPrice) {
-//        List<OrderResponse.MenuOrderResponse> menuOrderResponses = new ArrayList<>();
-//        for (OrderMenu orderMenu : orderMenus) {
-//            OrderResponse.MenuOrderResponse menuOrderResponse = OrderResponse.MenuOrderResponse.builder()
-//                .menuId(orderMenu.getMenu().getId())
-//                .name(orderMenu.getMenu().getName())
-//                .quantity(orderMenu.getQuantity())
-//                .price(orderMenu.getMenu().getPrice())
-//                .build();
-//            menuOrderResponses.add(menuOrderResponse);
-//        }
-//        return menuOrderResponses;
-//    }
     private List<OrderResponse.MenuOrderResponse> createMenuOrderResponses(List<OrderMenu> orderMenus) {
         List<OrderResponse.MenuOrderResponse> menuOrderResponses = new ArrayList<>();
         for (OrderMenu orderMenu : orderMenus) {
@@ -271,7 +239,7 @@ public class OrderService {
 
     // 주문에 대해 결제 상황을 반환
     public String getOrderStatus(Long kioskId) {
-        String status = orderRepository.findLatestStatusByKioskId(kioskId);
+        String status = orderRepository.findLatestStatusByKioskId2(kioskId);
         return Objects.requireNonNullElse(status, "ORDER_NOT_FOUND");
     }
 
@@ -279,14 +247,14 @@ public class OrderService {
     public String updateOrderStatusToCompleted(Long kioskId) {
 
         // 가장 최근 주문 상태가 "PENDING"인 경우에만 결제 처리
-        String latestStatus = orderRepository.findLatestStatusByKioskId(kioskId);
+        String latestStatus = orderRepository.findLatestStatusByKioskId2(kioskId);
 
         if (latestStatus == null || !latestStatus.equals("PENDING")) {
             // 결제할 주문이 존재하지 않거나, 주문 상태가 "PENDING"이 아닌 경우
             throw new BadRequestException(NOT_FOUND_ORDER);
         }
 
-        int updatedCount = orderRepository.updateOrderStatusToCompleted(kioskId);
+        int updatedCount = orderRepository.updateOrderStatusToCompleted2(kioskId);
 
         // 주문이 없을 경우
         if (updatedCount == 0) {
