@@ -1,5 +1,7 @@
 [versions]
 agp = "8.7.1"
+converterGson = "2.9.0"
+gson = "2.10.1"
 kotlin = "2.0.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -20,11 +22,16 @@ hilt = "2.52"
 hiltCompiler = "1.2.0"
 ksp = "2.0.0-1.0.24"
 detekt = "1.23.5"
+retrofit = "2.9.0"
 timberVersion = "5.0.1"
 constraintlayoutComposeAndroid = "1.1.0"
+activity = "1.8.0"
+constraintlayout = "2.1.4"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
 androidx-constraintlayout-compose-android = { module = "androidx.constraintlayout:constraintlayout-compose-android", version.ref = "constraintlayoutComposeAndroid" }
@@ -82,11 +89,14 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 datastore = { module = "androidx.datastore:datastore-preferences", version = "1.1.1" }
 
 # Splash
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 splash = { group = "androidx.core", name = "core-splashscreen", version = "1.0.1" }
 
 # Detekt
 detekt-gradle = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
