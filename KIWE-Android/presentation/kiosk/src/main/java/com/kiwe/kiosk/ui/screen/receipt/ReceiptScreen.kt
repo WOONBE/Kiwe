@@ -3,12 +3,17 @@ package com.kiwe.kiosk.ui.screen.receipt
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,60 +31,142 @@ fun ReceiptScreen() {
     )
 
     LaunchedEffect(Unit) {
-        delay(500) // Delay to start the animation after composable is displayed
+        delay(500)
         showReceipt = true
     }
 
-    Box(
+    Column(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color(0xFFE0D6CC)),
-        // Beige background color similar to the image
-        contentAlignment = Alignment.TopCenter,
+                .padding(top = 80.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        // Gray box representing the machine, layered on top of the receipt
         Box(
             modifier =
                 Modifier
-                    .fillMaxWidth().padding(horizontal = 20.dp)
-                    .height(60.dp)
-                    .background(Color.Gray)
-                    .zIndex(1f) // Ensures this box is layered above the receipt
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .height(200.dp)
+                    .background(Color.LightGray, shape = RoundedCornerShape(20.dp))
+                    .zIndex(1f)
                     .padding(8.dp),
-        )
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text =
+                    buildAnnotatedString {
+                        withStyle(
+                            style =
+                            SpanStyle(
+                                color = Color(0xFFD35400),
+                                fontWeight = FontWeight.Bold,
+                            ),
+                        ) {
+                            append("결제")
+                        }
+                        withStyle(
+                            style =
+                            SpanStyle(
+                                color = Color.Black,
+                                fontWeight = FontWeight.Normal,
+                            ),
+                        ) {
+                            append("가 ")
+                        }
+                        withStyle(
+                            style =
+                            SpanStyle(
+                                color = Color(0xFFD35400),
+                                fontWeight = FontWeight.Bold,
+                            ),
+                        ) {
+                            append("완료")
+                        }
+                        withStyle(
+                            style =
+                            SpanStyle(
+                                color = Color.Black,
+                                fontWeight = FontWeight.Normal,
+                            ),
+                        ) {
+                            append("되었습니다")
+                        }
+                    },
+                    fontSize = 48.sp,
+                    style = Typography.titleLarge,
+                    modifier = Modifier.padding(16.dp),
+                )
+                Text(
+                    text =
+                    buildAnnotatedString {
+                        withStyle(
+                            style =
+                            SpanStyle(
+                                color = Color.Black,
+                                fontWeight = FontWeight.Normal,
+                            ),
+                        ) {
+                            append("영수증 하단 ")
+                        }
+                        withStyle(
+                            style =
+                            SpanStyle(
+                                color = Color(0xFFD35400),
+                                fontWeight = FontWeight.Bold,
+                            ),
+                        ) {
+                            append("주문번호")
+                        }
+                        withStyle(
+                            style =
+                            SpanStyle(
+                                color = Color.Black,
+                                fontWeight = FontWeight.Normal,
+                            ),
+                        ) {
+                            append("를 확인해 주세요")
+                        }
+                    },
+                    fontSize = 32.sp,
+                    style = Typography.titleLarge,
+                    modifier = Modifier.padding(16.dp),
+                )
+            }
+        }
 
         Box(
             modifier =
                 Modifier
                     .offset(y = translationY.dp)
-                    .background(Color.White)
+                    .graphicsLayer {
+                        alpha = ((translationY + 300f) / 300f).coerceIn(0f, 1f)
+                    }.background(Color.White)
                     .padding(32.dp)
                     .width(200.dp)
-                    .height(250.dp) // Adjust size to match receipt size in the image
+                    .height(200.dp)
                     .zIndex(0f),
-            // Ensures this is layered below the gray box
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                modifier = Modifier.padding(top = 20.dp),
                 text = "205",
-                fontSize = 80.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 92.sp,
+                style = Typography.titleLarge,
                 color = Color.Black,
             )
         }
 
-        // Thank you message at the bottom
+        Spacer(Modifier.weight(1f))
         Box(
             modifier =
                 Modifier
-                    .align(Alignment.BottomCenter)
                     .padding(bottom = 24.dp),
         ) {
             Text(
                 text = "이용해 주셔서 감사합니다",
-                style = Typography.titleLarge
+                style = Typography.titleLarge,
             )
         }
     }
