@@ -1,5 +1,7 @@
 package com.kiwe.kiosk.ui.screen.order
 
+import android.view.Menu
+import com.kiwe.domain.model.MenuCategory
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
@@ -20,9 +22,16 @@ class OrderViewModel
                 postSideEffect(OrderSideEffect.Toast(throwable.message ?: "알수 없는 에러"))
             }
         }
+
+        fun setCategory(selectCategory: MenuCategory) = intent {
+            reduce {
+                state.copy(selectedCategory = selectCategory)
+            }
+        }
     }
 
 data class OrderState(
+    val selectedCategory: MenuCategory = MenuCategory.NEW,
     val orderItem: List<OrderItem> =
         listOf(
             OrderItem(
