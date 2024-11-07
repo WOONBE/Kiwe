@@ -18,15 +18,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.kiwe.domain.model.MenuCategoryParam
+import com.kiwe.kiosk.BuildConfig.BASE_IMAGE_URL
 import com.kiwe.kiosk.R
-import com.kiwe.kiosk.model.OrderItem
 import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.utils.dropShadow
 import java.util.Locale
 
 @Composable
 fun OrderItem(
-    orderItem: OrderItem,
+    orderItem: MenuCategoryParam,
     modifier: Modifier = Modifier,
     onClick: (String, Int) -> Unit,
 ) {
@@ -42,7 +43,7 @@ fun OrderItem(
                     spread = 0.dp,
                 ).clip(RoundedCornerShape(20.dp))
                 .background(color = Color.White)
-                .clickable { onClick(orderItem.menuTitle, orderItem.menuPrice) },
+                .clickable { onClick(orderItem.name, orderItem.price) },
     ) {
         Column(
             modifier =
@@ -50,22 +51,25 @@ fun OrderItem(
                     .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+//            Log.d(TAG, "https://" + BASE_IMAGE_URL + URLEncoder.encode(orderItem.imgPath, StandardCharsets.UTF_8.toString()))
+//            Log.d(TAG, "OrderItem: ${"https://" + BASE_IMAGE_URL + orderItem.imgPath}")
+
             AsyncImage(
                 modifier =
                     Modifier
                         .weight(1F)
                         .padding(bottom = 10.dp),
-                model = orderItem.menuImgUrl,
+                model = "https://" + BASE_IMAGE_URL + orderItem.imgPath,
                 contentScale = ContentScale.Crop,
                 contentDescription = "Translated description of what the image contains",
             )
             Text(
-                text = orderItem.menuTitle,
+                text = "[" + orderItem.hotOrIce + "]\n" + orderItem.name,
                 style = Typography.bodySmall,
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = String.format(Locale.getDefault(), "%,d원", orderItem.menuPrice),
+                text = String.format(Locale.getDefault(), "%,d원", orderItem.price),
                 color = colorResource(R.color.KIWE_orange1),
                 textAlign = TextAlign.Center,
             )
@@ -77,10 +81,15 @@ fun OrderItem(
 @Composable
 fun OrderItemPreview() {
     OrderItem(
-        OrderItem(
-            menuTitle = "디카페인 카페모카",
-            menuPrice = 4500,
-            menuImgUrl = "https://example.com/image.jpg",
+        MenuCategoryParam(
+            id = 1,
+            category = "디카페인",
+            categoryNumber = 1,
+            hotOrIce = "HOT",
+            name = "디카페인 아메리카노",
+            price = 2500,
+            description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
+            imgPath = "drinks/HOT_디카페인 아메리카노.jpg",
         ),
         onClick = { _, _ -> },
     )

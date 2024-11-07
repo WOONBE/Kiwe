@@ -2,6 +2,7 @@ package com.kiwe.kiosk.ui.screen.order
 
 import com.kiwe.domain.exception.APIException
 import com.kiwe.domain.model.MenuCategory
+import com.kiwe.domain.model.MenuCategoryParam
 import com.kiwe.domain.usecase.GetCategoryListUseCase
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
@@ -35,22 +36,27 @@ class OrderViewModel
             }
         }
 
-        fun getCategoryList(category: String) =
+        init {
             intent {
-                getCategoryListUseCase(category).getOrThrow()
+                setCategory(state.selectedCategory)
             }
+        }
 
         fun setCategory(selectCategory: MenuCategory) =
             intent {
+                val menuList = getCategoryListUseCase(selectCategory.displayName).getOrThrow()
                 reduce {
-                    state.copy(selectedCategory = selectCategory)
+                    state.copy(
+                        selectedCategory = selectCategory,
+                        menuList = menuList.chunked(6),
+                    )
                 }
             }
     }
 
 data class OrderState(
-    val category: String = "",
     val selectedCategory: MenuCategory = MenuCategory.NEW,
+    val menuList: List<List<MenuCategoryParam>> = listOf(),
     val orderItem: List<OrderItem> =
         listOf(
             OrderItem(
