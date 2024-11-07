@@ -81,21 +81,39 @@ public class OrderService {
             }
         }
 
+//        // 키오스크 ID 설정
+//        Optional<Kiosk> kioskOptional = kioskRepository.findById(orderRequest.getKioskId());
+//        if (kioskOptional.isPresent()) {
+//            Kiosk kiosk = kioskOptional.get();
+//
+//            // KioskOrder 객체 생성 후 주문에 연결
+//            KioskOrder kioskOrder = KioskOrder.builder()
+//                .kiosk(kiosk)  // 키오스크 연결
+//                .order(order)   // 주문 연결
+//                .assignedTime(LocalDateTime.now())  // 주문이 키오스크에 배정된 시간
+//                .build();
+//
+//            order.addKioskOrder(kioskOrder);  // 주문에 KioskOrder 추가
+//        }else if(kioskOptional.isEmpty()) {
+//            throw new BadRequestException(NOT_FOUND_KIOSK_ID);
+//        }
+
         // 키오스크 ID 설정
         Optional<Kiosk> kioskOptional = kioskRepository.findById(orderRequest.getKioskId());
-        if (kioskOptional.isPresent()) {
-            Kiosk kiosk = kioskOptional.get();
-
-            // KioskOrder 객체 생성 후 주문에 연결
-            KioskOrder kioskOrder = KioskOrder.builder()
-                .kiosk(kiosk)  // 키오스크 연결
-                .order(order)   // 주문 연결
-                .assignedTime(LocalDateTime.now())  // 주문이 키오스크에 배정된 시간
-                .build();
-
-            order.addKioskOrder(kioskOrder);  // 주문에 KioskOrder 추가
+        if (kioskOptional.isEmpty()) {
+            throw new BadRequestException(NOT_FOUND_KIOSK_ID);
         }
 
+        Kiosk kiosk = kioskOptional.get();
+
+        // KioskOrder 객체 생성 후 주문에 연결
+        KioskOrder kioskOrder = KioskOrder.builder()
+            .kiosk(kiosk)  // 키오스크 연결
+            .order(order)   // 주문 연결
+            .assignedTime(LocalDateTime.now())  // 주문이 키오스크에 배정된 시간
+            .build();
+
+        order.addKioskOrder(kioskOrder);  // 주문에 KioskOrder 추가
         // 주문 저장
         Order savedOrder = orderRepository.save(order);
 
@@ -289,7 +307,7 @@ public class OrderService {
                 .sum())
             .sum();
     }
-
+    @Transactional
     public int calculateTotalPriceForLastMonthByKioskId(Integer kioskId) {
         LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1); // 한 달 전 날짜 계산
 
@@ -302,7 +320,7 @@ public class OrderService {
             .mapToInt(orderMenu -> orderMenu.getMenu().getPrice() * orderMenu.getQuantity())
             .sum();
     }
-
+    @Transactional
     public Map<YearMonth, Integer> calculateMonthlyTotalForLastSixMonthsByKioskId(Integer kioskId) {
         Map<YearMonth, Integer> monthlySales = new HashMap<>();
         YearMonth currentMonth = YearMonth.now();
