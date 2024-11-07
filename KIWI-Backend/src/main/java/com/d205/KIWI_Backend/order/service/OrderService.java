@@ -263,6 +263,22 @@ public class OrderService {
         return "SUCCESS";
     }
 
+    // 주문에 대해 결제 상황을 반환
+    public void cancelKioskOrder(Long kioskId) {
+        String status = orderRepository.findLatestStatusByKioskId2(kioskId);
+        if (!status.equals("PENDING")) {
+            throw new BadRequestException(NOT_FOUND_ORDER);
+        }
+
+        Long orderId = orderRepository.findLatestOrderIdByKioskId(kioskId);
+        Optional<Order> existingOrder = orderRepository.findById(orderId);
+        if (existingOrder.isEmpty()) {
+            throw new BadRequestException(NOT_FOUND_ORDER);
+        }
+        orderRepository.delete(existingOrder.get());  // 주문 삭제
+    }
+
+
     @Transactional
     public int calculateTotalPriceForLastMonth() {
         LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
