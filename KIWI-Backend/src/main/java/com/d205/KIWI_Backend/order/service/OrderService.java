@@ -239,7 +239,7 @@ public class OrderService {
 
     // 주문에 대해 결제 상황을 반환
     public String getOrderStatus(Long kioskId) {
-        String status = orderRepository.findLatestStatusByKioskId2(kioskId);
+        String status = orderRepository.findLatestStatusByKioskId(kioskId);
         return Objects.requireNonNullElse(status, "ORDER_NOT_FOUND");
     }
 
@@ -247,14 +247,14 @@ public class OrderService {
     public String updateOrderStatusToCompleted(Long kioskId) {
 
         // 가장 최근 주문 상태가 "PENDING"인 경우에만 결제 처리
-        String latestStatus = orderRepository.findLatestStatusByKioskId2(kioskId);
+        String latestStatus = orderRepository.findLatestStatusByKioskId(kioskId);
 
         if (latestStatus == null || !latestStatus.equals("PENDING")) {
             // 결제할 주문이 존재하지 않거나, 주문 상태가 "PENDING"이 아닌 경우
             throw new BadRequestException(NOT_FOUND_ORDER);
         }
 
-        int updatedCount = orderRepository.updateOrderStatusToCompleted2(kioskId);
+        int updatedCount = orderRepository.updateOrderStatusToCompleted(kioskId);
 
         // 주문이 없을 경우
         if (updatedCount == 0) {
@@ -265,12 +265,12 @@ public class OrderService {
 
     // 주문에 대해 결제 상황을 반환
     public void cancelKioskOrder(Long kioskId) {
-        String status = orderRepository.findLatestStatusByKioskId2(kioskId);
+        String status = orderRepository.findLatestStatusByKioskId(kioskId);
         if (!status.equals("PENDING")) {
             throw new BadRequestException(NOT_FOUND_ORDER);
         }
 
-        Long orderId = orderRepository.findLatestOrderIdByKioskId2(kioskId);
+        Long orderId = orderRepository.findLatestOrderIdByKioskId(kioskId);
         Optional<Order> existingOrder = orderRepository.findById(orderId);
         if (existingOrder.isEmpty()) {
             throw new BadRequestException(NOT_FOUND_ORDER);
