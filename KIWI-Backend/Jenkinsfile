@@ -39,8 +39,8 @@ pipeline {
 
                     // 커밋 메시지 이스케이프 처리
                     def formattedCommits = allCommits.split('\n').collect { line ->
-                        // 이스케이프 문자를 제거하거나 제대로 처리
-                        def escapedLine = line.replaceAll("([\\[\\]\\(\\)])", '\\$1')  // 괄호를 이스케이프하지 않음
+                        // 이스케이프 문자를 제대로 처리하고, 필요없는 이스케이프 문자는 제거
+                        def escapedLine = line.replaceAll("([\\[\\]\\(\\)])", '\\\\$1') // 괄호나 대괄호는 이스케이프 처리
                         "• ${escapedLine}"
                     }.join('\n')  // 실제 줄바꿈을 사용
 
