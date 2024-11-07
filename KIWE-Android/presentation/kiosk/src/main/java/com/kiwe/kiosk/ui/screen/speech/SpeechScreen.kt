@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.WavyAnimation
+import com.kiwe.kiosk.ui.screen.utils.TextToSpeechManager
 import com.kiwe.kiosk.ui.screen.utils.containsMenuItem
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.Typography
@@ -51,9 +52,20 @@ import java.util.Locale
 
 const val MAX_SPEECH_WAIT_TIME = 5
 
+private const val TAG = "SpeechScreen"
+
 @Composable
 fun SpeechScreen(viewModel: MainViewModel) {
     val state = viewModel.collectAsState().value
+    val context = LocalContext.current
+    val ttsManager = remember { TextToSpeechManager(context) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            Timber.tag(TAG).d("onDispose")
+            ttsManager.stop()
+        }
+    }
 
     SpeechScreen(
         isDialogOpen = state.isRecording,

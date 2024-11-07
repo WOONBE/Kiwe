@@ -1,7 +1,6 @@
 package com.kiwe.kiosk.ui.screen.main
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -27,21 +25,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role.Companion.Button
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
-import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainViewModel
-import com.kiwe.kiosk.ui.screen.main.component.ImageButton
-import com.kiwe.kiosk.ui.screen.order.OrderListDialog
-import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
-import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
+import com.kiwe.kiosk.ui.screen.main.component.AnimatedImageSwitcher
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import com.kiwe.kiosk.utils.MainEnum
@@ -103,20 +95,7 @@ private fun ContainerScreen(
             if (page > 0) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     StepIndicator(page)
-                    Box(
-                        modifier = Modifier.clip(CircleShape).size(68.dp).padding(vertical = 8.dp),
-                    ) {
-                        Image(
-                            modifier =
-                                Modifier.fillMaxSize(),
-                            painter =
-                                rememberAsyncImagePainter(
-                                    model = R.drawable.ic_launcher_playstore_nobg,
-                                    contentScale = ContentScale.Crop,
-                                ),
-                            contentDescription = "logo",
-                        )
-                    }
+                    AnimatedImageSwitcher(100.dp)
                 }
             }
         },
