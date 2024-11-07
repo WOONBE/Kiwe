@@ -28,6 +28,15 @@ class OptionViewModel
             }
         }
 
+        fun init(
+            menuTitle: String,
+            menuCost: Int,
+        ) = intent {
+            reduce {
+                state.copy(menuTitle = menuTitle, menuCost = menuCost)
+            }
+        }
+
         fun onClear() =
             intent {
                 reduce {

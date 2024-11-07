@@ -45,7 +45,11 @@ fun OrderScreen(
     var isOrderOptionDialogOpen by remember { mutableStateOf(false) }
     var orderDialogMenuTitle by remember { mutableStateOf("") }
     var orderDialogMenuCost by remember { mutableIntStateOf(0) }
-    val orderList = itemStatus.orderItem.chunked(6)
+    val orderList by remember {
+        derivedStateOf {
+            itemStatus.orderItem.chunked(6)
+        }
+    }
     val animationScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         onEnterScreen(2)
@@ -68,15 +72,25 @@ fun OrderScreen(
             }
         }
     }
-    if (isOrderOptionDialogOpen) {
-//        Timber.tag(TAG).d("OrderScreen: 다이얼로그 실행")
-        OptionDialog(
-            shoppingCartViewModel = shoppingCartViewModel,
-            onClose = { isOrderOptionDialogOpen = false },
-            menuTitle = orderDialogMenuTitle,
-            menuCost = orderDialogMenuCost,
+    val optionViewModel =
+        hiltViewModel(
+            creationCallback = { factory: OptionViewModel.OptionViewModelFactory ->
+                factory.create(orderDialogMenuTitle, orderDialogMenuCost)
+            },
         )
+    LaunchedEffect(isOrderOptionDialogOpen) {
+        if (isOrderOptionDialogOpen) {
+            optionViewModel.init(orderDialogMenuTitle, orderDialogMenuCost)
+        } else {
+            optionViewModel.onClear()
+        }
     }
+    ShowDialog(
+        show = isOrderOptionDialogOpen,
+        onClose = { isOrderOptionDialogOpen = false },
+        optionViewModel = optionViewModel,
+        shoppingCartViewModel = shoppingCartViewModel,
+    )
 
     Column(
         modifier =
@@ -88,11 +102,14 @@ fun OrderScreen(
             state = pagerState,
             modifier = Modifier.weight(1F),
         ) { index ->
-            OrderListScreen(orderItemList = orderList[index].chunked(3), onItemClick = { title, cost ->
-                orderDialogMenuTitle = title
-                orderDialogMenuCost = cost
-                isOrderOptionDialogOpen = true
-            })
+            OrderListScreen(
+                orderItemList = orderList[index].chunked(3),
+                onItemClick = { title, cost ->
+                    orderDialogMenuTitle = title
+                    orderDialogMenuCost = cost
+                    isOrderOptionDialogOpen = true
+                },
+            )
         }
         Row(
             Modifier
@@ -185,6 +202,22 @@ private fun OrderListScreen(
                 Spacer(modifier = Modifier.weight(1F))
             }
         }
+    }
+}
+
+@Composable
+private fun ShowDialog(
+    show: Boolean,
+    onClose: () -> Unit,
+    shoppingCartViewModel: ShoppingCartViewModel,
+    optionViewModel: OptionViewModel,
+) {
+    if (show) {
+        OptionDialog(
+            shoppingCartViewModel = shoppingCartViewModel,
+            onClose = onClose,
+            optionViewModel = optionViewModel,
+        )
     }
 }
 

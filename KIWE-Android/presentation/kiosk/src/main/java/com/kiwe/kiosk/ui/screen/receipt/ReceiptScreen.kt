@@ -57,79 +57,79 @@ fun ReceiptScreen() {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text =
-                    buildAnnotatedString {
-                        withStyle(
-                            style =
-                            SpanStyle(
-                                color = Color(0xFFD35400),
-                                fontWeight = FontWeight.Bold,
-                            ),
-                        ) {
-                            append("결제")
-                        }
-                        withStyle(
-                            style =
-                            SpanStyle(
-                                color = Color.Black,
-                                fontWeight = FontWeight.Normal,
-                            ),
-                        ) {
-                            append("가 ")
-                        }
-                        withStyle(
-                            style =
-                            SpanStyle(
-                                color = Color(0xFFD35400),
-                                fontWeight = FontWeight.Bold,
-                            ),
-                        ) {
-                            append("완료")
-                        }
-                        withStyle(
-                            style =
-                            SpanStyle(
-                                color = Color.Black,
-                                fontWeight = FontWeight.Normal,
-                            ),
-                        ) {
-                            append("되었습니다")
-                        }
-                    },
+                        buildAnnotatedString {
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        color = Color(0xFFD35400),
+                                        fontWeight = FontWeight.Bold,
+                                    ),
+                            ) {
+                                append("결제")
+                            }
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Normal,
+                                    ),
+                            ) {
+                                append("가 ")
+                            }
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        color = Color(0xFFD35400),
+                                        fontWeight = FontWeight.Bold,
+                                    ),
+                            ) {
+                                append("완료")
+                            }
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Normal,
+                                    ),
+                            ) {
+                                append("되었습니다")
+                            }
+                        },
                     fontSize = 48.sp,
                     style = Typography.titleLarge,
                     modifier = Modifier.padding(16.dp),
                 )
                 Text(
                     text =
-                    buildAnnotatedString {
-                        withStyle(
-                            style =
-                            SpanStyle(
-                                color = Color.Black,
-                                fontWeight = FontWeight.Normal,
-                            ),
-                        ) {
-                            append("영수증 하단 ")
-                        }
-                        withStyle(
-                            style =
-                            SpanStyle(
-                                color = Color(0xFFD35400),
-                                fontWeight = FontWeight.Bold,
-                            ),
-                        ) {
-                            append("주문번호")
-                        }
-                        withStyle(
-                            style =
-                            SpanStyle(
-                                color = Color.Black,
-                                fontWeight = FontWeight.Normal,
-                            ),
-                        ) {
-                            append("를 확인해 주세요")
-                        }
-                    },
+                        buildAnnotatedString {
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Normal,
+                                    ),
+                            ) {
+                                append("영수증 하단 ")
+                            }
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        color = Color(0xFFD35400),
+                                        fontWeight = FontWeight.Bold,
+                                    ),
+                            ) {
+                                append("주문번호")
+                            }
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Normal,
+                                    ),
+                            ) {
+                                append("를 확인해 주세요")
+                            }
+                        },
                     fontSize = 32.sp,
                     style = Typography.titleLarge,
                     modifier = Modifier.padding(16.dp),
