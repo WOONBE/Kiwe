@@ -87,8 +87,6 @@ fun OrderScreen(
     }
     ShowDialog(
         show = isOrderOptionDialogOpen,
-        menuTitle = orderDialogMenuTitle,
-        menuCost = orderDialogMenuCost,
         onClose = { isOrderOptionDialogOpen = false },
         optionViewModel = optionViewModel,
         shoppingCartViewModel = shoppingCartViewModel,
@@ -211,8 +209,6 @@ private fun OrderListScreen(
 private fun ShowDialog(
     show: Boolean,
     onClose: () -> Unit,
-    menuTitle: String,
-    menuCost: Int,
     shoppingCartViewModel: ShoppingCartViewModel,
     optionViewModel: OptionViewModel,
 ) {
@@ -220,8 +216,6 @@ private fun ShowDialog(
         OptionDialog(
             shoppingCartViewModel = shoppingCartViewModel,
             onClose = onClose,
-            menuTitle = menuTitle,
-            menuCost = menuCost,
             optionViewModel = optionViewModel,
         )
     }

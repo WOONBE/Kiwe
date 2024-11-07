@@ -32,8 +32,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.AnimatedImageSwitcher
+import com.kiwe.kiosk.ui.screen.main.component.ImageButton
+import com.kiwe.kiosk.ui.screen.order.OrderListDialog
+import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
+import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import com.kiwe.kiosk.utils.MainEnum
