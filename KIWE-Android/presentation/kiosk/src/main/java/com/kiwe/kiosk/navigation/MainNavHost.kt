@@ -46,11 +46,17 @@ fun MainNavHost() {
                         enterTransition = { EnterTransition.None },
                     ) {
                         composable(route = MainRoute.INTRO.route) {
-                            IntroScreen(viewModel = mainViewModel, onEnterScreen = { page ->
-                                mainViewModel.setPage(page)
-                            }, onComfortClick = {}, onHelpClick = {
-                                navController.navigate(MainRoute.MENU.route)
-                            })
+                            IntroScreen(
+                                viewModel = mainViewModel,
+                                onEnterScreen = { page ->
+                                    mainViewModel.setPage(page)
+                                },
+                                onComfortClick = {},
+                                onHelpClick = {
+                                    navController.navigate(MainRoute.MENU.route)
+                                    mainViewModel.startSpeechRecognition() // 음성인식 ON
+                                },
+                            )
                         }
                         composable(route = MainRoute.ORDER.route) {
                             OrderScreen(

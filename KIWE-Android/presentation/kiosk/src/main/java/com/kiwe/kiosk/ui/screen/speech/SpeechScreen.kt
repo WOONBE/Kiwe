@@ -1,11 +1,5 @@
 package com.kiwe.kiosk.ui.screen.speech
 
-import android.content.Intent
-import android.os.Bundle
-import android.speech.RecognitionListener
-import android.speech.RecognizerIntent
-import android.speech.SpeechRecognizer.RESULTS_RECOGNITION
-import android.speech.SpeechRecognizer.createSpeechRecognizer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,9 +19,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,14 +33,11 @@ import androidx.compose.ui.unit.sp
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.WavyAnimation
 import com.kiwe.kiosk.ui.screen.utils.TextToSpeechManager
-import com.kiwe.kiosk.ui.screen.utils.containsMenuItem
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.Typography
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
 import timber.log.Timber
-import java.util.Locale
 
 const val MAX_SPEECH_WAIT_TIME = 5
 
@@ -68,114 +57,34 @@ fun SpeechScreen(viewModel: MainViewModel) {
     }
 
     SpeechScreen(
-        isDialogOpen = state.isRecording,
-        onDismissRequest = viewModel::onDismissSpeechDialog,
-        onResult = viewModel::onSpeechRecevied,
+        isDialogOpen = state.isDialogShowing, // 녹음중인 상태일 때 SpeechScreen을 보여준다
+        onResult = viewModel::onSpeechResult,
+        onDismissRequest = viewModel::onDismissRequest,
+        recognizedText = state.recognizedText,
         commandText = "\"차가운 아메리카노 한잔 주세요\"",
+        shouldShowRetryMessage = state.shouldShowRetryMessage,
     )
 }
 
 @Composable
 private fun SpeechScreen(
     isDialogOpen: Boolean,
-    onDismissRequest: () -> Unit,
     onResult: (String) -> Unit,
+    onDismissRequest: () -> Unit,
+    recognizedText: String,
     commandText: String,
+    shouldShowRetryMessage: Boolean,
 ) {
     if (isDialogOpen) {
-        val context = LocalContext.current
-        val speechRecognizer = remember { createSpeechRecognizer(context) }
-        var recognizedText by remember { mutableStateOf("") }
-        var isListening by remember { mutableStateOf(false) }
-        val coroutineScope = rememberCoroutineScope()
         var elapsedTime by remember { mutableLongStateOf(0L) }
-        var shouldShowRetryMessage by remember { mutableStateOf(false) }
-
-        val speechIntent =
-            Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, Locale.KOREAN)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.KOREAN)
-                putExtra(RecognizerIntent.EXTRA_CONFIDENCE_SCORES, true)
-                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            }
-
-        val recognitionListener =
-            object : RecognitionListener {
-                override fun onResults(results: Bundle?) {
-                    val matches = results?.getStringArrayList(RESULTS_RECOGNITION)
-                    recognizedText = matches?.firstOrNull() ?: ""
-                    shouldShowRetryMessage = !recognizedText.containsMenuItem()
-                    if (!shouldShowRetryMessage) {
-                        onResult(recognizedText)
-                    }
-                    elapsedTime = 0L
-                    isListening = false
-                }
-
-                override fun onError(error: Int) {
-                    Timber.tag("STT").d("Error code: $error")
-                    isListening = false
-                    elapsedTime = 0L
-                    shouldShowRetryMessage = true
-                }
-
-                override fun onReadyForSpeech(params: Bundle?) {
-                    Timber.tag("STT").d("Ready for speech")
-                }
-
-                override fun onBeginningOfSpeech() {
-                    Timber.tag("STT").d("Beginning of speech")
-                }
-
-                override fun onEndOfSpeech() {
-                    isListening = false
-                    speechRecognizer.stopListening()
-                    coroutineScope.launch {
-                        delay(500)
-                        isListening = true
-                        shouldShowRetryMessage = false
-                        speechRecognizer.startListening(speechIntent)
-                    }
-                }
-
-                override fun onPartialResults(partialResults: Bundle?) {
-                    val partialText =
-                        partialResults?.getStringArrayList(RESULTS_RECOGNITION)?.firstOrNull()
-                    recognizedText = partialText ?: ""
-                }
-
-                override fun onEvent(
-                    eventType: Int,
-                    params: Bundle?,
-                ) {
-                    Timber.tag("STT").d("Event type: $eventType")
-                    Timber.tag("STT").d("Event params: $params")
-                }
-
-                override fun onRmsChanged(rmsdB: Float) {
-                    Timber.tag("STT").d("RMS: $rmsdB")
-                }
-
-                override fun onBufferReceived(buffer: ByteArray?) {
-                    Timber.tag("STT").d("Buffer received")
-                }
-            }
-
-        DisposableEffect(Unit) {
-            speechRecognizer.setRecognitionListener(recognitionListener)
-            onDispose {
-                speechRecognizer.destroy()
-            }
-        }
 
         LaunchedEffect(Unit) {
             delay(1000)
-            isListening = true
-            speechRecognizer.startListening(speechIntent)
             elapsedTime = 0L // 타이머 초기화
             while (true) {
                 delay(1000)
                 elapsedTime += 1
+                if (elapsedTime >= MAX_SPEECH_WAIT_TIME) break
             }
         }
 
@@ -315,8 +224,10 @@ fun SpeechScreenPreview() {
     KIWEAndroidTheme {
         SpeechScreen(
             isDialogOpen = true,
-            onDismissRequest = {},
             onResult = {},
+            onDismissRequest = {},
+            recognizedText = "",
+            shouldShowRetryMessage = false,
             commandText = "dicat",
         )
     }
