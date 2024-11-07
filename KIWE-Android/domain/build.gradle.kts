@@ -6,6 +6,7 @@ plugins {
     id("java-library")
     alias(libs.plugins.jetbrains.kotlin.jvm)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 java {
@@ -45,4 +46,6 @@ dependencies {
     // detekt
     implementation(libs.detekt.gradle)
     detektPlugins(libs.detekt.formatting)
+    // serialization
+    implementation(libs.kotlinx.serialization.json)
 }
