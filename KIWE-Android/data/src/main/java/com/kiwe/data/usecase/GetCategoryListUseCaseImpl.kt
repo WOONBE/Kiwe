@@ -1,7 +1,7 @@
 package com.kiwe.data.usecase
 
 import com.kiwe.data.network.service.MenuService
-import com.kiwe.domain.model.MenuCategory
+import com.kiwe.domain.model.MenuCategoryParam
 import com.kiwe.domain.usecase.GetCategoryListUseCase
 import javax.inject.Inject
 
@@ -10,5 +10,5 @@ class GetCategoryListUseCaseImpl
     constructor(
         private val menuService: MenuService,
     ) : GetCategoryListUseCase {
-        override suspend fun invoke(category: String): Result<List<MenuCategory>> = menuService.getCategoryList(category)
+        override suspend fun invoke(category: String): Result<List<MenuCategoryParam>> = menuService.getCategoryList(category)
     }

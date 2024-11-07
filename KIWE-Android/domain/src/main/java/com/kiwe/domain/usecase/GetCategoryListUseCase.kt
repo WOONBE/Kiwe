@@ -1,7 +1,7 @@
 package com.kiwe.domain.usecase
 
-import com.kiwe.domain.model.MenuCategory
+import com.kiwe.domain.model.MenuCategoryParam
 
 interface GetCategoryListUseCase {
-    suspend operator fun invoke(category: String): Result<List<MenuCategory>>
+    suspend operator fun invoke(category: String): Result<List<MenuCategoryParam>>
 }
