@@ -5,6 +5,7 @@ import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
 import com.d205.KIWI_Backend.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,28 @@ public class OrderController {
         } catch (BadRequestException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/total-price/last-month")
+    @Operation(summary = "한달 간 총 주문금액", description = "한달 간 총 주문금액을 리턴하는 API")
+    public ResponseEntity<Integer> getTotalPriceForLastMonth() {
+        int totalPrice = orderService.calculateTotalPriceForLastMonth(); // 서비스 호출하여 총 금액 계산
+        return ResponseEntity.ok(totalPrice); // 계산된 총 금액을 ResponseEntity로 반환
+    }
+
+    @GetMapping("/total-price/last-month/{kioskId}")
+    @Operation(summary = "특정 키오스크의 한달 간 총 주문금액", description = "특정 키오스크의 한달 간 총 주문금액을 리턴하는 API")
+    public ResponseEntity<Integer> getTotalPriceForLastMonthByKioskId(@PathVariable Integer kioskId) {
+        int totalPrice = orderService.calculateTotalPriceForLastMonthByKioskId(kioskId); // 키오스크 ID 기준으로 총 금액 계산
+        return ResponseEntity.ok(totalPrice); // 결과 반환
+    }
+
+    // 특정 키오스크 ID 기준으로 최근 3개월간 월별 매출 조회
+    @GetMapping("/monthly-sales/last-six-months/{kioskId}")
+    @Operation(summary = "특정 키오스크의 6개월 간 주문금액", description = "특정 키오스크의 6개월 간 주문금액을 월별로 리턴하는 API")
+    public ResponseEntity<Map<YearMonth, Integer>> getMonthlySalesForLastThreeMonthsByKioskId(@PathVariable Integer kioskId) {
+        Map<YearMonth, Integer> monthlySales = orderService.calculateMonthlyTotalForLastSixMonthsByKioskId(kioskId);
+        return ResponseEntity.ok(monthlySales);
     }
 
 }
