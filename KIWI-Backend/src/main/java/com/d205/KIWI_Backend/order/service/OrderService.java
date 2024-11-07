@@ -17,6 +17,8 @@ import com.d205.KIWI_Backend.order.domain.OrderMenu;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
 import com.d205.KIWI_Backend.order.repository.OrderRepository;
+import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -273,6 +275,57 @@ public class OrderService {
             throw new BadRequestException(NOT_FOUND_KIOSK_ID);
         }
         return "SUCCESS";
+    }
+
+    @Transactional
+    public int calculateTotalPriceForLastMonth() {
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+        List<Order> recentOrders = orderRepository.findByOrderDateAfter(oneMonthAgo);
+
+
+        return recentOrders.stream()
+            .mapToInt(order -> order.getOrderMenus().stream()
+                .mapToInt(orderMenu -> orderMenu.getMenu().getPrice() * orderMenu.getQuantity())
+                .sum())
+            .sum();
+    }
+
+    public int calculateTotalPriceForLastMonthByKioskId(Integer kioskId) {
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1); // 한 달 전 날짜 계산
+
+        // 특정 키오스크 ID와 한 달 내의 주문 목록 가져오기
+        List<Order> orders = orderRepository.findByKioskIdAndOrderDateAfter(kioskId, oneMonthAgo);
+
+        // 주문 총 금액 계산
+        return orders.stream()
+            .flatMap(order -> order.getOrderMenus().stream())
+            .mapToInt(orderMenu -> orderMenu.getMenu().getPrice() * orderMenu.getQuantity())
+            .sum();
+    }
+
+    public Map<YearMonth, Integer> calculateMonthlyTotalForLastSixMonthsByKioskId(Integer kioskId) {
+        Map<YearMonth, Integer> monthlySales = new HashMap<>();
+        YearMonth currentMonth = YearMonth.now();
+
+        // 최근 6개월 동안 각 월별로 매출 계산
+        for (int i = 0; i < 6; i++) {
+            YearMonth targetMonth = currentMonth.minusMonths(i);
+            LocalDateTime startOfMonth = targetMonth.atDay(1).atStartOfDay();
+            LocalDateTime endOfMonth = targetMonth.atEndOfMonth().atTime(23, 59, 59);
+
+            // 해당 월의 주문 목록 조회
+            List<Order> orders = orderRepository.findByKioskIdAndOrderDateBetween(kioskId, startOfMonth, endOfMonth);
+
+
+            int monthlyTotal = orders.stream()
+                .flatMap(order -> order.getOrderMenus().stream())
+                .mapToInt(orderMenu -> orderMenu.getMenu().getPrice() * orderMenu.getQuantity())
+                .sum();
+
+            monthlySales.put(targetMonth, monthlyTotal);
+        }
+
+        return monthlySales;
     }
 
 }
