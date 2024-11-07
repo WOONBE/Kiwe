@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.model.OrderOption
 import com.kiwe.kiosk.model.ShoppingCartItem
@@ -45,18 +44,9 @@ private const val TAG = "OptionDialog 싸피"
 @Composable
 fun OptionDialog(
     onClose: () -> Unit,
-    menuTitle: String,
-    menuCost: Int,
     shoppingCartViewModel: ShoppingCartViewModel,
+    optionViewModel: OptionViewModel,
 ) {
-    val optionViewModel: OptionViewModel =
-        hiltViewModel(
-            key = System.currentTimeMillis().toString(),
-            creationCallback = { factory: OptionViewModel.OptionViewModelFactory ->
-                factory.create(menuTitle, menuCost)
-            },
-        )
-
     val state = optionViewModel.collectAsState().value
     var change by remember { mutableIntStateOf(0) }
     Dialog(
@@ -79,7 +69,6 @@ fun OptionDialog(
             onRadioOptionClick = optionViewModel::onRadioOptionClick,
             onPurchase = {
                 shoppingCartViewModel.onInsertItem(it)
-                optionViewModel.onClear()
                 onClose()
             },
         )
