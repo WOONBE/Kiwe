@@ -77,7 +77,7 @@ private fun SpeechScreen(
 ) {
     if (isDialogOpen) {
         var elapsedTime by remember { mutableLongStateOf(0L) }
-
+        onResult // TODO
         LaunchedEffect(Unit) {
             delay(1000)
             elapsedTime = 0L // 타이머 초기화

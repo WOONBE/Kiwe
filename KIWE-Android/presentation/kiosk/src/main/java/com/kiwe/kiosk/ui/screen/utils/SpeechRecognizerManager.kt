@@ -53,7 +53,9 @@ class SpeechRecognizerManager
                     Timber.tag(TAG).d("onBeginningOfSpeech")
                 }
 
-                override fun onRmsChanged(rmsdB: Float) {}
+                override fun onRmsChanged(rmsdB: Float) {
+                    // Timber.tag(TAG).d("onRmsChanged: $rmsdB")
+                }
 
                 override fun onBufferReceived(buffer: ByteArray?) {
                     Timber.tag(TAG).d("onBufferReceived")
