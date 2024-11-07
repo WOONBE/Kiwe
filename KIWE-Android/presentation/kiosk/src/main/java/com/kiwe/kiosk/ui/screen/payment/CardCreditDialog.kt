@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -68,15 +71,18 @@ fun CardCreditDialog(
             // 카드 결제 이미지
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .weight(1f)
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f),
                     painter = painterResource(id = R.drawable.img_card_credit),
                     contentDescription = null,
-                    modifier = Modifier.size(256.dp)
-                )
+
+                    )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -126,6 +132,23 @@ fun CardCreditDialog(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // 취소 버튼 추가
+            Button(
+                onClick = { onDismissRequest() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 0.dp),
+                colors = ButtonDefaults.buttonColors(KiweWhite1),
+                shape = RoundedCornerShape(8.dp),
+                elevation = ButtonDefaults.buttonElevation(4.dp)
+            ) {
+                Text(
+                    text = "취소",
+                    style = Typography.bodyLarge.copy(fontSize = 16.sp, color = KiweBlack1),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
