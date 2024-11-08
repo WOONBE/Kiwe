@@ -25,7 +25,7 @@ import org.orbitmvi.orbit.compose.collectAsState
 @Composable
 fun MainNavHost() {
     val navController = rememberNavController()
-    val mainViewModel: MainViewModel = viewModel()
+    val mainViewModel: MainViewModel = hiltViewModel()
     val shoppingCartViewModel: ShoppingCartViewModel = hiltViewModel()
     val state = mainViewModel.collectAsState().value
     Surface {

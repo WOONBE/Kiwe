@@ -9,7 +9,10 @@ import com.google.mlkit.vision.face.FaceDetectorOptions
 import timber.log.Timber
 
 @ExperimentalGetImage
-fun processImageProxyFromCamera(imageProxy: ImageProxy) {
+fun processImageProxyFromCamera(
+    imageProxy: ImageProxy,
+    faceDetection: (Boolean) -> Unit,
+) {
     val mediaImage = imageProxy.image
     if (mediaImage != null) {
         val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
@@ -35,6 +38,11 @@ fun processImageProxyFromCamera(imageProxy: ImageProxy) {
                     val faceWidth = bounds.width()
                     val faceHeight = bounds.height()
                     // 200
+                    if (faceWidth >= 200 || faceHeight >= 200) {
+                        faceDetection(true)
+                    } else {
+                        faceDetection(false)
+                    }
                     Timber.tag("FC").d("Face width: $faceWidth, height: $faceHeight")
                     val rotY = face.headEulerAngleY
                     val rotZ = face.headEulerAngleZ

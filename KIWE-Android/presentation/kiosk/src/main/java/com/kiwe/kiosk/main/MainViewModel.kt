@@ -144,6 +144,28 @@ class MainViewModel
                     )
                 }
             }
+
+        fun detectPerson(box: Boolean) {
+            if (box) {
+                onPersonCome()
+            } else {
+                onPersonLeave()
+            }
+        }
+
+        fun onPersonCome() =
+            intent {
+                reduce {
+                    state.copy(isExistPerson = true)
+                }
+            }
+
+        fun onPersonLeave() =
+            intent {
+                reduce {
+                    state.copy(isExistPerson = false)
+                }
+            }
     }
 
 data class MainState(
@@ -153,6 +175,7 @@ data class MainState(
     val category: List<Category> = emptyList(),
     val recognizedText: String = "",
     val shouldShowRetryMessage: Boolean = false,
+    val isExistPerson: Boolean = false,
 ) : BaseState
 
 sealed interface MainSideEffect : BaseSideEffect {

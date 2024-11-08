@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
@@ -24,13 +25,13 @@ import dagger.hilt.android.AndroidEntryPoint
 @ExperimentalGetImage
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val mainViewModel: MainViewModel by viewModels()
     private val requestPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
             val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
 
             if (cameraGranted && audioGranted) {
-                startCamera()
             } else {
                 if (!audioGranted) {
                     Toast.makeText(this, "음성 권한을 허용해주세요", Toast.LENGTH_SHORT).show()
@@ -89,7 +90,10 @@ class MainActivity : ComponentActivity() {
                     .build()
 
             imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), { imageProxy ->
-                processImageProxyFromCamera(imageProxy)
+                processImageProxyFromCamera(
+                    imageProxy,
+                    faceDetection = { detect -> mainViewModel.detectPerson(detect) },
+                )
             })
 
             try {
