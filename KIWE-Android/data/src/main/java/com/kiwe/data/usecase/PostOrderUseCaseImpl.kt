@@ -13,12 +13,16 @@ class PostOrderUseCaseImpl
     constructor(
         private val orderService: OrderService,
     ) : PostOrderUseCase {
-        override suspend fun invoke(order: Order): Result<String> {
+        override suspend fun invoke(
+            kioskId: Int,
+            order: Order,
+        ): Result<String> {
             val orderRequest =
                 OrderRequest(
-                    kioskId = 1,
+                    kioskId = kioskId,
                     menuOrders = order.menuOrders.map { it.toRequest() },
                 )
+            Timber.tag("결제").d("$kioskId")
             val response = orderService.order(requestBody = orderRequest)
             Timber.tag(javaClass.simpleName).d("response : $response")
             return Result.success(response.toString())

@@ -18,8 +18,10 @@ fun PaymentScreen(
     modifier: Modifier = Modifier,
     viewModel: PaymentViewModel = hiltViewModel(),
     shoppingCartViewModel: ShoppingCartViewModel = hiltViewModel(),
+    onCompletePayment: () -> Unit,
     onEnterScreen: (Int) -> Unit,
 ) {
+    val paymentState = viewModel.collectAsState().value
     val shoppingCartState = shoppingCartViewModel.collectAsState().value
     var showDialog by remember { mutableStateOf(false) }
 
@@ -29,6 +31,11 @@ fun PaymentScreen(
         })
     LaunchedEffect(Unit) {
         onEnterScreen(3)
+    }
+    LaunchedEffect(paymentState.completePayment) {
+        if (paymentState.completePayment) {
+            onCompletePayment()
+        }
     }
     HorizontalPager(
         modifier = modifier,
@@ -40,13 +47,24 @@ fun PaymentScreen(
                 TakeOutChoiceScreen(
                     modifier = Modifier,
                     onPackagingClick = {
-                        viewModel.postOrder(shoppingCartState)
+                        viewModel.postOrder(paymentState.kioskId, shoppingCartState)
+                        showDialog = true
                     },
                     onStoreClick = {
-                        viewModel.postOrder(shoppingCartState)
-                        viewModel.navigateToPaymentStatus(pagerState, PaymentStatus.PAYMENT_METHOD)
+                        viewModel.postOrder(paymentState.kioskId, shoppingCartState)
+                        showDialog = true
                     },
                 )
+                if (paymentState.showDialog) {
+                    CardCreditDialog(
+                        onDismissRequest = {
+                            showDialog = false
+                            viewModel.cancelPayment()
+                        },
+                        totalAmount = shoppingCartState.shoppingCartItem.sumOf { it.totalPrice * it.count },
+                        cardNumber = paymentState.userCardNumber,
+                    )
+                }
             }
 
             PaymentStatus.PAYMENT_METHOD -> {
@@ -58,16 +76,6 @@ fun PaymentScreen(
                         showDialog = true
                     },
                 )
-                if (showDialog) {
-                    viewModel.startConfirmPayment(kioskId = 1)
-                    CardCreditDialog(
-                        onDismissRequest = {
-                            showDialog = false
-                            viewModel.cancelPayment()
-                        },
-                        totalAmount = shoppingCartState.shoppingCartItem.sumOf { it.totalPrice * it.count },
-                    )
-                }
             }
 
             PaymentStatus.CARD -> {
