@@ -41,7 +41,10 @@ class KioskManagerService
          * Kiosk를 생성합니다.
          * @TODO: access token
          */
-        suspend fun createKiosk(request: CreateKioskRequest): Result<Kiosk> = client.postResult<Kiosk>("api/kiosks")
+        suspend fun createKiosk(request: CreateKioskRequest): Result<Kiosk> =
+            client.postResult<Kiosk>("api/kiosks") {
+                setBody(request)
+            }
 
         /**
          * Kiosk에서 로그아웃합니다.
