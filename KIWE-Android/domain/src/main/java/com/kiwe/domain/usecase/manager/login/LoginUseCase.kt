@@ -1,5 +1,8 @@
 package com.kiwe.domain.usecase.manager.login
 
+import com.kiwe.domain.model.LoginParam
+import com.kiwe.domain.model.LoginResponse
+
 interface LoginUseCase {
-    operator fun invoke()
+    suspend operator fun invoke(loginParam: LoginParam): Result<LoginResponse>
 }

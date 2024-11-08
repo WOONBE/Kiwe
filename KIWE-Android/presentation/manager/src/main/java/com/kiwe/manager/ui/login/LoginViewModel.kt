@@ -1,6 +1,11 @@
 package com.kiwe.manager.ui.login
 
 import androidx.lifecycle.ViewModel
+import com.kiwe.domain.exception.APIException
+import com.kiwe.domain.model.LoginParam
+import com.kiwe.domain.model.Token
+import com.kiwe.domain.usecase.manager.login.LoginUseCase
+import com.kiwe.domain.usecase.manager.token.SetTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.orbitmvi.orbit.Container
@@ -13,7 +18,8 @@ import javax.inject.Inject
 class LoginViewModel
     @Inject
     constructor(
-//        private val loginUseCase: LoginUseCase,
+        private val loginUseCase: LoginUseCase,
+        private val setTokenUseCase: SetTokenUseCase,
 //        private val setTokenUseCase: SetTokenUseCase,
     ) : ViewModel(),
         ContainerHost<LoginState, LoginSideEffect> {
@@ -24,7 +30,20 @@ class LoginViewModel
                     this.exceptionHandler =
                         CoroutineExceptionHandler { _, throwable ->
                             intent {
-                                postSideEffect(LoginSideEffect.Toast(message = throwable.message.orEmpty()))
+                                if (throwable is APIException) {
+                                    postSideEffect(
+                                        LoginSideEffect.Toast(
+                                            "${throwable.code} : " +
+                                                (throwable.message ?: "알수 없는 에러"),
+                                        ),
+                                    )
+                                } else {
+                                    postSideEffect(
+                                        LoginSideEffect.Toast(
+                                            throwable.message ?: "알수 없는 에러",
+                                        ),
+                                    )
+                                }
                             }
                         }
                 },
@@ -32,12 +51,25 @@ class LoginViewModel
 
         fun onLoginClick() =
             intent {
-//                val id = state.id
-//                val password = state.password
-//                val token = loginUseCase(id, password).getOrThrow()
-//                setTokenUseCase(token)
-//        postSideEffect(LoginSideEffect.Toast(message = "token = $token"))
-                postSideEffect(LoginSideEffect.NavigateToMainActivity)
+                if (state.id.isEmpty() || state.password.isEmpty()) {
+                    postSideEffect(LoginSideEffect.Toast("이메일과 비밀번호를 입력해주세요!"))
+                    return@intent
+                }
+                val response =
+                    loginUseCase(
+                        LoginParam(
+                            email = state.id,
+                            password = state.password,
+                        ),
+                    ).getOrThrow()
+                setTokenUseCase(
+                    Token(
+                        response.accessToken,
+                        response.refreshToken,
+                    ),
+                )
+                postSideEffect(LoginSideEffect.Toast("환영합니다!"))
+                postSideEffect(LoginSideEffect.NavigateToHomeActivity)
             }
 
         fun onIdChange(id: String) =
@@ -66,5 +98,5 @@ sealed interface LoginSideEffect {
         val message: String,
     ) : LoginSideEffect
 
-    object NavigateToMainActivity : LoginSideEffect
+    object NavigateToHomeActivity : LoginSideEffect
 }
