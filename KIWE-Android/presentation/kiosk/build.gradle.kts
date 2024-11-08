@@ -119,6 +119,15 @@ dependencies {
     implementation(libs.lottie)
     implementation(libs.lottie.compose)
 
+    // MLKit
+    implementation(libs.face.detection)
+    // Camera
+    implementation("androidx.camera:camera-core:1.4.0")
+    implementation("androidx.camera:camera-camera2:1.4.0")
+    implementation("androidx.camera:camera-lifecycle:1.4.0")
+    implementation("androidx.camera:camera-view:1.4.0")
+    implementation("androidx.camera:camera-extensions:1.4.0")
+
 //    // SystemUi
 //    implementation("com.google.accompanist:accompanist-insets:1.0.0")
 }
