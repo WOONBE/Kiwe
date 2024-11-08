@@ -27,6 +27,6 @@ choose_id,eng_name,kor_name,noraml_drink,mega_drink
 26,no_choice_light_vanlia_changed,라이트바닐라시럽변경안함,0,0
 27,no_choice_stevia_add,스태비아추가선택안함,0,0
 28,no_choice_milk,우유선택안함,0,0
-29,no_choice_zero_cider,제로사이다변경안함0,0
+29,no_choice_zero_cider,제로사이다변경안함,0,0
 30,no_choice_decaffein,디카페인선택안함,0,0
 31,no_choice_stevia_changed,스태비아변경안함,0,0

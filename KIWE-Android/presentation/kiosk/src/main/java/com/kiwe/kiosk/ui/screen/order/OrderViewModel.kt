@@ -1,5 +1,9 @@
 package com.kiwe.kiosk.ui.screen.order
 
+import com.kiwe.domain.exception.APIException
+import com.kiwe.domain.model.MenuCategory
+import com.kiwe.domain.model.MenuCategoryParam
+import com.kiwe.domain.usecase.GetCategoryListUseCase
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
@@ -11,18 +15,48 @@ import kotlin.coroutines.CoroutineContext
 @HiltViewModel
 class OrderViewModel
     @Inject
-    constructor() : BaseViewModel<OrderState, OrderSideEffect>(OrderState()) {
+    constructor(
+        private val getCategoryListUseCase: GetCategoryListUseCase,
+    ) : BaseViewModel<OrderState, OrderSideEffect>(OrderState()) {
         override fun handleExceptionIntent(
             coroutineContext: CoroutineContext,
             throwable: Throwable,
         ) {
             intent {
-                postSideEffect(OrderSideEffect.Toast(throwable.message ?: "알수 없는 에러"))
+                if (throwable is APIException) {
+                    postSideEffect(
+                        OrderSideEffect.Toast(
+                            "${throwable.code} : " +
+                                (throwable.message ?: "알수 없는 에러"),
+                        ),
+                    )
+                } else {
+                    postSideEffect(OrderSideEffect.Toast(throwable.message ?: "알수 없는 에러"))
+                }
             }
         }
+
+        init {
+            intent {
+                setCategory(state.selectedCategory)
+            }
+        }
+
+        fun setCategory(selectCategory: MenuCategory) =
+            intent {
+                val menuList = getCategoryListUseCase(selectCategory.displayName).getOrThrow()
+                reduce {
+                    state.copy(
+                        selectedCategory = selectCategory,
+                        menuList = menuList.chunked(12),
+                    )
+                }
+            }
     }
 
 data class OrderState(
+    val selectedCategory: MenuCategory = MenuCategory.NEW,
+    val menuList: List<List<MenuCategoryParam>> = listOf(),
     val orderItem: List<OrderItem> =
         listOf(
             OrderItem(
