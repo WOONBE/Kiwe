@@ -47,6 +47,8 @@ fun SignUpScreen(
                         sideEffect.message,
                         Toast.LENGTH_SHORT,
                     ).show()
+
+            SignUpSideEffect.NavigateToLoginScreen -> onNavigateToLoginScreen()
         }
     }
 
@@ -65,7 +67,7 @@ fun SignUpScreen(
         onPasswordRepeatChange = viewModel::onPasswordRepeatChange,
         onShowPasswordChange = viewModel::onShowPasswordChange,
         onShowPasswordRepeatChange = viewModel::onShowPasswordRepeatChange,
-        onNavigateToLoginScreen = onNavigateToLoginScreen,
+        onSignUp = viewModel::onSignUp,
     )
 }
 
@@ -86,7 +88,7 @@ private fun SignUpScreen(
     onPasswordRepeatChange: (String) -> Unit,
     onShowPasswordChange: () -> Unit,
     onShowPasswordRepeatChange: () -> Unit,
-    onNavigateToLoginScreen: () -> Unit,
+    onSignUp: () -> Unit,
 ) {
     Surface(
         color = colorResource(R.color.login_dark),
@@ -161,7 +163,7 @@ private fun SignUpScreen(
                         content = {
                             Text(text = "회원 가입")
                         },
-                        onClick = onNavigateToLoginScreen,
+                        onClick = onSignUp,
                     )
                 }
             }

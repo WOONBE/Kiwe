@@ -1,6 +1,6 @@
 package com.kiwe.data.di
 
-import com.kiwe.data.usecase.SignUpUseCaseImpl
+import com.kiwe.data.usecase.manager.SignUpUseCaseImpl
 import com.kiwe.domain.usecase.SignUpUseCase
 import dagger.Binds
 import dagger.Module

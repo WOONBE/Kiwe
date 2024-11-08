@@ -18,19 +18,11 @@ fun LoginNavHost() {
                 onNavigateToSignUpScreen = {
                     navController.navigate(
                         LoginRoute.SignUpScreen.name,
-                        navOptions =
-                            navOptions {
-                                popUpTo(LoginRoute.LoginScreen.name) { inclusive = true }
-                            },
                     )
                 },
                 onNavigateToFindPassWordScreen = {
                     navController.navigate(
                         LoginRoute.FindPassWordScreen.name,
-                        navOptions =
-                            navOptions {
-                                popUpTo(LoginRoute.LoginScreen.name) { inclusive = true }
-                            },
                     )
                 },
             )
@@ -43,7 +35,7 @@ fun LoginNavHost() {
                         route = LoginRoute.LoginScreen.name,
                         navOptions =
                             navOptions {
-                                popUpTo(LoginRoute.SignUpScreen.name) { inclusive = true }
+                                popUpTo(LoginRoute.LoginScreen.name) { inclusive = true }
                             },
                     )
                 },
