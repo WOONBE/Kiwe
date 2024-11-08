@@ -18,6 +18,7 @@ import com.kiwe.kiosk.ui.screen.menu.MenuScreen
 import com.kiwe.kiosk.ui.screen.order.OrderScreen
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import com.kiwe.kiosk.ui.screen.payment.PaymentScreen
+import com.kiwe.kiosk.ui.screen.receipt.ReceiptScreen
 import com.kiwe.kiosk.ui.screen.speech.SpeechScreen
 import org.orbitmvi.orbit.compose.collectAsState
 
@@ -77,7 +78,15 @@ fun MainNavHost() {
                         composable(route = MainRoute.PAYMENT.route) {
                             PaymentScreen(
                                 shoppingCartViewModel = shoppingCartViewModel,
+                                onCompletePayment = {
+                                    navController.navigate(MainRoute.RECEIPT.route)
+                                },
                             ) { page ->
+                                mainViewModel.setPage(page)
+                            }
+                        }
+                        composable(route = MainRoute.RECEIPT.route) {
+                            ReceiptScreen { page ->
                                 mainViewModel.setPage(page)
                             }
                         }
