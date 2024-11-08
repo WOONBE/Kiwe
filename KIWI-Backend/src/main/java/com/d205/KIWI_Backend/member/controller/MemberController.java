@@ -2,6 +2,7 @@ package com.d205.KIWI_Backend.member.controller;
 
 import com.d205.KIWI_Backend.member.dto.MemberRequest;
 import com.d205.KIWI_Backend.member.dto.MemberResponse;
+import com.d205.KIWI_Backend.member.dto.SignInRequest;
 import com.d205.KIWI_Backend.member.dto.SignInResponse;
 import com.d205.KIWI_Backend.member.service.BlackListService;
 import com.d205.KIWI_Backend.member.service.MemberService;
@@ -34,10 +35,17 @@ public class MemberController {
     }
 
     // 로그인
+//    @PostMapping("/login")
+//    @Operation(summary = "로그인", description = "로그인을 진행하는 API")
+//    public ResponseEntity<SignInResponse> signIn(@RequestParam String email, @RequestParam String password) {
+//        SignInResponse signInResponse = memberService.signIn(email, password);
+//        return ResponseEntity.ok(signInResponse);
+//    }
+
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "로그인을 진행하는 API")
-    public ResponseEntity<SignInResponse> signIn(@RequestParam String email, @RequestParam String password) {
-        SignInResponse signInResponse = memberService.signIn(email, password);
+    public ResponseEntity<SignInResponse> signIn(@RequestBody SignInRequest signInRequest) {
+        SignInResponse signInResponse = memberService.signIn(signInRequest.getEmail(), signInRequest.getPassword());
         return ResponseEntity.ok(signInResponse);
     }
 
