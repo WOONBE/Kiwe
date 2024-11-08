@@ -1,11 +1,13 @@
 package com.kiwe.kiosk.ui.screen.order
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
@@ -24,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,9 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.model.OrderItem
+import com.kiwe.kiosk.ui.screen.order.component.CategorySelector
 import com.kiwe.kiosk.ui.screen.order.component.OrderItem
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
+import timber.log.Timber
 
 @Composable
 fun OrderScreen(
@@ -41,6 +47,7 @@ fun OrderScreen(
     shoppingCartViewModel: ShoppingCartViewModel,
     onEnterScreen: (Int) -> Unit,
 ) {
+    val categoryStatus = viewModel.collectAsState().value
     val itemStatus = viewModel.collectAsState().value
     var isOrderOptionDialogOpen by remember { mutableStateOf(false) }
     var orderDialogMenuTitle by remember { mutableStateOf("") }
@@ -48,6 +55,28 @@ fun OrderScreen(
     val orderList by remember {
         derivedStateOf {
             itemStatus.orderItem.chunked(6)
+        }
+    }
+    val context = LocalContext.current
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is OrderSideEffect.Toast ->
+                Toast
+                    .makeText(
+                        context,
+                        sideEffect.message,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+
+            OrderSideEffect.NavigateToNextScreen -> {
+            }
+        }
+    }
+
+    val coroutine = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        coroutine.launch {
+            viewModel.getCategoryList("디카페sss인")
         }
     }
     val animationScope = rememberCoroutineScope()
@@ -96,74 +125,90 @@ fun OrderScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 0.dp),
     ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.weight(1F),
-        ) { index ->
-            OrderListScreen(
-                orderItemList = orderList[index].chunked(3),
-                onItemClick = { title, cost ->
-                    orderDialogMenuTitle = title
-                    orderDialogMenuCost = cost
-                    isOrderOptionDialogOpen = true
-                },
-            )
-        }
-        Row(
-            Modifier
-                .wrapContentHeight()
-                .fillMaxWidth()
-                .padding(bottom = 8.dp, start = 70.dp, end = 70.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom,
+        CategorySelector(
+            modifier = Modifier,
+            categoryState = categoryStatus.selectedCategory,
+            onCategoryClick = { selectedCategory ->
+                viewModel.setCategory(selectedCategory)
+                Timber.tag(javaClass.simpleName).d("selectedCategory: $selectedCategory")
+            },
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 10.dp),
         ) {
-            if (buttonState == 0 || buttonState == 3) {
-                Spacer(modifier = Modifier.weight(1F))
-            } else {
-                IconButton(
-                    onClick = {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1F),
+            ) { index ->
+                OrderListScreen(
+                    orderItemList = orderList[index].chunked(3),
+                    onItemClick = { title, cost ->
+                        orderDialogMenuTitle = title
+                        orderDialogMenuCost = cost
+                        isOrderOptionDialogOpen = true
+                    },
+                )
+            }
+            Row(
+                Modifier
+                    .wrapContentHeight()
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp, start = 70.dp, end = 70.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom,
+            ) {
+                if (buttonState == 0 || buttonState == 3) {
+                    Spacer(modifier = Modifier.weight(1F))
+                } else {
+                    IconButton(
+                        onClick = {
+                            animationScope.launch {
+                                pagerState.animateScrollToPage(
+                                    (pagerState.currentPage - 1).coerceAtMost(
+                                        0,
+                                    ),
+                                )
+                            }
+                        },
+                        modifier = Modifier.weight(1F),
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.arrow_left),
+                            contentDescription = "이전",
+                        )
+                    }
+                }
+                Text(
+                    modifier =
+                        Modifier
+                            .weight(1F)
+                            .align(Alignment.CenterVertically),
+                    textAlign = TextAlign.Center,
+                    text = "${pagerState.currentPage + 1}/${pagerState.pageCount}",
+                )
+                if (buttonState == 2 || buttonState == 3) {
+                    Spacer(modifier = Modifier.weight(1F))
+                } else {
+                    IconButton(onClick = {
                         animationScope.launch {
                             pagerState.animateScrollToPage(
-                                (pagerState.currentPage - 1).coerceAtMost(
-                                    0,
+                                (pagerState.currentPage + 1).coerceAtMost(
+                                    pagerState.pageCount - 1,
                                 ),
                             )
                         }
-                    },
-                    modifier = Modifier.weight(1F),
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.arrow_left),
-                        contentDescription = "이전",
-                    )
-                }
-            }
-            Text(
-                modifier =
-                    Modifier
-                        .weight(1F)
-                        .align(Alignment.CenterVertically),
-                textAlign = TextAlign.Center,
-                text = "${pagerState.currentPage + 1}/${pagerState.pageCount}",
-            )
-            if (buttonState == 2 || buttonState == 3) {
-                Spacer(modifier = Modifier.weight(1F))
-            } else {
-                IconButton(onClick = {
-                    animationScope.launch {
-                        pagerState.animateScrollToPage(
-                            (pagerState.currentPage + 1).coerceAtMost(
-                                pagerState.pageCount - 1,
-                            ),
+                    }, modifier = Modifier.weight(1F)) {
+                        Icon(
+                            painter = painterResource(R.drawable.arrow_right),
+                            contentDescription = "다음",
                         )
                     }
-                }, modifier = Modifier.weight(1F)) {
-                    Icon(
-                        painter = painterResource(R.drawable.arrow_right),
-                        contentDescription = "다음",
-                    )
                 }
             }
         }

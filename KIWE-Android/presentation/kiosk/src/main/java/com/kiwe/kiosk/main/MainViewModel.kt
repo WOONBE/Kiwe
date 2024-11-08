@@ -4,6 +4,10 @@ import com.kiwe.domain.model.Category
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
+import com.kiwe.kiosk.ui.screen.utils.SpeechRecognizerManager
+import com.kiwe.kiosk.ui.screen.utils.SpeechResultListener
+import com.kiwe.kiosk.ui.screen.utils.helpPopupRegex
+import com.kiwe.kiosk.ui.screen.utils.menuRegex
 import com.kiwe.kiosk.utils.MainEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
@@ -13,7 +17,10 @@ import kotlin.coroutines.CoroutineContext
 @HiltViewModel
 class MainViewModel
     @Inject
-    constructor() : BaseViewModel<MainState, MainSideEffect>(MainState()) {
+    constructor(
+        private val speechRecognizerManager: SpeechRecognizerManager,
+    ) : BaseViewModel<MainState, MainSideEffect>(MainState()),
+        SpeechResultListener {
         override fun handleExceptionIntent(
             coroutineContext: CoroutineContext,
             throwable: Throwable,
@@ -25,22 +32,83 @@ class MainViewModel
 
         init {
             getMenuCategory()
+            initSpeechRecognizer()
         }
 
-        fun onDismissSpeechDialog() =
+        private fun initSpeechRecognizer() {
+            speechRecognizerManager.setSpeechResultListener(this)
+        }
+
+        // 음성 인식 시작
+        fun startSpeechRecognition() {
+            speechRecognizerManager.startListening()
+        }
+
+        // 음성 인식 중단
+        fun stopSpeechRecognition() {
+            intent {
+                reduce { state.copy(isDialogShowing = false) }
+                speechRecognizerManager.stopListening()
+            }
+        }
+
+        override fun onResultsReceived(results: List<String>) {
+            val resultText = results.firstOrNull() ?: ""
+            intent {
+                Timber.tag("MainViewModel").d("Result: $resultText 하고 ${state.isDialogShowing}")
+                if (state.isDialogShowing) {
+                    Timber.tag("MainViewModel").d("Result: $resultText 하고 ${state.isDialogShowing}")
+                    onSpeechResult(resultText)
+                } else if (helpPopupRegex.containsMatchIn(resultText)) {
+                    reduce {
+                        state.copy(isDialogShowing = true)
+                    }
+                }
+            }
+        }
+
+        fun onDismissRequest() =
             intent {
                 reduce {
-                    state.copy(isRecording = false)
+                    state.copy(isDialogShowing = false)
                 }
             }
 
-        fun onSpeechRecevied(text: String) =
+        fun onSpeechResult(result: String) =
             intent {
-                reduce {
-                    Timber.tag("MainViewModel").d(text)
-                    state.copy(isRecording = false)
+                if (menuRegex.containsMatchIn(result)) { // 메뉴판에 있는 메뉴를 말했다면
+                    reduce {
+                        state.copy(
+                            isDialogShowing = false,
+                            recognizedText = result,
+                            shouldShowRetryMessage = false,
+                        )
+                    }
+                } else {
+                    reduce {
+                        state.copy(
+                            recognizedText = result,
+                            shouldShowRetryMessage = true, // 다시 말해달라는 flag
+                        )
+                    }
                 }
             }
+
+        override fun onPartialResultsReceived(partialResults: List<String>) {
+            val partialText = partialResults.firstOrNull() ?: ""
+            Timber.tag("MainViewModel").d("Partial Result: $partialText")
+            intent {
+                if (state.isDialogShowing) {
+                    // 다이얼로그가 보여지고 있는 상황이라면
+                } else if (helpPopupRegex.containsMatchIn(partialText)) {
+                    // 다이얼로그가 안보이는 상황에서 음성이 들어온다면 이걸 탐
+                    Timber.tag("MainViewModel").d("${helpPopupRegex.containsMatchIn(partialText)}")
+                    reduce {
+                        state.copy(isDialogShowing = true)
+                    }
+                }
+            }
+        }
 
         fun getMenuCategory() =
             intent {
@@ -81,8 +149,10 @@ class MainViewModel
 data class MainState(
     val page: Int = 0,
     val mode: MainEnum.KioskMode = MainEnum.KioskMode.ASSIST,
-    val isRecording: Boolean = true,
+    val isDialogShowing: Boolean = false,
     val category: List<Category> = emptyList(),
+    val recognizedText: String = "",
+    val shouldShowRetryMessage: Boolean = false,
 ) : BaseState
 
 sealed interface MainSideEffect : BaseSideEffect {

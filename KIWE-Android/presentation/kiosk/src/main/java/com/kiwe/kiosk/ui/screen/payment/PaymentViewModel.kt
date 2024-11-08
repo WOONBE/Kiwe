@@ -3,7 +3,6 @@ package com.kiwe.kiosk.ui.screen.payment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kiwe.domain.model.Order
-import com.kiwe.domain.model.getDummyOrder
 import com.kiwe.domain.usecase.kiosk.OrderUseCase
 import com.kiwe.kiosk.model.toOrderItem
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartState
@@ -28,7 +27,7 @@ class PaymentViewModel
                 )
             shoppingCartState.shoppingCartItem
             Timber.tag(javaClass.simpleName).d("postOrder")
-            val dummyOrder = getDummyOrder()
+//            val dummyOrder = getDummyOrder()
             viewModelScope.launch {
                 orderUseCase(order)
             }
