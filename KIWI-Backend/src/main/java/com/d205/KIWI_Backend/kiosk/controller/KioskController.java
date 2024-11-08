@@ -2,6 +2,7 @@ package com.d205.KIWI_Backend.kiosk.controller;
 
 import com.d205.KIWI_Backend.kiosk.dto.KioskRequest;
 import com.d205.KIWI_Backend.kiosk.dto.KioskResponse;
+import com.d205.KIWI_Backend.kiosk.dto.KioskSignOutRequest;
 import com.d205.KIWI_Backend.kiosk.service.KioskService;
 import com.d205.KIWI_Backend.member.service.BlackListService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -53,12 +54,23 @@ public class KioskController {
         return ResponseEntity.ok(kiosks);
     }
 
+//    @PostMapping("/log-out")
+//    @Operation(summary = "키오스크 로그아웃", description = "비밀번호를 사용하여 키오스크 로그아웃을 수행합니다.")
+//    public ResponseEntity<Void> kioskSignOut(@RequestHeader("Refresh-Token") String refreshToken,
+//        @RequestParam String password) {
+//        try {
+//            blackListService.kioskSignOut(password, refreshToken); // 비밀번호와 Refresh Token으로 로그아웃 수행
+//            return ResponseEntity.noContent().build(); // 성공적으로 로그아웃된 경우 204 No Content 반환
+//        } catch (JsonProcessingException e) {
+//            return ResponseEntity.badRequest().build(); // 비밀번호 불일치 또는 기타 예외 처리
+//        }
+//    }
+
     @PostMapping("/log-out")
     @Operation(summary = "키오스크 로그아웃", description = "비밀번호를 사용하여 키오스크 로그아웃을 수행합니다.")
-    public ResponseEntity<Void> kioskSignOut(@RequestHeader("Refresh-Token") String refreshToken,
-        @RequestParam String password) {
+    public ResponseEntity<Void> kioskSignOut(@RequestBody KioskSignOutRequest request) {
         try {
-            blackListService.kioskSignOut(password, refreshToken); // 비밀번호와 Refresh Token으로 로그아웃 수행
+            blackListService.kioskSignOut(request.getPassword(), request.getRefreshToken()); // 비밀번호와 Refresh Token으로 로그아웃 수행
             return ResponseEntity.noContent().build(); // 성공적으로 로그아웃된 경우 204 No Content 반환
         } catch (JsonProcessingException e) {
             return ResponseEntity.badRequest().build(); // 비밀번호 불일치 또는 기타 예외 처리

@@ -2,7 +2,9 @@ package com.d205.KIWI_Backend.member.controller;
 
 import com.d205.KIWI_Backend.member.dto.MemberRequest;
 import com.d205.KIWI_Backend.member.dto.MemberResponse;
+import com.d205.KIWI_Backend.member.dto.SignInRequest;
 import com.d205.KIWI_Backend.member.dto.SignInResponse;
+import com.d205.KIWI_Backend.member.dto.SignOutRequest;
 import com.d205.KIWI_Backend.member.service.BlackListService;
 import com.d205.KIWI_Backend.member.service.MemberService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,10 +36,17 @@ public class MemberController {
     }
 
     // 로그인
+//    @PostMapping("/login")
+//    @Operation(summary = "로그인", description = "로그인을 진행하는 API")
+//    public ResponseEntity<SignInResponse> signIn(@RequestParam String email, @RequestParam String password) {
+//        SignInResponse signInResponse = memberService.signIn(email, password);
+//        return ResponseEntity.ok(signInResponse);
+//    }
+
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "로그인을 진행하는 API")
-    public ResponseEntity<SignInResponse> signIn(@RequestParam String email, @RequestParam String password) {
-        SignInResponse signInResponse = memberService.signIn(email, password);
+    public ResponseEntity<SignInResponse> signIn(@RequestBody SignInRequest signInRequest) {
+        SignInResponse signInResponse = memberService.signIn(signInRequest.getEmail(), signInRequest.getPassword());
         return ResponseEntity.ok(signInResponse);
     }
 
@@ -84,13 +93,26 @@ public class MemberController {
         return ResponseEntity.ok(memberResponse);
     }
 
+//    @PostMapping("/log-out")
+//    @Operation(summary = "로그아웃", description = "로그인 된 사용자의 로그 아웃을 진행하는 API, Refresh Token을 BlackList 처리 + Access Token은 Redis에서 삭제")
+//    public ResponseEntity<Void> signOut(@RequestHeader("Refresh-Token") String refreshToken) {
+//        try {
+//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//            String accessToken = (String) authentication.getCredentials();
+//            blackListService.userSignOut(accessToken,refreshToken);
+//            return ResponseEntity.noContent().build();
+//        } catch (JsonProcessingException e) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//    }
+
     @PostMapping("/log-out")
     @Operation(summary = "로그아웃", description = "로그인 된 사용자의 로그 아웃을 진행하는 API, Refresh Token을 BlackList 처리 + Access Token은 Redis에서 삭제")
-    public ResponseEntity<Void> signOut(@RequestHeader("Refresh-Token") String refreshToken) {
+    public ResponseEntity<Void> signOut(@RequestBody SignOutRequest request) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String accessToken = (String) authentication.getCredentials();
-            blackListService.userSignOut(accessToken,refreshToken);
+            blackListService.userSignOut(accessToken, request.getRefreshToken());
             return ResponseEntity.noContent().build();
         } catch (JsonProcessingException e) {
             return ResponseEntity.badRequest().build();
