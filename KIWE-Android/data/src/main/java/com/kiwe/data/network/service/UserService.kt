@@ -11,7 +11,7 @@ import com.kiwe.domain.model.SignUpParam
 import com.kiwe.domain.model.SignUpResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.request.parameter
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import timber.log.Timber
@@ -33,8 +33,7 @@ class UserService
 
         suspend fun login(request: LoginParam): Result<LoginResponse> =
             client.postResult(url = "api/members/login") {
-                parameter("email", request.email)
-                parameter("password", request.password)
+                setBody(request)
                 contentType(ContentType.Application.Json)
             }
 
