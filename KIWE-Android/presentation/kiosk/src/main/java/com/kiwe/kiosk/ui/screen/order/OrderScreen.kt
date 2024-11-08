@@ -32,8 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kiwe.domain.model.MenuCategoryParam
 import com.kiwe.kiosk.R
-import com.kiwe.kiosk.model.OrderItem
 import com.kiwe.kiosk.ui.screen.order.component.CategorySelector
 import com.kiwe.kiosk.ui.screen.order.component.OrderItem
 import kotlinx.coroutines.launch
@@ -48,15 +48,9 @@ fun OrderScreen(
     onEnterScreen: (Int) -> Unit,
 ) {
     val categoryStatus = viewModel.collectAsState().value
-    val itemStatus = viewModel.collectAsState().value
     var isOrderOptionDialogOpen by remember { mutableStateOf(false) }
     var orderDialogMenuTitle by remember { mutableStateOf("") }
     var orderDialogMenuCost by remember { mutableIntStateOf(0) }
-    val orderList by remember {
-        derivedStateOf {
-            itemStatus.orderItem.chunked(6)
-        }
-    }
     val context = LocalContext.current
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
@@ -73,20 +67,18 @@ fun OrderScreen(
         }
     }
 
-    val coroutine = rememberCoroutineScope()
-    LaunchedEffect(Unit) {
-        coroutine.launch {
-            viewModel.getCategoryList("디카페sss인")
-        }
-    }
     val animationScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         onEnterScreen(2)
     }
     val pagerState =
         rememberPagerState(pageCount = {
-            orderList.size
+            categoryStatus.menuList.size
         })
+
+    LaunchedEffect(categoryStatus.menuList) {
+        pagerState.scrollToPage(0) // 첫 페이지로 리셋
+    }
 
     val buttonState by remember {
         derivedStateOf {
@@ -147,7 +139,7 @@ fun OrderScreen(
                 modifier = Modifier.weight(1F),
             ) { index ->
                 OrderListScreen(
-                    orderItemList = orderList[index].chunked(3),
+                    orderItemList = categoryStatus.menuList[index].chunked(4),
                     onItemClick = { title, cost ->
                         orderDialogMenuTitle = title
                         orderDialogMenuCost = cost
@@ -217,7 +209,7 @@ fun OrderScreen(
 
 @Composable
 private fun OrderListScreen(
-    orderItemList: List<List<OrderItem>>,
+    orderItemList: List<List<MenuCategoryParam>>,
     onItemClick: (String, Int) -> Unit,
 ) {
     val firstRowList = orderItemList[0]
@@ -228,13 +220,20 @@ private fun OrderListScreen(
             emptyList()
         }
 
+    val thirdRowList =
+        if (orderItemList.size > 2) {
+            orderItemList[2]
+        } else {
+            emptyList()
+        }
+
     Column {
         Row(modifier = Modifier.weight(1F)) {
             firstRowList.forEach {
                 OrderItem(orderItem = it, modifier = Modifier.weight(1F), onClick = onItemClick)
             }
             // 개수가 3개보다 적을 때 채울 빈칸
-            (firstRowList.size until 3).forEach { _ ->
+            (firstRowList.size until 4).forEach { _ ->
                 Spacer(modifier = Modifier.weight(1F))
             }
         }
@@ -243,7 +242,16 @@ private fun OrderListScreen(
             secondRowList.forEach {
                 OrderItem(orderItem = it, modifier = Modifier.weight(1F), onClick = onItemClick)
             }
-            (secondRowList.size until 3).forEach { _ ->
+            (secondRowList.size until 4).forEach { _ ->
+                Spacer(modifier = Modifier.weight(1F))
+            }
+        }
+        Spacer(modifier = Modifier.padding(10.dp))
+        Row(modifier = Modifier.weight(1F)) {
+            thirdRowList.forEach {
+                OrderItem(orderItem = it, modifier = Modifier.weight(1F), onClick = onItemClick)
+            }
+            (thirdRowList.size until 4).forEach { _ ->
                 Spacer(modifier = Modifier.weight(1F))
             }
         }
