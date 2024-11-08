@@ -39,23 +39,35 @@ fun PaymentScreen(
             PaymentStatus.TAKEOUT -> {
                 TakeOutChoiceScreen(
                     modifier = Modifier,
-                    onClick = {
-                        showDialog = true
+                    onPackagingClick = {
                         viewModel.postOrder(shoppingCartState)
+                    },
+                    onStoreClick = {
+                        viewModel.postOrder(shoppingCartState)
+                        viewModel.navigateToPaymentStatus(pagerState, PaymentStatus.PAYMENT_METHOD)
+                    },
+                )
+            }
+
+            PaymentStatus.PAYMENT_METHOD -> {
+                PaymentChoiceScreen(
+                    modifier = Modifier,
+                    onQrClick = {
+                    },
+                    onCardClick = {
+                        showDialog = true
                     },
                 )
                 if (showDialog) {
+                    viewModel.startConfirmPayment(kioskId = 1)
                     CardCreditDialog(
-                        onDismissRequest = { showDialog = false },
+                        onDismissRequest = {
+                            showDialog = false
+                            viewModel.cancelPayment()
+                        },
                         totalAmount = shoppingCartState.shoppingCartItem.sumOf { it.totalPrice * it.count },
                     )
                 }
-            }
-
-            PaymentStatus.POINT -> {
-                TakeOutChoiceScreen(
-                    modifier = Modifier,
-                )
             }
 
             PaymentStatus.CARD -> {
@@ -69,6 +81,6 @@ fun PaymentScreen(
 
 enum class PaymentStatus {
     TAKEOUT,
-    POINT,
+    PAYMENT_METHOD,
     CARD,
 }

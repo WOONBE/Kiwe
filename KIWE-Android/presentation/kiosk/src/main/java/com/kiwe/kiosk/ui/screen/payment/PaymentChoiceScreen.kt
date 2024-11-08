@@ -27,10 +27,10 @@ import com.kiwe.kiosk.ui.theme.KiweWhite1
 import com.kiwe.kiosk.ui.theme.Typography
 
 @Composable
-fun TakeOutChoiceScreen(
+fun PaymentChoiceScreen(
     modifier: Modifier = Modifier,
-    onPackagingClick: () -> Unit = {},
-    onStoreClick: () -> Unit = {},
+    onQrClick: () -> Unit = {},
+    onCardClick: () -> Unit = {},
 ) {
     Column(
         modifier =
@@ -43,9 +43,9 @@ fun TakeOutChoiceScreen(
         // 질문 텍스트
         BoldTextWithKeywords(
             modifier = Modifier,
-            fullText = "어디에서 이용하시겠습니까?",
-            keywords = listOf("어디", "이용"),
-            brushFlag = listOf(true, true),
+            fullText = "결제 방법을 선택해주세요",
+            keywords = listOf("결제", "방법", "선택"),
+            brushFlag = listOf(true, true, true),
             alignStyle = TextAlign.Center,
             boldStyle = Typography.bodyMedium.copy(fontSize = 24.sp),
             normalStyle = Typography.bodyMedium.copy(fontSize = 24.sp),
@@ -58,20 +58,20 @@ fun TakeOutChoiceScreen(
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             ChoiceButton(
-                iconResourceId = R.drawable.img_use_takeout,
+                iconResourceId = R.drawable.img_payment_qr,
                 isImage = true,
-                label = "포장",
+                label = "QR",
                 backgroundColor = KiweWhite1,
                 labelColor = KiweBlack1,
-                onClick = onPackagingClick,
+                onClick = onQrClick,
             )
             ChoiceButton(
-                iconResourceId = R.drawable.img_use_store,
+                iconResourceId = R.drawable.img_payment_card,
                 isImage = true,
-                label = "매장",
+                label = "카드",
                 backgroundColor = KiweWhite1,
                 labelColor = KiweBlack1,
-                onClick = onStoreClick,
+                onClick = onCardClick,
             )
         }
     }
@@ -81,6 +81,6 @@ fun TakeOutChoiceScreen(
 @Composable
 private fun Preview() {
     KIWEAndroidTheme {
-        TakeOutChoiceScreen(modifier = Modifier.background(brush = KioskBackgroundBrush))
+        PaymentChoiceScreen(modifier = Modifier.background(brush = KioskBackgroundBrush))
     }
 }
