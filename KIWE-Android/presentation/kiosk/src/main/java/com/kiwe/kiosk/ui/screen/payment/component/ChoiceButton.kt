@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kiwe.kiosk.ui.theme.KiweWhite1
 import com.kiwe.kiosk.ui.theme.Typography
 
 /**
@@ -63,11 +62,11 @@ fun ChoiceButton(
                 Image(
                     painter = painterResource(id = iconResourceId),
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(64.dp)
+                    modifier =
+                        Modifier
+                            .size(64.dp),
                 )
             } else {
-
                 Icon(
                     painter = painterResource(id = iconResourceId),
                     contentDescription = null,

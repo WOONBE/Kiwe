@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -44,45 +43,48 @@ import java.util.Locale
 fun CardCreditDialog(
     modifier: Modifier = Modifier,
     totalAmount: Int = 0,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
 ) {
     val priceText = String.format(Locale.KOREAN, "%,d", totalAmount)
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Column(
-            modifier = modifier
-                .width(300.dp)
-                .height(520.dp)
-                .background(KiweWhite1, RoundedCornerShape(10.dp))
-                .padding(5.dp)
+            modifier =
+                modifier
+                    .width(300.dp)
+                    .height(520.dp)
+                    .background(KiweWhite1, RoundedCornerShape(10.dp))
+                    .padding(5.dp),
         ) {
             // 다이얼로그 제목
             Text(
                 text = "카드 결제",
                 style = Typography.titleMedium.copy(fontSize = 28.sp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(KiweBrown2, RoundedCornerShape(5.dp))
-                    .padding(vertical = 12.dp),
-                textAlign = TextAlign.Center
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .background(KiweBrown2, RoundedCornerShape(5.dp))
+                        .padding(vertical = 12.dp),
+                textAlign = TextAlign.Center,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // 카드 결제 이미지
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .padding(16.dp),
+                contentAlignment = Alignment.Center,
             ) {
                 Image(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f),
                     painter = painterResource(id = R.drawable.img_card_credit),
                     contentDescription = null,
-
-                    )
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -100,7 +102,7 @@ fun CardCreditDialog(
                         textColor = KiweOrange1,
                     )
                 },
-                backgroundColor = KiweSilver1
+                backgroundColor = KiweSilver1,
             )
 
             // 할부 개월 표시
@@ -110,24 +112,25 @@ fun CardCreditDialog(
                     Text(
                         modifier = Modifier,
                         text = "일시불",
-                        style = Typography.bodyMedium.copy(fontSize = 20.sp, color = KiweGray1)
+                        style = Typography.bodyMedium.copy(fontSize = 20.sp, color = KiweGray1),
                     )
                 },
-                backgroundColor = KiweWhite1
+                backgroundColor = KiweWhite1,
             )
 
             // 카드번호 입력
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(KiweSilver1, RoundedCornerShape(4.dp))
-                    .padding(vertical = 12.dp, horizontal = 16.dp),
-                contentAlignment = Alignment.CenterStart
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .background(KiweSilver1, RoundedCornerShape(4.dp))
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                contentAlignment = Alignment.CenterStart,
             ) {
                 Text(
                     text = "카드번호",
                     style = Typography.labelMedium.copy(fontSize = 16.sp),
-                    color = KiweBlack1
+                    color = KiweBlack1,
                 )
             }
 
@@ -136,17 +139,18 @@ fun CardCreditDialog(
             // 취소 버튼 추가
             Button(
                 onClick = { onDismissRequest() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 0.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 0.dp),
                 colors = ButtonDefaults.buttonColors(KiweWhite1),
                 shape = RoundedCornerShape(8.dp),
-                elevation = ButtonDefaults.buttonElevation(4.dp)
+                elevation = ButtonDefaults.buttonElevation(4.dp),
             ) {
                 Text(
                     text = "취소",
                     style = Typography.bodyLarge.copy(fontSize = 16.sp, color = KiweBlack1),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             }
         }
@@ -157,20 +161,21 @@ fun CardCreditDialog(
 fun PaymentInfoRow(
     label: String,
     value: @Composable () -> Unit = {},
-    backgroundColor: Color
+    backgroundColor: Color,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(backgroundColor, RoundedCornerShape(5.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(backgroundColor, RoundedCornerShape(5.dp))
+                .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = label,
             style = Typography.labelMedium.copy(fontSize = 16.sp),
-            color = KiweBlack1
+            color = KiweBlack1,
         )
         value()
     }

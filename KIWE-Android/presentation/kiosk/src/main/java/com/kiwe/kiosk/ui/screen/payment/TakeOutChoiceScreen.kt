@@ -22,8 +22,6 @@ import com.kiwe.kiosk.ui.screen.payment.component.ChoiceButton
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import com.kiwe.kiosk.ui.theme.KiweBlack1
-import com.kiwe.kiosk.ui.theme.KiweGray1
-import com.kiwe.kiosk.ui.theme.KiweGreen5
 import com.kiwe.kiosk.ui.theme.KiweOrange1
 import com.kiwe.kiosk.ui.theme.KiweWhite1
 import com.kiwe.kiosk.ui.theme.Typography

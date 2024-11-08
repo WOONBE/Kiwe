@@ -47,14 +47,12 @@ fun PaymentScreen(
                         viewModel.navigateToPaymentStatus(pagerState, PaymentStatus.PAYMENT_METHOD)
                     },
                 )
-
             }
 
             PaymentStatus.PAYMENT_METHOD -> {
                 PaymentChoiceScreen(
                     modifier = Modifier,
                     onQrClick = {
-
                     },
                     onCardClick = {
                         showDialog = true
