@@ -7,6 +7,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.ViewModel
+import com.kiwe.domain.exception.APIException
+import com.kiwe.domain.model.SignUpParam
+import com.kiwe.domain.usecase.SignUpUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.orbitmvi.orbit.Container
@@ -19,6 +22,7 @@ import javax.inject.Inject
 class SignUpViewModel
     @Inject
     constructor(
+        private val signUpUseCase: SignUpUseCase,
 //        private val loginUseCase: LoginUseCase,
 //        private val setTokenUseCase: SetTokenUseCase,
     ) : ViewModel(),
@@ -30,11 +34,40 @@ class SignUpViewModel
                     this.exceptionHandler =
                         CoroutineExceptionHandler { _, throwable ->
                             intent {
-                                postSideEffect(SignUpSideEffect.Toast(message = throwable.message.orEmpty()))
+                                if (throwable is APIException) {
+                                    postSideEffect(
+                                        SignUpSideEffect.Toast(
+                                            "${throwable.code} : " +
+                                                (throwable.message ?: "알수 없는 에러"),
+                                        ),
+                                    )
+                                } else {
+                                    postSideEffect(SignUpSideEffect.Toast(throwable.message ?: "알수 없는 에러"))
+                                }
                             }
                         }
                 },
             )
+
+        fun onSignUp() =
+            intent {
+                if (state.password != state.passwordRepeat) {
+                    postSideEffect(SignUpSideEffect.Toast(message = "패스워드를 다시 확인해주세요."))
+                    return@intent
+                }
+
+                signUpUseCase(
+                    SignUpParam(
+                        name = state.name,
+                        password = state.password,
+                        email = state.id,
+                        kioskIds = listOf(),
+                    ),
+                ).getOrThrow()
+
+                postSideEffect(SignUpSideEffect.NavigateToLoginScreen)
+                postSideEffect(SignUpSideEffect.Toast(message = "회원가입에 성공했습니다"))
+            }
 
         fun onNameChange(name: String) =
             blockingIntent {
@@ -112,12 +145,14 @@ data class SignUpState(
     val showPassword: Boolean = false,
     val passwordImageVector: ImageVector = Icons.Filled.VisibilityOff,
     val passwordRepeatImageVector: ImageVector = Icons.Filled.VisibilityOff,
-    val passwordVisualTransformation: VisualTransformation = VisualTransformation.None,
-    val passwordRepeatVisualTransformation: VisualTransformation = VisualTransformation.None,
+    val passwordVisualTransformation: VisualTransformation = PasswordVisualTransformation(),
+    val passwordRepeatVisualTransformation: VisualTransformation = PasswordVisualTransformation(),
     val showPasswordRepeat: Boolean = false,
 )
 
 sealed interface SignUpSideEffect {
+    object NavigateToLoginScreen : SignUpSideEffect
+
     class Toast(
         val message: String,
     ) : SignUpSideEffect
