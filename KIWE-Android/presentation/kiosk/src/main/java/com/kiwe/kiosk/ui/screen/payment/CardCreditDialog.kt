@@ -43,6 +43,7 @@ import java.util.Locale
 fun CardCreditDialog(
     modifier: Modifier = Modifier,
     totalAmount: Int = 0,
+    cardNumber: String = "",
     onDismissRequest: () -> Unit,
 ) {
     val priceText = String.format(Locale.KOREAN, "%,d", totalAmount)
@@ -127,14 +128,25 @@ fun CardCreditDialog(
                         .padding(vertical = 12.dp, horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart,
             ) {
-                Text(
-                    text = "카드번호",
-                    style = Typography.labelMedium.copy(fontSize = 16.sp),
-                    color = KiweBlack1,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = "카드번호",
+                        style = Typography.labelMedium.copy(fontSize = 16.sp),
+                        color = KiweBlack1,
+                    )
+
+                    Text(
+                        text = cardNumber,
+                        style = Typography.bodyMedium.copy(fontSize = 16.sp),
+                        color = KiweBlack1,
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // 취소 버튼 추가
             Button(
@@ -143,13 +155,14 @@ fun CardCreditDialog(
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 0.dp),
-                colors = ButtonDefaults.buttonColors(KiweWhite1),
+                enabled = cardNumber.isBlank(),
+                colors = ButtonDefaults.buttonColors(KiweOrange1),
                 shape = RoundedCornerShape(8.dp),
                 elevation = ButtonDefaults.buttonElevation(4.dp),
             ) {
                 Text(
                     text = "취소",
-                    style = Typography.bodyLarge.copy(fontSize = 16.sp, color = KiweBlack1),
+                    style = Typography.bodyLarge.copy(fontSize = 16.sp, color = KiweWhite1),
                     textAlign = TextAlign.Center,
                 )
             }

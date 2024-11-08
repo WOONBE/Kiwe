@@ -4,6 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -13,10 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.kiwe.domain.model.MenuCategoryParam
 import com.kiwe.kiosk.BuildConfig.BASE_IMAGE_URL
@@ -36,19 +41,19 @@ fun OrderItem(
             modifier
                 .padding(end = 4.dp)
                 .dropShadow(
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(5.dp),
                     color = Color.Black.copy(alpha = 0.25F),
                     offsetY = 4.dp,
                     offsetX = 4.dp,
                     spread = 0.dp,
-                ).clip(RoundedCornerShape(20.dp))
+                ).clip(RoundedCornerShape(5.dp))
                 .background(color = Color.White)
                 .clickable { onClick(orderItem.name, orderItem.price) },
     ) {
         Column(
             modifier =
                 Modifier
-                    .padding(10.dp),
+                    .padding(2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 //            Log.d(TAG, "https://" + BASE_IMAGE_URL + URLEncoder.encode(orderItem.imgPath, StandardCharsets.UTF_8.toString()))
@@ -57,26 +62,43 @@ fun OrderItem(
             AsyncImage(
                 modifier =
                     Modifier
-                        .weight(1F)
-                        .padding(bottom = 10.dp),
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .padding(bottom = 5.dp),
                 model = "https://" + BASE_IMAGE_URL + orderItem.imgPath,
                 contentScale = ContentScale.Crop,
                 contentDescription = "Translated description of what the image contains",
             )
             val title: String =
                 if (orderItem.hotOrIce.isNotEmpty()) {
-                    "[" + orderItem.hotOrIce + "]\n" + orderItem.name
+                    "[" + orderItem.hotOrIce + "] " + orderItem.name
                 } else {
                     orderItem.name
                 }
-            Text(
-                text = title,
-                style = Typography.bodySmall,
-                textAlign = TextAlign.Center,
-            )
+            val fontSizeSp = 8.sp
+            val lineHeight = fontSizeSp.value * 1.2f // 여유 높이 1.2배로 설정 (필요에 따라 조절)
+            val maxLines = 2
+            // sp 값을 dp 값으로 변환
+            val boxHeightDp = with(LocalDensity.current) { (lineHeight * maxLines).toDp() }
+            Box(
+                modifier =
+                    Modifier
+                        .height(boxHeightDp) // 두 줄 높이에 맞게 고정
+                        .fillMaxWidth(),
+                // 텍스트가 가로로도 중앙에 위치하도록
+                contentAlignment = Alignment.Center, // 수직 및 수평 중앙 정렬
+            ) {
+                Text(
+                    text = title,
+                    style = Typography.bodySmall.copy(fontSize = 8.sp),
+                    textAlign = TextAlign.Center,
+                    maxLines = maxLines, // 두 줄까지만 표시
+                )
+            }
             Text(
                 text = String.format(Locale.getDefault(), "%,d원", orderItem.price),
                 color = colorResource(R.color.KIWE_orange1),
+                style = Typography.bodySmall.copy(fontSize = 10.sp),
                 textAlign = TextAlign.Center,
             )
         }
