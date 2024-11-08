@@ -44,6 +44,7 @@ fun ReceiptScreen() {
     val translationY by animateFloatAsState(
         targetValue = if (showReceipt) 0f else -300f,
         animationSpec = tween(durationMillis = 1000, easing = LinearOutSlowInEasing),
+        label = "",
     )
 
     LaunchedEffect(Unit) {
