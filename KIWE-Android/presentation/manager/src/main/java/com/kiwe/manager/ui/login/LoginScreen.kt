@@ -1,5 +1,6 @@
 package com.kiwe.manager.ui.login
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.kiwe.manager.R
 import com.kiwe.manager.ui.component.ContentArea
 import com.kiwe.manager.ui.component.LoginTextFieldForm
+import com.kiwe.manager.ui.home.HomeActivity
 import com.kiwe.manager.ui.theme.KIWEAndroidTheme
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -46,15 +48,15 @@ fun LoginScreen(
                         Toast.LENGTH_SHORT,
                     ).show()
 
-            LoginSideEffect.NavigateToMainActivity -> {
-//                context.startActivity(
-//                    Intent(
-//                        context,
-//                        MainActivity::class.java,
-//                    ).apply {
-//                        flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-//                    },
-//                )
+            LoginSideEffect.NavigateToHomeActivity -> {
+                context.startActivity(
+                    Intent(
+                        context,
+                        HomeActivity::class.java,
+                    ).apply {
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    },
+                )
             }
         }
     }
@@ -62,6 +64,7 @@ fun LoginScreen(
     LoginScreen(
         id = state.id,
         password = state.password,
+        onLoginClick = viewModel::onLoginClick,
         onIdChange = viewModel::onIdChange,
         onPasswordChange = viewModel::onPasswordChange,
         onNavigateToSignUpScreen = onNavigateToSignUpScreen,
@@ -74,6 +77,7 @@ fun LoginScreen(
 private fun LoginScreen(
     id: String,
     password: String,
+    onLoginClick: () -> Unit,
     onIdChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onNavigateToSignUpScreen: () -> Unit,
@@ -130,8 +134,7 @@ private fun LoginScreen(
                         content = {
                             Text(text = "로그인")
                         },
-                        onClick = {
-                        },
+                        onClick = onLoginClick,
                     )
                 }
 

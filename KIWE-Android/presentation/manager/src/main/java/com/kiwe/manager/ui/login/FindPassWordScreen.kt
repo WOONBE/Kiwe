@@ -34,7 +34,7 @@ fun FindPassWordScreen(
                         Toast.LENGTH_SHORT,
                     ).show()
 
-            LoginSideEffect.NavigateToMainActivity -> {
+            LoginSideEffect.NavigateToHomeActivity -> {
                 context.startActivity(
                     Intent(
                         context,
