@@ -1,5 +1,6 @@
 package com.kiwe.kiosk.ui.screen.payment.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kiwe.kiosk.ui.theme.KiweWhite1
 import com.kiwe.kiosk.ui.theme.Typography
 
 /**
@@ -36,7 +36,9 @@ fun ChoiceButton(
     modifier: Modifier = Modifier,
     backgroundColor: Color,
     iconResourceId: Int,
+    isImage: Boolean = false,
     label: String,
+    labelColor: Color,
     onClick: () -> Unit = {},
 ) {
     Card(
@@ -56,18 +58,28 @@ fun ChoiceButton(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Icon(
-                painter = painterResource(id = iconResourceId),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(64.dp),
-            )
+            if (isImage) {
+                Image(
+                    painter = painterResource(id = iconResourceId),
+                    contentDescription = null,
+                    modifier =
+                        Modifier
+                            .size(64.dp),
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = iconResourceId),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(64.dp),
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 modifier = Modifier,
                 text = label,
-                color = KiweWhite1,
+                color = labelColor,
                 style = Typography.bodyMedium.copy(fontSize = 32.sp),
             )
         }
