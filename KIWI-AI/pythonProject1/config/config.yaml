@@ -1,0 +1,14 @@
+database:
+  host: "localhost"
+  user: "db_user"
+  password: "db_password"
+  database: "orders_db"
+
+elk:
+  host: "localhost"
+  user: "elastic"
+  password: "elastic_password"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
