@@ -1,5 +1,6 @@
 package com.kiwe.data.di
 
+import com.kiwe.data.network.service.KioskManagerService
 import com.kiwe.data.network.service.OrderService
 import com.kiwe.data.network.service.UserService
 import dagger.Module
@@ -19,4 +20,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideOrderService(httpClient: HttpClient): OrderService = OrderService(httpClient)
+
+    @Provides
+    @Singleton
+    fun provideKioskManagerService(httpClient: HttpClient): KioskManagerService = KioskManagerService(httpClient)
 }
