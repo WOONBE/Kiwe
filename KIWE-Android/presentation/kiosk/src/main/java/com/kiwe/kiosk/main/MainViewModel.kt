@@ -26,8 +26,8 @@ class MainViewModel
         private val speechRecognizerManager: SpeechRecognizerManager,
     ) : BaseViewModel<MainState, MainSideEffect>(MainState()),
         SpeechResultListener {
-        var personDetectedRecently = false
-        val delayTime = TimeUnit.MINUTES.toMillis(2)
+        private var personDetectedRecently = false
+        private val delayTime = TimeUnit.MINUTES.toMillis(2)
 
         override fun handleExceptionIntent(
             coroutineContext: CoroutineContext,
@@ -185,6 +185,11 @@ class MainViewModel
             CoroutineScope(Dispatchers.Main).launch {
                 delay(delayTime)
                 personDetectedRecently = false
+                intent {
+                    reduce {
+                        state.copy(isExistPerson = false)
+                    }
+                }
             }
         }
     }

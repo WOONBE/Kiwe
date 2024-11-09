@@ -94,7 +94,13 @@ fun MainNavHost() {
         LaunchedEffect(state.isExistPerson, state.page) {
             if (state.isExistPerson && state.page == 0) {
                 navController.navigate(MainRoute.INTRO.route) {
-                    popUpTo(0)
+                    popUpTo(MainRoute.INTRO.route)
+                }
+            }
+
+            if (!state.isExistPerson) {
+                navController.navigate(MainRoute.AD.route) {
+                    popUpTo(MainRoute.AD.route)
                 }
             }
         }
