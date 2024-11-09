@@ -70,6 +70,10 @@ android {
     }
 }
 
+@Suppress("ktlint:standard:property-naming")
+val ASSET_DIR by extra { "$projectDir/src/main/assets" }
+apply(from = "download_tasks.gradle")
+
 dependencies {
     implementation(project(":domain"))
     implementation(libs.androidx.core.ktx)
@@ -122,11 +126,12 @@ dependencies {
     // MLKit
     implementation(libs.face.detection)
     // Camera
-    implementation("androidx.camera:camera-core:1.4.0")
-    implementation("androidx.camera:camera-camera2:1.4.0")
-    implementation("androidx.camera:camera-lifecycle:1.4.0")
-    implementation("androidx.camera:camera-view:1.4.0")
-    implementation("androidx.camera:camera-extensions:1.4.0")
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.camera.extensions)
+    implementation("com.google.mediapipe:tasks-vision:0.10.14")
 
 //    // SystemUi
 //    implementation("com.google.accompanist:accompanist-insets:1.0.0")

@@ -92,7 +92,8 @@ class MainActivity : ComponentActivity() {
 
             imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), { imageProxy ->
                 processImageProxyFromCamera(
-                    imageProxy,
+                    context = this,
+                    imageProxy = imageProxy,
                     faceDetection = { detect -> mainViewModel.detectPerson(detect) },
                 )
             })
