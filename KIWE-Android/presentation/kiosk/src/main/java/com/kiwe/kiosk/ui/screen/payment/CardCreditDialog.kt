@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.ui.component.BoldTextWithKeywords
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
@@ -42,12 +43,21 @@ import java.util.Locale
 @Composable
 fun CardCreditDialog(
     modifier: Modifier = Modifier,
+    remainingTime: Long = 0,
     totalAmount: Int = 0,
     cardNumber: String = "",
     onDismissRequest: () -> Unit,
 ) {
     val priceText = String.format(Locale.KOREAN, "%,d", totalAmount)
-    Dialog(onDismissRequest = { onDismissRequest() }) {
+
+    Dialog(
+        onDismissRequest = { onDismissRequest() },
+        properties =
+            DialogProperties(
+                dismissOnBackPress = false, // 뒤로가기 눌러도 닫히지 않음
+                dismissOnClickOutside = false, // 외부 클릭으로 닫히지 않음
+            ),
+    ) {
         Column(
             modifier =
                 modifier
@@ -89,6 +99,17 @@ fun CardCreditDialog(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+            // 남은 시간 표시
+
+            BoldTextWithKeywords(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                fullText = "남은 시간: ${30 - remainingTime}초",
+                keywords = listOf("${30 - remainingTime}"),
+                brushFlag = listOf(true),
+                boldStyle = Typography.bodyMedium.copy(fontSize = 14.sp),
+                normalStyle = Typography.labelMedium.copy(fontSize = 14.sp, color = KiweGray1),
+                textColor = KiweBlack1,
+            )
             // 총 결제 금액 표시
             PaymentInfoRow(
                 label = "총 결제금액",

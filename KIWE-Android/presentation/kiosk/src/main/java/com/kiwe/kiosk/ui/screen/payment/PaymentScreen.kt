@@ -1,13 +1,10 @@
 package com.kiwe.kiosk.ui.screen.payment
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
@@ -18,12 +15,11 @@ fun PaymentScreen(
     modifier: Modifier = Modifier,
     viewModel: PaymentViewModel = hiltViewModel(),
     shoppingCartViewModel: ShoppingCartViewModel = hiltViewModel(),
-    onCompletePayment: () -> Unit,
-    onEnterScreen: (Int) -> Unit,
+    onCompletePayment: () -> Unit = {},
+    onEnterScreen: (Int) -> Unit = {},
 ) {
     val paymentState = viewModel.collectAsState().value
     val shoppingCartState = shoppingCartViewModel.collectAsState().value
-    var showDialog by remember { mutableStateOf(false) }
 
     val pagerState =
         rememberPagerState(pageCount = {
@@ -45,43 +41,27 @@ fun PaymentScreen(
         when (PaymentStatus.entries[page]) {
             PaymentStatus.TAKEOUT -> {
                 TakeOutChoiceScreen(
-                    modifier = Modifier,
+                    modifier = Modifier.fillMaxSize(),
                     onPackagingClick = {
                         viewModel.postOrder(paymentState.kioskId, shoppingCartState)
-                        showDialog = true
+                        viewModel.showDialog()
                     },
                     onStoreClick = {
                         viewModel.postOrder(paymentState.kioskId, shoppingCartState)
-                        showDialog = true
+                        viewModel.showDialog()
                     },
                 )
                 if (paymentState.showDialog) {
                     CardCreditDialog(
                         onDismissRequest = {
-                            showDialog = false
+                            viewModel.hideDialog()
                             viewModel.cancelPayment()
                         },
+                        remainingTime = paymentState.remainingTime,
                         totalAmount = shoppingCartState.shoppingCartItem.sumOf { it.totalPrice * it.count },
                         cardNumber = paymentState.userCardNumber,
                     )
                 }
-            }
-
-            PaymentStatus.PAYMENT_METHOD -> {
-                PaymentChoiceScreen(
-                    modifier = Modifier,
-                    onQrClick = {
-                    },
-                    onCardClick = {
-                        showDialog = true
-                    },
-                )
-            }
-
-            PaymentStatus.CARD -> {
-                TakeOutChoiceScreen(
-                    modifier = Modifier,
-                )
             }
         }
     }
@@ -89,6 +69,4 @@ fun PaymentScreen(
 
 enum class PaymentStatus {
     TAKEOUT,
-    PAYMENT_METHOD,
-    CARD,
 }

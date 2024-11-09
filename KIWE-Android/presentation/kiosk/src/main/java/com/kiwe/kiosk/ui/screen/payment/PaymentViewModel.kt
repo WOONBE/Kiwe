@@ -1,6 +1,5 @@
 package com.kiwe.kiosk.ui.screen.payment
 
-import androidx.compose.foundation.pager.PagerState
 import androidx.lifecycle.viewModelScope
 import com.kiwe.domain.model.Order
 import com.kiwe.domain.usecase.kiosk.CancelPaymentUseCase
@@ -12,15 +11,10 @@ import com.kiwe.kiosk.base.BaseViewModel
 import com.kiwe.kiosk.model.toOrderItem
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -40,19 +34,6 @@ class PaymentViewModel
         ) {
             intent {
                 postSideEffect(PaymentSideEffect.Toast(throwable.message ?: "알수 없는 에러"))
-            }
-        }
-
-        // 페이지 전환 인텐트
-        fun navigateToPaymentStatus(
-            pagerState: PagerState,
-            targetStatus: PaymentStatus,
-        ) {
-            viewModelScope.launch {
-                withContext(Dispatchers.Main) {
-                    // 페이지 전환 애니메이션
-                    pagerState.scrollToPage(targetStatus.ordinal)
-                }
             }
         }
 
@@ -122,12 +103,17 @@ class PaymentViewModel
                     initUserCardNumber()
                     showDialog()
                     val startTime = System.currentTimeMillis()
-                    val limitTime = 20_000L // 30초 제한 시간 // TODO : 20초로 테스트
+                    val limitTime = 30_000L // 30초 제한 시간
                     val interval = 500L // 0.5초 간격
+
                     while (System.currentTimeMillis() - startTime < limitTime) {
+                        intent {
+                            reduce { state.copy(remainingTime = (System.currentTimeMillis() - startTime) / 1000) }
+                        }
                         runCatching {
                             confirmPaymentUseCase(kioskId = kioskId)
                         }.onSuccess { result ->
+                            Timber.tag("결제 요청").d("result $result")
                             val isPaymentConfirmed = result.getOrElse { false } // 실패 시 기본값 false
 
                             if (isPaymentConfirmed) {
@@ -168,13 +154,10 @@ class PaymentViewModel
         }
 
         fun generateUserCardNumber(): String {
-            val currentTime = System.currentTimeMillis()
-            val dateFormat = SimpleDateFormat("MMdd mmss", Locale.getDefault())
-            val formattedTime = dateFormat.format(Date(currentTime))
-
+            val randomPrefix = (1000..9999).random()
+            val randomSuffix = (1000..9999).random()
             // 카드 번호 형식 적용
-            val cardNumber = "$formattedTime **** ****"
-            return cardNumber
+            return "$randomPrefix $randomSuffix **** ****"
         }
 
         override fun onCleared() {
@@ -188,6 +171,7 @@ data class PaymentState(
     val kioskId: Int = 1,
     val order: Order? = null,
     val showDialog: Boolean = false,
+    val remainingTime: Long = 0,
     val userCardNumber: String = "",
     val completePayment: Boolean = false,
 ) : BaseState
