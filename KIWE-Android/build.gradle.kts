@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.detekt) apply false
+    id("de.undercouch.download") version "5.0.4"
 }
 
 apply(from = "gradle/projectDependencyGraph.gradle")
