@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
             val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
 
             if (cameraGranted && audioGranted) {
+                startCamera()
             } else {
                 if (!audioGranted) {
                     Toast.makeText(this, "음성 권한을 허용해주세요", Toast.LENGTH_SHORT).show()

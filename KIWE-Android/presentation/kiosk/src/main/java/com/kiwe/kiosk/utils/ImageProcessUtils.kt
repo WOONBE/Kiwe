@@ -44,8 +44,8 @@ fun processImageProxyFromCamera(
                         faceDetection(false)
                     }
                     Timber.tag("FC").d("Face width: $faceWidth, height: $faceHeight")
-                    val rotY = face.headEulerAngleY
-                    val rotZ = face.headEulerAngleZ
+//                    val rotY = face.headEulerAngleY
+//                    val rotZ = face.headEulerAngleZ
                 }
             }.addOnFailureListener { e ->
                 e.printStackTrace()
