@@ -110,9 +110,6 @@ class PaymentViewModel
             }
             shoppingCartState.shoppingCartItem
             Timber.tag(javaClass.simpleName).d("postOrder")
-            viewModelScope.launch {
-                startConfirmPayment(kioskId)
-            }
         }
 
         fun startConfirmPayment(kioskId: Int) {
