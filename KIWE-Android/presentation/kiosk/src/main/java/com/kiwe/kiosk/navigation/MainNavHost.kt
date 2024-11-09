@@ -101,6 +101,7 @@ fun MainNavHost() {
             if (!state.isExistPerson) {
                 navController.navigate(MainRoute.AD.route) {
                     popUpTo(MainRoute.AD.route)
+                    mainViewModel.setPage(0)
                 }
             }
         }
