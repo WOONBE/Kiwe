@@ -6,12 +6,14 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.kiwe.kiosk.main.MainViewModel
+import com.kiwe.kiosk.ui.screen.ad.AdScreen
 import com.kiwe.kiosk.ui.screen.intro.IntroScreen
 import com.kiwe.kiosk.ui.screen.main.ContainerScreen
 import com.kiwe.kiosk.ui.screen.menu.MenuScreen
@@ -41,10 +43,13 @@ fun MainNavHost() {
                 ) {
                     NavHost(
                         navController = navController,
-                        startDestination = MainRoute.INTRO.route,
+                        startDestination = MainRoute.AD.route,
                         exitTransition = { ExitTransition.None },
                         enterTransition = { EnterTransition.None },
                     ) {
+                        composable(route = MainRoute.AD.route) {
+                            AdScreen()
+                        }
                         composable(route = MainRoute.INTRO.route) {
                             IntroScreen(
                                 viewModel = mainViewModel,
@@ -85,6 +90,15 @@ fun MainNavHost() {
                 }
             },
         )
+
+        LaunchedEffect(state.isExistPerson, state.page) {
+            if (state.isExistPerson && state.page == 0) {
+                navController.navigate(MainRoute.INTRO.route) {
+                    popUpTo(0)
+                }
+            }
+        }
+
         if (state.page > 0) {
             SpeechScreen(
                 viewModel = mainViewModel,

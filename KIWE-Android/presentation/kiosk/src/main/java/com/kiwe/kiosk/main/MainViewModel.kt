@@ -10,7 +10,12 @@ import com.kiwe.kiosk.ui.screen.utils.helpPopupRegex
 import com.kiwe.kiosk.ui.screen.utils.menuRegex
 import com.kiwe.kiosk.utils.MainEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -21,6 +26,9 @@ class MainViewModel
         private val speechRecognizerManager: SpeechRecognizerManager,
     ) : BaseViewModel<MainState, MainSideEffect>(MainState()),
         SpeechResultListener {
+        var personDetectedRecently = false
+        val delayTime = TimeUnit.MINUTES.toMillis(2)
+
         override fun handleExceptionIntent(
             coroutineContext: CoroutineContext,
             throwable: Throwable,
@@ -147,9 +155,14 @@ class MainViewModel
 
         fun detectPerson(box: Boolean) {
             if (box) {
-                onPersonCome()
+                if (!personDetectedRecently) {
+                    onPersonCome()
+                    startPersonDetectionCooldown()
+                }
             } else {
-                onPersonLeave()
+                if (!personDetectedRecently) {
+                    onPersonLeave()
+                }
             }
         }
 
@@ -166,6 +179,14 @@ class MainViewModel
                     state.copy(isExistPerson = false)
                 }
             }
+
+        private fun startPersonDetectionCooldown() {
+            personDetectedRecently = true
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(delayTime)
+                personDetectedRecently = false
+            }
+        }
     }
 
 data class MainState(

@@ -46,18 +46,13 @@ fun processImageProxyFromCamera(
                     Timber.tag("FC").d("Face width: $faceWidth, height: $faceHeight")
                     val rotY = face.headEulerAngleY
                     val rotZ = face.headEulerAngleZ
-
-                    // 여기서 추가 작업 가능
-                    Timber.tag("FC").d("bounds: $bounds")
-                    Timber.tag("FC").d("rotY: $rotY")
-                    Timber.tag("FC").d("rotZ: $rotZ")
                 }
             }.addOnFailureListener { e ->
                 e.printStackTrace()
             }.addOnCompleteListener {
-                imageProxy.close() // 반드시 이미지 프록시를 닫아야 메모리 누수가 없습니다.
+                imageProxy.close()
             }
     } else {
-        imageProxy.close() // 이미지가 null일 경우 닫기
+        imageProxy.close()
     }
 }
