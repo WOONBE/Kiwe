@@ -46,24 +46,24 @@ pipeline {
                                 configName: 'D205-Server',
                                 transfers: [
                                     sshTransfer(
-                                        sourceFiles: "KIWI-AI/pythonProject1/$DOCKER_IMAGE_FILE",  // 환경 변수로 설정된 파일명 사용
-                                        removePrefix: 'KIWI-AI/pythonProject1/',  // 파일 경로에서 제거할 접두어
-                                        remoteDirectory: env.REMOTE_DIR,  // 환경변수로 설정된 REMOTE_DIR 사용
-                                        execCommand: '',
+                                        sourceFiles: "KIWI-AI/pythonProject1/$DOCKER_IMAGE_FILE",
+                                        removePrefix: 'KIWI-AI/pythonProject1/',
+                                        remoteDirectory: env.REMOTE_DIR,
+                                        execCommand: 'echo "Transferring $DOCKER_IMAGE_FILE to $REMOTE_DIR" && ls -al $REMOTE_DIR',
                                         execTimeout: 120000
                                     ),
                                     sshTransfer(
-                                        sourceFiles: 'KIWI-AI/pythonProject1/compose.yml',  // compose.yml 파일 전송
-                                        removePrefix: 'KIWI-AI/pythonProject1/', 
-                                        remoteDirectory: env.REMOTE_DIR,  // 환경변수로 설정된 REMOTE_DIR 사용
-                                        execCommand: '', 
+                                        sourceFiles: 'KIWI-AI/pythonProject1/compose.yml',
+                                        removePrefix: 'KIWI-AI/pythonProject1/',
+                                        remoteDirectory: env.REMOTE_DIR,
+                                        execCommand: 'echo "Transferring compose.yml to $REMOTE_DIR" && ls -al $REMOTE_DIR',
                                         execTimeout: 120000
                                     )
-                                ],
-                                usePromotionTimestamp: false
+                                ]
                             )
                         ]
                     )
+
                 }
             }
         }
