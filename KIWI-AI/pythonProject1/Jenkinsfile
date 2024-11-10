@@ -33,7 +33,6 @@ pipeline {
                 }
             }
         }
-
         stage('Transfer Files to EC2') {
             steps {
                 script {
@@ -47,14 +46,14 @@ pipeline {
                                 transfers: [
                                     sshTransfer(
                                         sourceFiles: "KIWI-AI/pythonProject1/$DOCKER_IMAGE_FILE",
-                                        removePrefix: 'KIWI-AI/pythonProject1/',
+                                        removePrefix: '',
                                         remoteDirectory: env.REMOTE_DIR,
                                         execCommand: 'echo "Transferring $DOCKER_IMAGE_FILE to $REMOTE_DIR" && ls -al $REMOTE_DIR',
                                         execTimeout: 120000
                                     ),
                                     sshTransfer(
                                         sourceFiles: 'KIWI-AI/pythonProject1/compose.yml',
-                                        removePrefix: 'KIWI-AI/pythonProject1/',
+                                        removePrefix: '',
                                         remoteDirectory: env.REMOTE_DIR,
                                         execCommand: 'echo "Transferring compose.yml to $REMOTE_DIR" && ls -al $REMOTE_DIR',
                                         execTimeout: 120000
@@ -63,11 +62,9 @@ pipeline {
                             )
                         ]
                     )
-
                 }
             }
         }
-
         stage('Deploy FastApi Server') {
             steps {
                 script {
