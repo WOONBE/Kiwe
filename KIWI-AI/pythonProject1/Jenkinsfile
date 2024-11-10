@@ -45,8 +45,8 @@ pipeline {
                                 configName: 'D205-Server',
                                 transfers: [
                                     sshTransfer(
-                                        sourceFiles: "KIWI-AI/pythonProject1/$DOCKER_IMAGE_FILE",
-                                        removePrefix: '',
+                                        sourceFiles: "**/$DOCKER_IMAGE_FILE", // 전체 경로에서 찾기
+                                        removePrefix: '', // 상대경로 제거
                                         remoteDirectory: env.REMOTE_DIR,
                                         execCommand: 'echo "Transferring $DOCKER_IMAGE_FILE to $REMOTE_DIR" && ls -al $REMOTE_DIR',
                                         execTimeout: 120000
