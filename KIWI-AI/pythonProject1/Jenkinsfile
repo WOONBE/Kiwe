@@ -33,6 +33,7 @@ pipeline {
                 }
             }
         }
+
         stage('Transfer Files to EC2') {
             steps {
                 script {
@@ -47,7 +48,7 @@ pipeline {
                                     sshTransfer(
                                         sourceFiles: "**/$DOCKER_IMAGE_FILE", // 전체 경로에서 찾기
                                         removePrefix: '', // 상대경로 제거
-                                        remoteDirectory: env.REMOTE_DIR,
+                                        remoteDirectory: env.REMOTE_DIR, // 올바른 디렉토리로 설정
                                         execCommand: 'echo "Transferring $DOCKER_IMAGE_FILE to $REMOTE_DIR" && ls -al $REMOTE_DIR',
                                         execTimeout: 120000
                                     ),
@@ -65,6 +66,7 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy FastApi Server') {
             steps {
                 script {
