@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  vllm_service:
+    image: vllm:latest
+    container_name: kiwi_vllm
+    networks:
+      - kiwi_network
+    ports:
+      - "9988:9988"
+
+networks:
+  kiwi_network:
+    external: true
