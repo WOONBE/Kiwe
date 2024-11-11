@@ -59,7 +59,7 @@ fun MainNavHost() {
                                 },
                                 onComfortClick = {},
                                 onHelpClick = {
-                                    navController.navigate(MainRoute.MENU.route)
+                                    navController.navigate(MainRoute.ORDER.route)
                                     mainViewModel.startSpeechRecognition() // 음성인식 ON
                                 },
                             )
@@ -91,9 +91,17 @@ fun MainNavHost() {
                             }
                         }
                         composable(route = MainRoute.RECEIPT.route) {
-                            ReceiptScreen { page ->
-                                mainViewModel.setPage(page)
-                            }
+                            ReceiptScreen(
+                                onEnterScreen = { page ->
+                                    mainViewModel.setPage(page)
+                                },
+                                onBackHome = {
+                                    navController.navigate(MainRoute.AD.route) {
+                                        popUpTo(MainRoute.AD.route)
+                                        mainViewModel.setPage(0)
+                                    }
+                                },
+                            )
                         }
                     }
                 }
