@@ -1,5 +1,6 @@
 package com.kiwe.data.network.service
 
+import com.kiwe.data.network.util.deleteResult
 import com.kiwe.data.network.util.getResult
 import com.kiwe.data.network.util.postResult
 import com.kiwe.data.network.util.putResult
@@ -40,4 +41,6 @@ class MenuService
             client.putResult("api/menus/$menuId") {
                 setBody(menuParam)
             }
+
+        suspend fun deleteMenu(menuId: Int): Result<Unit> = client.deleteResult("api/menus/$menuId")
     }

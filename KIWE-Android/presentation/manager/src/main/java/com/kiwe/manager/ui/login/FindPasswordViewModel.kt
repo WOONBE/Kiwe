@@ -7,6 +7,7 @@ import com.kiwe.domain.model.MenuCategory
 import com.kiwe.domain.model.MenuParam
 import com.kiwe.domain.usecase.manager.edit.EditMemberInfoUseCase
 import com.kiwe.domain.usecase.manager.menu.CreateMenuUseCase
+import com.kiwe.domain.usecase.manager.menu.DeleteMenuUseCase
 import com.kiwe.domain.usecase.manager.menu.EditMenuUseCase
 import com.kiwe.domain.usecase.manager.menu.GetAllMenuListUseCase
 import com.kiwe.domain.usecase.manager.menu.GetMenuByIdUseCase
@@ -33,6 +34,7 @@ class FindPasswordViewModel
         private val getAllMenuListUseCase: GetAllMenuListUseCase,
         private val createMenuUseCase: CreateMenuUseCase,
         private val editMenuUseCase: EditMenuUseCase,
+        private val deleteMenuUseCase: DeleteMenuUseCase,
     ) : ViewModel(),
         ContainerHost<FindPasswordState, FindPasswordSideEffect> {
         override val container: Container<FindPasswordState, FindPasswordSideEffect> =
@@ -119,7 +121,7 @@ class FindPasswordViewModel
                                 description = state.description,
                                 imgPath = state.imgPath,
                             ),
-                    )
+                    ).getOrThrow()
                 postSideEffect(FindPasswordSideEffect.Toast(response.toString()))
             }
 
@@ -137,7 +139,13 @@ class FindPasswordViewModel
                                 description = state.description,
                                 imgPath = state.imgPath,
                             ),
-                    )
+                    ).getOrThrow()
+                postSideEffect(FindPasswordSideEffect.Toast(response.toString()))
+            }
+
+        fun onDeleteMenu() =
+            intent {
+                val response = deleteMenuUseCase(state.menuId).getOrThrow()
                 postSideEffect(FindPasswordSideEffect.Toast(response.toString()))
             }
     }
@@ -152,7 +160,7 @@ data class FindPasswordState(
     val kioskIds: List<Int> = listOf(),
     val category: String = MenuCategory.NEW.displayName,
     val menuName: String = "새로운 음료 메뉴",
-    val menuId: Int = 324,
+    val menuId: Int = 325,
     val hotOrIce: String = "ICE",
     val price: Int = 9990,
     val description: String = "음료입니다",
