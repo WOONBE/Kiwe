@@ -45,7 +45,6 @@ fun ReceiptScreen(
     onEnterScreen: (Int) -> Unit = {},
     onBackHome: () -> Unit = {},
 ) {
-    receiptNumber // TODO
     var showReceipt by remember { mutableStateOf(false) }
     val translationY by animateFloatAsState(
         targetValue = if (showReceipt) 0f else -300f,
