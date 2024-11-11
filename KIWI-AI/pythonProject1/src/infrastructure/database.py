@@ -36,7 +36,7 @@ class Database:
             cursor.execute("SELECT 1")
             result = cursor.fetchone()
             if result:
-                print("Connection completed successfully!")
+                print("Database connection completed successfully!")
             cursor.close()
 
         except Error as e:
@@ -104,7 +104,7 @@ class Database:
         cursor = self.connection.cursor(dictionary=True)
         try:
             cursor.execute("""
-                SELECT DISTINCT menu_category, menu_name, description 
+                SELECT DISTINCT menu_id, menu_category, menu_name, menu_desc 
                 FROM menu
             """)
             combinations = cursor.fetchall()

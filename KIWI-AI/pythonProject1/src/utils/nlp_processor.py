@@ -24,7 +24,11 @@ class NLPProcessor:
         self.okt = Okt()  # Initialize a Korean tokenizer/pos-tagger
         self.db = db  # Store the database instance
         self.menu_items = self.fetch_menu_items()  # Preload menu items
+        self.menu_data = self.fetch_menu_combinations()  # Fetch menu data with menu_id, name, etc.
         self.options = self.fetch_options()  # Placeholder for dynamic options fetching
+
+        print("Menu Items:", self.menu_items)  # Debugging print
+        print("Menu Data:", self.menu_data)    # Debugging print
 
     def fetch_menu_items(self):
         """Fetch menu items from the database."""
@@ -34,6 +38,32 @@ class NLPProcessor:
     def fetch_options(self):
         """Fetch available options (e.g., add-ons, customizations) from the database."""
         return ["shot", "sugar"]  # Only the options we are interested in (shot, sugar)
+
+    def fetch_menu_combinations(self):
+        """Fetch unique menu combinations from the database, including menu_id and menu_name."""
+        menu_data = self.db.get_unique_menu_combinations()
+        if menu_data:
+            # Convert to a dictionary for quick lookup by menu_name
+            return {item['menu_name']: item for item in menu_data}
+        return {}
+
+    def extract_menu_item_and_options(self, sentence):
+        """Extract the menu item, options, and temperature preference."""
+        for menu_name, menu_info in self.menu_data.items():
+            if menu_name in sentence:
+                sentence = sentence.replace(menu_name, '')  # Remove menu item name from sentence
+                menu_id = menu_info["menu_id"]  # Retrieve menu_id based on name
+
+                # Check for temperature keywords in the sentence
+                temperature = "hot" if "따뜻한" in sentence else "cold" if "차가운" in sentence else "default"
+
+                # Remove temperature keywords to clean up remaining sentence
+                sentence = sentence.replace("따뜻한", "").replace("차가운", "")
+
+                return menu_id, temperature, sentence
+
+        # Raise an error if no menu item is found
+        raise HTTPException(status_code=400, detail="No matching menu item found in the sentence.")
 
     def process_request(self, request: OrderRequest):
         """Process a Korean input sentence to extract intent and structured data."""
@@ -89,11 +119,14 @@ class NLPProcessor:
 
         for _ in range(quantity):
             # Each iteration extracts one order (with its options)
-            menu_item, remaining_sentence = self.extract_menu_item_and_options(remaining_sentence)
+            menuId, tmp, remaining_sentence = self.extract_menu_item_and_options(remaining_sentence)
+
+            numbers = self.extract_quantity(remaining_sentence)
             options = self.extract_options_for_each_item(remaining_sentence)
             items.append({
-                "menuTitle": menu_item,
-                "count": 1,  # As we're processing one item at a time
+                "menuId": menuId,
+                "temp": tmp,
+                "count": numbers,  # As we're processing one item at a time
                 "options": options
             })
 
@@ -106,15 +139,17 @@ class NLPProcessor:
                 return quantity_value
         return 1  # Default to 1 if no quantity is mentioned
 
-    def extract_menu_item_and_options(self, sentence):
-        """Extract the menu item and options for the current order."""
-        for menu_item in self.menu_items:
-            try:
-                if menu_item in sentence:
-                    sentence = sentence.replace(menu_item, '')  # Remove menu item for further processing
-                    return menu_item, sentence
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=f"no matching menu {str(e)}")
+    # def extract_menu_item_and_options(self, sentence):
+    #     """Extract the menu item and options for the current order."""
+    #     for menu_item in self.menu_items:
+    #         try:
+    #             if menu_item in sentence:
+    #                 sentence = sentence.replace(menu_item, '')  # Remove menu item for further processing
+    #                 # find Id of menu
+    #                 # check if word about tempretature is in
+    #                 return menu_item, sentence
+    #         except Exception as e:
+    #             raise HTTPException(status_code=500, detail=f"no matching menu {str(e)}")
         # return None, sentence  # If no menu item is found
 
     def extract_options_for_each_item(self, sentence):

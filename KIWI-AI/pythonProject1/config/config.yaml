@@ -1,13 +1,15 @@
 database:
-  host: "localhost"
-  user: "db_user"
-  password: "db_password"
-  database: "orders_db"
+  port: 3306
+  host: "k11d205.p.ssafy.io"
+  user: "kiwi"
+  password: "wiki"
+  database: "kiwi"
 
 elk:
-  host: "localhost"
+  port: 9300
+  host: "k11d205.p.ssafy.io"
   user: "elastic"
-  password: "elastic_password"
+  password: "elastic_kiwi"
 
 logging:
   level: "INFO"

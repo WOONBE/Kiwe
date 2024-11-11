@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from src.service_layer.service_router import ServiceRouter
 from src.infrastructure.database import Database
 from src.infrastructure.elk_client import ELKClient
-from src.utils.logger import setup_logger, get_logger
+# from src.utils.logger import setup_logger, get_logger
 from src.utils.nlp_processor import NLPProcessor
 from src.utils.response_formatter import format_success_response, format_error_response
 
@@ -43,7 +43,7 @@ def load_config():
         return yaml.safe_load(file)
 
 config = load_config()
-setup_logger(config['logging'])
+# setup_logger(config['logging'])
 
 # Initialize Database and ELK client
 database = Database()
@@ -60,14 +60,6 @@ nlp_processor = NLPProcessor(database)  # Pass Database instance to NLPProcessor
 service_router = ServiceRouter(infrastructure,database)
 app.include_router(api_router)
 
-
-# data class NextOrderItem(
-#     val menuTitle: String,
-#     val menuPrice: Int,
-#     val count: Int,
-#     val option: Map<String, String> = mapOf(),
-# )
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -76,7 +68,7 @@ async def lifespan(app: FastAPI):
     # Startup logic
     database.connect()  # Connect to the database during startup
     print("Database connection established.")
-
+    print("hi!")
     yield  # The application runs here
 
     # Shutdown logic
@@ -92,12 +84,14 @@ async def process_order(order_request: OrderRequest):
     """
     Process an order request and return a structured response.
     """
+
     try:
         # Route request through ServiceRouter
         response = service_router.route_request(order_request)
+        print("response",response)
         return response
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"error response  {str(e)}")
 
 
 
@@ -109,7 +103,7 @@ class PromptRequest(BaseModel):
 def send_prompt_to_llm(prompt: str):
     """Send a prompt to the LLM server and get a response."""
     try:
-        response = requests.post("http://127.0.0.1:9988/infer", json={"prompt": prompt})
+        response = requests.post("http://70.12.130.121:9988/infer", json={"prompt": prompt})
         response.raise_for_status()  # Ensure a 200 status
         return response.json().get("response")
     except requests.exceptions.RequestException as e:

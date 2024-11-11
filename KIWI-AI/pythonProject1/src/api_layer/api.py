@@ -77,7 +77,8 @@ async def process_order(request: OrderRequest):
                     "count": item.count,
                     "option": item.option
                 } for item in order_items
-            ]
+            ],
+            "hello":"hello"
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

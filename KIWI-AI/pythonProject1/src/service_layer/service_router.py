@@ -12,6 +12,7 @@ class ServiceRouter:
         self.infrastructure = infrastructure
         self.nlp_processor = NLPProcessor(db)
 
+
     def route_request(self, request: OrderRequest):
         """
         Route the request based on NLP-detected intent.
@@ -21,11 +22,11 @@ class ServiceRouter:
         request_type = processed_data["request_type"]
         data = processed_data["data"]
 
-        print("data,request", data, request)
-
         if request_type == "order":
             command = NewOrderCommand(self.infrastructure)
-            return command.execute(data,request)
+            ans = command.execute(data,request)
+            print("ans",ans)
+            return ans
         elif request_type == "modify_or_delete":
             command = FixOrderCommand(self.infrastructure)
             return command.execute(data)
