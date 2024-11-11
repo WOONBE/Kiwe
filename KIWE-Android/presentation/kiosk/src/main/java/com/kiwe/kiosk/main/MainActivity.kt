@@ -90,13 +90,22 @@ class MainActivity : ComponentActivity() {
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
 
+            var lastAnalyzedTime = 0L
+            val frameIntervalMillis = 500L
             imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), { imageProxy ->
-                processImageProxyFromCamera(
-                    context = this,
-                    imageProxy = imageProxy,
-                    faceDetection = { detect -> mainViewModel.detectPerson(detect) },
-                    gazeDetection = { gazePoint -> mainViewModel.updateGazePoint(gazePoint) },
-                )
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastAnalyzedTime >= frameIntervalMillis) {
+                    lastAnalyzedTime = currentTime // 마지막 처리 시간 업데이트
+
+                    processImageProxyFromCamera(
+                        context = this,
+                        imageProxy = imageProxy,
+                        faceDetection = { detect -> mainViewModel.detectPerson(detect) },
+                        gazeDetection = { gazePoint -> mainViewModel.updateGazePoint(gazePoint) },
+                    )
+                } else {
+                    imageProxy.close() // 처리하지 않은 프레임은 닫아줌
+                }
             })
 
             try {
