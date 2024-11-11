@@ -54,7 +54,6 @@ public class Member extends BaseEntity {
     }
 
     public void removeKiosk(Kiosk kiosk) {
-        kiosks.remove(kiosk);
         kiosk.updateMember(null); // 키오스크와 멤버 관계 해제
     }
 

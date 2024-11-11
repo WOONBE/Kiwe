@@ -30,6 +30,13 @@ public class KioskController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{kioskId}")
+    @Operation(summary = "키오스크 조회", description = "키오스크 ID로 단일 키오스크 정보를 조회하는 API")
+    public ResponseEntity<KioskResponse> getKioskById(@PathVariable Integer kioskId) {
+        KioskResponse kioskResponse = kioskService.getKioskById(kioskId);
+        return ResponseEntity.ok(kioskResponse);
+    }
+
     // 키오스크 수정
     @PutMapping("/{id}")
     @Operation(summary = "키오스크 수정", description = "키오스크 정보를 수정하는 API")
