@@ -44,7 +44,7 @@ public class Member extends BaseEntity {
     private MemberType type;
 
     @Builder.Default
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Kiosk> kiosks = new ArrayList<>(); //키오스크 목록
 
     //비즈니스 로직

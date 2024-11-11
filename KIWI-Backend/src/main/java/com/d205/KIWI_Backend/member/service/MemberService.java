@@ -137,11 +137,13 @@ public class MemberService {
 
             // 키오스크 목록 업데이트
             if (memberRequest.getKioskIds() != null) {
-                // 현재 멤버의 키오스크를 모두 제거
+                // 현재 멤버의 키오스크의 연관을 제거
                 List<Kiosk> kiosksToRemove = new ArrayList<>(existingMember.getKiosks());
                 for (Kiosk kiosk : kiosksToRemove) {
                     existingMember.removeKiosk(kiosk);
                 }
+                //일단 키오스크 초기화
+                existingMember.getKiosks().clear();
 
                 // 요청된 키오스크 ID 목록을 기반으로 키오스크 추가
                 for (Integer kioskId : memberRequest.getKioskIds()) {
@@ -157,7 +159,7 @@ public class MemberService {
         }
 
         // 수정된 member를 saveAndFlush() 후 바로 반환
-        memberRepository.saveAndFlush(existingMember);
+        memberRepository.save(existingMember);
         return MemberResponse.fromMember(existingMember);  // 변경된 정보를 정확히 반영
     }
 
