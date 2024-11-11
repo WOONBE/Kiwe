@@ -92,7 +92,7 @@ fun HomeScreen(
             }
             Button(
                 onClick = {
-                    viewModel.onSearchMyInfo()
+                    viewModel.onGetOrder()
                 },
             ) {
                 Text("주문 단건 조회")

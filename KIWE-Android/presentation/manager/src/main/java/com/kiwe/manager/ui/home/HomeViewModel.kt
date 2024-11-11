@@ -11,6 +11,7 @@ import com.kiwe.domain.usecase.manager.login.LogoutUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMyInfoUseCase
 import com.kiwe.domain.usecase.manager.token.GetTokenUseCase
 import com.kiwe.domain.usecase.order.GetLastMonthIncomeUseCase
+import com.kiwe.domain.usecase.order.GetOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.orbitmvi.orbit.Container
@@ -30,7 +31,8 @@ class HomeViewModel
         private val clearTokenUseCase: ClearTokenUseCase,
         private val searchMyInfoUseCase: SearchMyInfoUseCase,
         private val editMyInfoUseCase: EditMyInfoUseCase,
-        private val getLastMonthIncomeUseCase: GetLastMonthIncomeUseCase
+        private val getLastMonthIncomeUseCase: GetLastMonthIncomeUseCase,
+        private val getOrderUseCase: GetOrderUseCase,
     ) : ViewModel(),
         ContainerHost<HomeState, HomeSideEffect> {
         override val container: Container<HomeState, HomeSideEffect> =
@@ -105,6 +107,12 @@ class HomeViewModel
                 val response = getLastMonthIncomeUseCase().getOrThrow()
                 postSideEffect(HomeSideEffect.Toast(response.toString()))
             }
+
+        fun onGetOrder() =
+            intent {
+                val response = getOrderUseCase(state.orderId).getOrThrow()
+                postSideEffect(HomeSideEffect.Toast(response.toString()))
+            }
     }
 
 @Immutable
@@ -113,6 +121,7 @@ data class HomeState(
     val id: String = "5",
     val password: String = "5",
     val email: String = "5",
+    val orderId: Int = 170,
     val kioskIds: List<Int> = listOf(),
 )
 
