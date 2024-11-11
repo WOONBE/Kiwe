@@ -56,7 +56,7 @@ fun CategorySelector(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         IconButton(
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(32.dp),
             onClick = { if (currentPage > 0) currentPage-- },
             enabled = currentPage > 0,
         ) {
@@ -82,8 +82,8 @@ fun CategorySelector(
                     modifier =
                         Modifier
                             .weight(1f)
-                            .height(40.dp)
-                            .padding(horizontal = 4.dp),
+                            .height(36.dp)
+                            .padding(vertical = 2.dp, horizontal = 4.dp),
                     shape = RoundedCornerShape(4.dp),
                     elevation = CardDefaults.cardElevation(4.dp),
                     onClick = {
@@ -100,7 +100,7 @@ fun CategorySelector(
                     ) {
                         Text(
                             text = category.displayName,
-                            style = textStyle.copy(fontSize = 10.sp, color = textColor),
+                            style = textStyle.copy(fontSize = 12.sp, color = textColor),
                         )
                     }
                 }
@@ -113,7 +113,7 @@ fun CategorySelector(
         }
 
         IconButton(
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(32.dp),
             onClick = { if (currentPage < pageCount - 1) currentPage++ },
             enabled = currentPage < pageCount - 1,
         ) {

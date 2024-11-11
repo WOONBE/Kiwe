@@ -36,8 +36,8 @@ fun TakeOutChoiceScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+                .padding(5.dp),
+        verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // 질문 텍스트
@@ -51,7 +51,6 @@ fun TakeOutChoiceScreen(
             normalStyle = Typography.bodyMedium.copy(fontSize = 24.sp),
             textColor = KiweOrange1,
         )
-        Spacer(modifier = Modifier.height(50.dp))
         // 선택 버튼들
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -74,6 +73,7 @@ fun TakeOutChoiceScreen(
                 onClick = onStoreClick,
             )
         }
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 

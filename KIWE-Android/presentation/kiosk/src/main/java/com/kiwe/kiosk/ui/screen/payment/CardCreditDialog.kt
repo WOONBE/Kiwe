@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.ui.component.BoldTextWithKeywords
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
@@ -42,11 +43,21 @@ import java.util.Locale
 @Composable
 fun CardCreditDialog(
     modifier: Modifier = Modifier,
+    remainingTime: Long = 0,
     totalAmount: Int = 0,
+    cardNumber: String = "",
     onDismissRequest: () -> Unit,
 ) {
     val priceText = String.format(Locale.KOREAN, "%,d", totalAmount)
-    Dialog(onDismissRequest = { onDismissRequest() }) {
+
+    Dialog(
+        onDismissRequest = { onDismissRequest() },
+        properties =
+            DialogProperties(
+                dismissOnBackPress = false, // 뒤로가기 눌러도 닫히지 않음
+                dismissOnClickOutside = false, // 외부 클릭으로 닫히지 않음
+            ),
+    ) {
         Column(
             modifier =
                 modifier
@@ -88,6 +99,17 @@ fun CardCreditDialog(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+            // 남은 시간 표시
+
+            BoldTextWithKeywords(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                fullText = "남은 시간: ${30 - remainingTime}초",
+                keywords = listOf("${30 - remainingTime}"),
+                brushFlag = listOf(true),
+                boldStyle = Typography.bodyMedium.copy(fontSize = 14.sp),
+                normalStyle = Typography.labelMedium.copy(fontSize = 14.sp, color = KiweGray1),
+                textColor = KiweBlack1,
+            )
             // 총 결제 금액 표시
             PaymentInfoRow(
                 label = "총 결제금액",
@@ -127,14 +149,25 @@ fun CardCreditDialog(
                         .padding(vertical = 12.dp, horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart,
             ) {
-                Text(
-                    text = "카드번호",
-                    style = Typography.labelMedium.copy(fontSize = 16.sp),
-                    color = KiweBlack1,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = "카드번호",
+                        style = Typography.labelMedium.copy(fontSize = 16.sp),
+                        color = KiweBlack1,
+                    )
+
+                    Text(
+                        text = cardNumber,
+                        style = Typography.bodyMedium.copy(fontSize = 16.sp),
+                        color = KiweBlack1,
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // 취소 버튼 추가
             Button(
@@ -143,13 +176,14 @@ fun CardCreditDialog(
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 0.dp),
-                colors = ButtonDefaults.buttonColors(KiweWhite1),
+                enabled = cardNumber.isBlank(),
+                colors = ButtonDefaults.buttonColors(KiweOrange1),
                 shape = RoundedCornerShape(8.dp),
                 elevation = ButtonDefaults.buttonElevation(4.dp),
             ) {
                 Text(
                     text = "취소",
-                    style = Typography.bodyLarge.copy(fontSize = 16.sp, color = KiweBlack1),
+                    style = Typography.bodyLarge.copy(fontSize = 16.sp, color = KiweWhite1),
                     textAlign = TextAlign.Center,
                 )
             }

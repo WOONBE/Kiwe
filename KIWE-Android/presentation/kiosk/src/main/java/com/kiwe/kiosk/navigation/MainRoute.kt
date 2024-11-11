@@ -9,4 +9,5 @@ enum class MainRoute(
     ORDER(route = "OrderScreen", contentDescription = "주문선택"),
     MENU(route = "MenuScreen", contentDescription = "메뉴"),
     PAYMENT(route = "PaymentScreen", contentDescription = "결제"),
+    RECEIPT(route = "ReceiptScreen", contentDescription = "완료"),
 }
