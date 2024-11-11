@@ -33,7 +33,9 @@ import com.kiwe.kiosk.main.MainSideEffect
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.Typography
+import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
+import timber.log.Timber
 
 @Composable
 fun IntroScreen(
@@ -42,19 +44,21 @@ fun IntroScreen(
     onComfortClick: () -> Unit,
     onHelpClick: () -> Unit,
 ) {
-//    val state = viewModel.collectAsState().value
+    val state = viewModel.collectAsState().value
     viewModel.collectSideEffect {
         when (it) {
             MainSideEffect.NavigateToNextScreen -> TODO()
             is MainSideEffect.Toast -> TODO()
         }
     }
+
     LaunchedEffect(Unit) {
         onEnterScreen(0)
     }
     IntroScreen(
         onComfortClick = onComfortClick,
         onHelpClick = onHelpClick,
+        faceDetection = state.isExistPerson,
     )
 }
 
@@ -62,6 +66,7 @@ fun IntroScreen(
 private fun IntroScreen(
     onComfortClick: () -> Unit,
     onHelpClick: () -> Unit,
+    faceDetection: Boolean,
 ) {
     onComfortClick
     Box(
@@ -115,6 +120,8 @@ private fun IntroScreen(
                         style = Typography.titleLarge.copy(color = Color.White),
                     )
                 }
+                Timber.tag("detection").d("$faceDetection")
+
                 Column(
                     modifier =
                         Modifier
@@ -144,7 +151,7 @@ private fun IntroScreen(
 fun IntroScreenPreview() {
     KIWEAndroidTheme {
         Surface {
-            IntroScreen({}, {})
+            IntroScreen({}, {}, false)
         }
     }
 }

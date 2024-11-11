@@ -34,7 +34,7 @@ public class Member extends BaseEntity {
     @Column(name = "MEMBER_NAME", nullable = false)
     private String name;
 
-    @Column(name = "MEMBER_EMAIL", unique = true, nullable = false)
+    @Column(name = "MEMBER_EMAIL", nullable = false)
     private String email;
 
     @Column(name = "MEMBER_PASSWORD", nullable = false)
@@ -54,7 +54,6 @@ public class Member extends BaseEntity {
     }
 
     public void removeKiosk(Kiosk kiosk) {
-        kiosks.remove(kiosk);
         kiosk.updateMember(null); // 키오스크와 멤버 관계 해제
     }
 

@@ -113,6 +113,7 @@ public class MemberService {
             return new SignInResponse(newMember.getEmail(), newMember.getType(), accessToken, refreshToken);
         }
     }
+
     @Transactional
     public MemberResponse updateMemberInfo(Integer memberId, MemberRequest memberRequest)
         throws BadRequestException {
@@ -136,7 +137,7 @@ public class MemberService {
 
             // 키오스크 목록 업데이트
             if (memberRequest.getKioskIds() != null) {
-                // 현재 멤버의 키오스크를 모두 제거(초기화 안해서 터진듯)
+                // 현재 멤버의 키오스크를 모두 제거
                 List<Kiosk> kiosksToRemove = new ArrayList<>(existingMember.getKiosks());
                 for (Kiosk kiosk : kiosksToRemove) {
                     existingMember.removeKiosk(kiosk);
@@ -155,9 +156,58 @@ public class MemberService {
             throw new BadRequestException(ExceptionCode.INVALID_UPDATE);
         }
 
-        Member updatedMember = memberRepository.save(existingMember);
-        return MemberResponse.fromMember(updatedMember);
+        // 수정된 member를 saveAndFlush() 후 바로 반환
+        memberRepository.saveAndFlush(existingMember);
+        return MemberResponse.fromMember(existingMember);  // 변경된 정보를 정확히 반영
     }
+
+
+//    @Transactional
+//    public MemberResponse updateMemberInfo(Integer memberId, MemberRequest memberRequest)
+//        throws BadRequestException {
+//        // 기존 멤버 조회
+//        Member existingMember = memberRepository.findById(memberId)
+//            .orElseThrow(() -> new BadRequestException(ExceptionCode.NOT_FOUND_MEMBER_ID));
+//
+//        // 멤버 정보 업데이트
+//        if (memberRequest != null) { // memberRequest가 null인지 체크
+//            if (memberRequest.getName() != null) {
+//                existingMember.updateName(memberRequest.getName());
+//            }
+//
+//            if (memberRequest.getEmail() != null) {
+//                existingMember.updateEmail(memberRequest.getEmail());
+//            }
+//
+//            if (memberRequest.getPassword() != null) {
+//                existingMember.updatePassword(passwordEncoder.encode(memberRequest.getPassword()));
+//            }
+//
+//            // 키오스크 목록 업데이트
+//            if (memberRequest.getKioskIds() != null) {
+//                // 현재 멤버의 키오스크를 모두 제거(초기화 안해서 터진듯)
+//                List<Kiosk> kiosksToRemove = new ArrayList<>(existingMember.getKiosks());
+//                for (Kiosk kiosk : kiosksToRemove) {
+//                    existingMember.removeKiosk(kiosk);
+//                }
+//
+//                // 요청된 키오스크 ID 목록을 기반으로 키오스크 추가
+//                for (Integer kioskId : memberRequest.getKioskIds()) {
+//                    if (kioskId != null) { // 키오스크 ID가 null인지 체크
+//                        Kiosk kiosk = kioskRepository.findById(kioskId)
+//                            .orElseThrow(() -> new BadRequestException(ExceptionCode.NOT_FOUND_KIOSK_ID));
+//                        existingMember.addKiosk(kiosk);
+//                    }
+//                }
+//            }
+//        } else {
+//            throw new BadRequestException(ExceptionCode.INVALID_UPDATE);
+//        }
+//
+//        Member updatedMember = memberRepository.saveAllAndFlush(existingMember);
+//        return MemberResponse.fromMember(updatedMember);
+//    }
+
 
     @Transactional
     public List<MemberResponse> getAllUsers() {

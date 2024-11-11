@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -151,9 +153,9 @@ fun OrderScreen(
                 Modifier
                     .wrapContentHeight()
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp, start = 70.dp, end = 70.dp),
+                    .padding(top = 5.dp, bottom = 5.dp, start = 70.dp, end = 70.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (buttonState == 0 || buttonState == 3) {
                     Spacer(modifier = Modifier.weight(1F))
@@ -179,7 +181,9 @@ fun OrderScreen(
                 Text(
                     modifier =
                         Modifier
-                            .weight(1F)
+                            .height(48.dp)
+                            .width(60.dp)
+                            .wrapContentHeight(Alignment.CenterVertically)
                             .align(Alignment.CenterVertically),
                     textAlign = TextAlign.Center,
                     text = "${pagerState.currentPage + 1}/${pagerState.pageCount}",
@@ -187,15 +191,18 @@ fun OrderScreen(
                 if (buttonState == 2 || buttonState == 3) {
                     Spacer(modifier = Modifier.weight(1F))
                 } else {
-                    IconButton(onClick = {
-                        animationScope.launch {
-                            pagerState.animateScrollToPage(
-                                (pagerState.currentPage + 1).coerceAtMost(
-                                    pagerState.pageCount - 1,
-                                ),
-                            )
-                        }
-                    }, modifier = Modifier.weight(1F)) {
+                    IconButton(
+                        onClick = {
+                            animationScope.launch {
+                                pagerState.animateScrollToPage(
+                                    (pagerState.currentPage + 1).coerceAtMost(
+                                        pagerState.pageCount - 1,
+                                    ),
+                                )
+                            }
+                        },
+                        modifier = Modifier.weight(1F),
+                    ) {
                         Icon(
                             painter = painterResource(R.drawable.arrow_right),
                             contentDescription = "다음",
@@ -232,9 +239,9 @@ private fun OrderListScreen(
             firstRowList.forEach {
                 OrderItem(orderItem = it, modifier = Modifier.weight(1F), onClick = onItemClick)
             }
-            // 개수가 3개보다 적을 때 채울 빈칸
+            // 개수가 4개보다 적을 때 채울 빈칸
             (firstRowList.size until 4).forEach { _ ->
-                Spacer(modifier = Modifier.weight(1F))
+                Spacer(modifier = Modifier.weight(1F).fillMaxHeight())
             }
         }
         Spacer(modifier = Modifier.padding(10.dp))
