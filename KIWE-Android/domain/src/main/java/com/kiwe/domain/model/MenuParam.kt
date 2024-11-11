@@ -3,7 +3,7 @@ package com.kiwe.domain.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateMenuParam(
+data class MenuParam(
     val category: String,
     val hotOrIce: String,
     val name: String,

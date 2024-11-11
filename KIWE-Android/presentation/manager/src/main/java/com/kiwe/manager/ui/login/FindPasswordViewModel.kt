@@ -2,11 +2,12 @@ package com.kiwe.manager.ui.login
 
 import androidx.lifecycle.ViewModel
 import com.kiwe.domain.exception.APIException
-import com.kiwe.domain.model.CreateMenuParam
 import com.kiwe.domain.model.EditMemberParam
 import com.kiwe.domain.model.MenuCategory
+import com.kiwe.domain.model.MenuParam
 import com.kiwe.domain.usecase.manager.edit.EditMemberInfoUseCase
 import com.kiwe.domain.usecase.manager.menu.CreateMenuUseCase
+import com.kiwe.domain.usecase.manager.menu.EditMenuUseCase
 import com.kiwe.domain.usecase.manager.menu.GetAllMenuListUseCase
 import com.kiwe.domain.usecase.manager.menu.GetMenuByIdUseCase
 import com.kiwe.domain.usecase.manager.search.SearchAllMemberUseCase
@@ -31,6 +32,7 @@ class FindPasswordViewModel
         private val getMenuByIdUseCase: GetMenuByIdUseCase,
         private val getAllMenuListUseCase: GetAllMenuListUseCase,
         private val createMenuUseCase: CreateMenuUseCase,
+        private val editMenuUseCase: EditMenuUseCase,
     ) : ViewModel(),
         ContainerHost<FindPasswordState, FindPasswordSideEffect> {
         override val container: Container<FindPasswordState, FindPasswordSideEffect> =
@@ -109,10 +111,28 @@ class FindPasswordViewModel
                 val response =
                     createMenuUseCase(
                         createMenuParam =
-                            CreateMenuParam(
+                            MenuParam(
                                 category = state.category,
                                 hotOrIce = state.hotOrIce,
                                 name = state.menuName,
+                                price = state.price,
+                                description = state.description,
+                                imgPath = state.imgPath,
+                            ),
+                    )
+                postSideEffect(FindPasswordSideEffect.Toast(response.toString()))
+            }
+
+        fun onEditMenu() =
+            intent {
+                val response =
+                    editMenuUseCase(
+                        menuId = state.menuId,
+                        menuParam =
+                            MenuParam(
+                                category = state.category,
+                                hotOrIce = state.hotOrIce,
+                                name = state.newName,
                                 price = state.price,
                                 description = state.description,
                                 imgPath = state.imgPath,
@@ -132,10 +152,12 @@ data class FindPasswordState(
     val kioskIds: List<Int> = listOf(),
     val category: String = MenuCategory.NEW.displayName,
     val menuName: String = "새로운 음료 메뉴",
+    val menuId: Int = 324,
     val hotOrIce: String = "ICE",
     val price: Int = 9990,
     val description: String = "음료입니다",
     val imgPath: String = "https://cdn-icons-png.flaticon.com/512/4329/4329542.png",
+    val newName: String = "메뉴 이름 바꿔봤어요",
 )
 
 sealed interface FindPasswordSideEffect {

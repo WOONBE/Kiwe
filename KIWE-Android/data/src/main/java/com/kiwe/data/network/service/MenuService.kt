@@ -2,8 +2,9 @@ package com.kiwe.data.network.service
 
 import com.kiwe.data.network.util.getResult
 import com.kiwe.data.network.util.postResult
-import com.kiwe.domain.model.CreateMenuParam
+import com.kiwe.data.network.util.putResult
 import com.kiwe.domain.model.MenuCategoryParam
+import com.kiwe.domain.model.MenuParam
 import io.ktor.client.HttpClient
 import io.ktor.client.request.parameter
 import io.ktor.client.request.setBody
@@ -27,8 +28,16 @@ class MenuService
 
         suspend fun getAllMenuList(): Result<List<MenuCategoryParam>> = client.getResult("api/menus/all")
 
-        suspend fun createMenu(createMenuParam: CreateMenuParam): Result<MenuCategoryParam> =
+        suspend fun createMenu(createMenuParam: MenuParam): Result<MenuCategoryParam> =
             client.postResult("api/menus") {
                 setBody(createMenuParam)
+            }
+
+        suspend fun editMenu(
+            menuId: Int,
+            menuParam: MenuParam,
+        ): Result<MenuCategoryParam> =
+            client.putResult("api/menus/$menuId") {
+                setBody(menuParam)
             }
     }
