@@ -16,9 +16,18 @@ import kotlin.coroutines.CoroutineContext
 class OptionViewModel
     @AssistedInject
     constructor(
-        @Assisted private val menuTitle: String,
-        @Assisted private val menuCost: Int,
-    ) : BaseViewModel<OptionState, OptionSideEffect>(OptionState(menuTitle, menuCost)) {
+        @Assisted("menuId") private val menuId: Int,
+        @Assisted("menuImgPath") private val menuImgPath: String,
+        @Assisted("menuTitle") private val menuTitle: String,
+        @Assisted("menuCost") private val menuCost: Int,
+    ) : BaseViewModel<OptionState, OptionSideEffect>(
+            OptionState(
+                menuId,
+                menuImgPath,
+                menuTitle,
+                menuCost,
+            ),
+        ) {
         override fun handleExceptionIntent(
             coroutineContext: CoroutineContext,
             throwable: Throwable,
@@ -29,18 +38,25 @@ class OptionViewModel
         }
 
         fun init(
+            menuId: Int,
+            menuImgPath: String,
             menuTitle: String,
             menuCost: Int,
         ) = intent {
             reduce {
-                state.copy(menuTitle = menuTitle, menuCost = menuCost)
+                state.copy(
+                    menuId = menuId,
+                    menuImgPath = menuImgPath,
+                    menuTitle = menuTitle,
+                    menuCost = menuCost,
+                )
             }
         }
 
         fun onClear() =
             intent {
                 reduce {
-                    OptionState("", 0)
+                    OptionState(0, "", "", 0)
                 }
             }
 
@@ -79,24 +95,31 @@ class OptionViewModel
         @AssistedFactory
         interface OptionViewModelFactory {
             fun create(
-                menuTitle: String,
-                menuCost: Int,
+                @Assisted("menuId") menuId: Int,
+                @Assisted("menuImgPath") menuImgPath: String,
+                @Assisted("menuTitle") menuTitle: String,
+                @Assisted("menuCost") menuCost: Int,
             ): OptionViewModel
         }
 
         companion object {
             fun provideFactory(
                 assistedFactory: OptionViewModelFactory,
+                menuId: Int,
+                menuImgPath: String,
                 menuTitle: String,
                 menuCost: Int,
             ): ViewModelProvider.Factory =
                 object : ViewModelProvider.Factory {
-                    override fun <T : ViewModel> create(modelClass: Class<T>): T = assistedFactory.create(menuTitle, menuCost) as T
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                        assistedFactory.create(menuId, menuImgPath, menuTitle, menuCost) as T
                 }
         }
     }
 
 data class OptionState(
+    val menuId: Int,
+    val menuImgPath: String,
     val menuTitle: String,
     val menuCost: Int,
     val menuCount: Int = 1,

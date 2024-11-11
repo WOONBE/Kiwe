@@ -51,6 +51,8 @@ fun OrderScreen(
 ) {
     val categoryStatus = viewModel.collectAsState().value
     var isOrderOptionDialogOpen by remember { mutableStateOf(false) }
+    var orderDialogMenuId by remember { mutableIntStateOf(0) }
+    var orderDialogMenuImgPath by remember { mutableStateOf("") }
     var orderDialogMenuTitle by remember { mutableStateOf("") }
     var orderDialogMenuCost by remember { mutableIntStateOf(0) }
     val context = LocalContext.current
@@ -71,7 +73,7 @@ fun OrderScreen(
 
     val animationScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
-        onEnterScreen(2)
+        onEnterScreen(1)
     }
     val pagerState =
         rememberPagerState(pageCount = {
@@ -98,12 +100,22 @@ fun OrderScreen(
     val optionViewModel =
         hiltViewModel(
             creationCallback = { factory: OptionViewModel.OptionViewModelFactory ->
-                factory.create(orderDialogMenuTitle, orderDialogMenuCost)
+                factory.create(
+                    orderDialogMenuId,
+                    orderDialogMenuImgPath,
+                    orderDialogMenuTitle,
+                    orderDialogMenuCost,
+                )
             },
         )
     LaunchedEffect(isOrderOptionDialogOpen) {
         if (isOrderOptionDialogOpen) {
-            optionViewModel.init(orderDialogMenuTitle, orderDialogMenuCost)
+            optionViewModel.init(
+                orderDialogMenuId,
+                orderDialogMenuImgPath,
+                orderDialogMenuTitle,
+                orderDialogMenuCost,
+            )
         } else {
             optionViewModel.onClear()
         }
@@ -123,7 +135,7 @@ fun OrderScreen(
     ) {
         CategorySelector(
             modifier = Modifier,
-            categoryState = categoryStatus.selectedCategory,
+            categoryState = categoryStatus.selectedCategoryGroup,
             onCategoryClick = { selectedCategory ->
                 viewModel.setCategory(selectedCategory)
                 Timber.tag(javaClass.simpleName).d("selectedCategory: $selectedCategory")
@@ -142,7 +154,9 @@ fun OrderScreen(
             ) { index ->
                 OrderListScreen(
                     orderItemList = categoryStatus.menuList[index].chunked(4),
-                    onItemClick = { title, cost ->
+                    onItemClick = { id, imgPath, title, cost ->
+                        orderDialogMenuId = id
+                        orderDialogMenuImgPath = imgPath
                         orderDialogMenuTitle = title
                         orderDialogMenuCost = cost
                         isOrderOptionDialogOpen = true
@@ -217,7 +231,7 @@ fun OrderScreen(
 @Composable
 private fun OrderListScreen(
     orderItemList: List<List<MenuCategoryParam>>,
-    onItemClick: (String, Int) -> Unit,
+    onItemClick: (Int, String, String, Int) -> Unit,
 ) {
     val firstRowList = orderItemList[0]
     val secondRowList =
@@ -244,7 +258,7 @@ private fun OrderListScreen(
                 Spacer(modifier = Modifier.weight(1F).fillMaxHeight())
             }
         }
-        Spacer(modifier = Modifier.padding(10.dp))
+        Spacer(modifier = Modifier.padding(0.dp))
         Row(modifier = Modifier.weight(1F)) {
             secondRowList.forEach {
                 OrderItem(orderItem = it, modifier = Modifier.weight(1F), onClick = onItemClick)
@@ -253,7 +267,7 @@ private fun OrderListScreen(
                 Spacer(modifier = Modifier.weight(1F))
             }
         }
-        Spacer(modifier = Modifier.padding(10.dp))
+        Spacer(modifier = Modifier.padding(0.dp))
         Row(modifier = Modifier.weight(1F)) {
             thirdRowList.forEach {
                 OrderItem(orderItem = it, modifier = Modifier.weight(1F), onClick = onItemClick)

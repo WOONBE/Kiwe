@@ -90,7 +90,7 @@ fun OrderListDialog(
                         listOf(
                             title,
                             it.count.toString(),
-                            it.totalPrice.toString(),
+                            (it.count * it.totalPrice).toString(),
                         )
                     },
                 ),
@@ -331,51 +331,21 @@ fun OrderListDialogPreview() {
             ShoppingCartState(
                 listOf(
                     ShoppingCartItem(
+                        menuId = 1,
+                        menuImgPath = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         menuTitle = "디카페인 카페모카",
-//                        menuPrice = 4500,
-//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         count = 2,
                     ),
                     ShoppingCartItem(
+                        menuId = 1,
+                        menuImgPath = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         menuTitle = "콜드브루디카페인",
-//                        menuPrice = 3500,
-//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         count = 1,
                     ),
                     ShoppingCartItem(
+                        menuId = 1,
+                        menuImgPath = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         menuTitle = "딸기쿠키프라페",
-//                        menuPrice = 5000,
-//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        count = 99,
-                    ),
-                    ShoppingCartItem(
-                        menuTitle = "딸기쿠키프라페11111",
-//                        menuPrice = 5000,
-//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        count = 99,
-                    ),
-                    ShoppingCartItem(
-                        menuTitle = "딸111기쿠키프라페1111",
-//                        menuPrice = 5000,
-//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        count = 99,
-                    ),
-                    ShoppingCartItem(
-                        menuTitle = "딸111기쿠키프라페111",
-//                        menuPrice = 5000,
-//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        count = 99,
-                    ),
-                    ShoppingCartItem(
-                        menuTitle = "딸111기쿠키프라페11",
-//                        menuPrice = 5000,
-//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        count = 99,
-                    ),
-                    ShoppingCartItem(
-                        menuTitle = "딸111기쿠키프라페1",
-//                        menuPrice = 5000,
-//                        menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                         count = 99,
                     ),
                 ),

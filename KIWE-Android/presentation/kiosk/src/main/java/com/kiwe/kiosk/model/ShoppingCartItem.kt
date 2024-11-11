@@ -3,6 +3,8 @@ package com.kiwe.kiosk.model
 import com.kiwe.domain.model.OrderItem
 
 data class ShoppingCartItem(
+    val menuId: Int,
+    val menuImgPath: String,
     val menuTitle: String,
     val menuRadioOption: MutableMap<String, Pair<String, Int>> = mutableMapOf(),
     val defaultPrice: Int = 0,
@@ -18,6 +20,6 @@ data class ShoppingCartItem(
 
 fun ShoppingCartItem.toOrderItem(): OrderItem =
     OrderItem(
-        menuId = menuTitle.length,
+        menuId = menuId,
         quantity = count,
     )
