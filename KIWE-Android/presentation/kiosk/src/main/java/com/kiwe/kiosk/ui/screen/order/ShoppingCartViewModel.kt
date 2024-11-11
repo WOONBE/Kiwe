@@ -21,6 +21,13 @@ class ShoppingCartViewModel
             }
         }
 
+        fun onClearAllItem() =
+            intent {
+                reduce {
+                    state.copy(shoppingCartItem = listOf())
+                }
+            }
+
         fun onDeleteItem(menuTitle: String) =
             intent {
                 reduce {
@@ -102,49 +109,7 @@ class ShoppingCartViewModel
 
 data class ShoppingCartState(
     val shoppingCartItem: List<ShoppingCartItem> =
-        listOf(
-//            ShoppingCartItem(
-//                menuTitle = "디카페인 카페모카",
-//                menuRadioOption = mutableMapOf("샷" to Pair("연하게", 500), "설탕" to Pair("추가", 100)),
-//                count = 2,
-//            ),
-//            ShoppingCartItem(
-//                menuTitle = "콜드브루디카페인",
-//                menuRadioOption = mutableMapOf("샷" to Pair("연하게", 500), "설탕" to Pair("추가", 100)),
-//                count = 1,
-//            ),
-//            ShoppingCartItem(
-//                menuTitle = "딸기쿠키프라페",
-//                menuRadioOption = mutableMapOf("샷" to Pair("연하게", 500), "설탕" to Pair("추가", 100)),
-//                count = 99,
-//            ),
-//            ShoppingCartItem(
-//                menuTitle = "딸기쿠키프라페11111",
-//                menuRadioOption = mutableMapOf("샷" to Pair("연하게", 500), "설탕" to Pair("추가", 100)),
-//                count = 99,
-//            ),
-//            ShoppingCartItem(
-//                menuTitle = "딸111기쿠키프라페1111",
-//                menuRadioOption = mutableMapOf("샷" to Pair("연하게", 500), "설탕" to Pair("추가", 100)),
-//                count = 99,
-//            ),
-//            ShoppingCartItem(
-//                menuTitle = "딸111기쿠키프라페111",
-//                menuRadioOption = mutableMapOf("샷" to Pair("연하게", 500), "설탕" to Pair("추가", 100)),
-//                count = 99,
-//            ),
-//            ShoppingCartItem(
-//                menuTitle = "딸111기쿠키프라페11",
-//                menuRadioOption = mutableMapOf("샷" to Pair("연하게", 500), "설탕" to Pair("추가", 100)),
-//                count = 99,
-//            ),
-//            ShoppingCartItem(
-//                menuTitle = "딸111기쿠키프라페1",
-// //                menuPrice = 5000,
-// //                menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-//                count = 99,
-//            ),
-        ),
+        listOf(),
 ) : BaseState
 
 sealed interface ShoppingCartSideEffect : BaseSideEffect {
