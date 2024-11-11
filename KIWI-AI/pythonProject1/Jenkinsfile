@@ -7,13 +7,13 @@ pipeline {
         stage('Load Environment Variables') {
             steps {
                 script {
-                    // env.KIWI_ENV 경로를 기준으로 jenkins_kiwi_ai.env 파일을 로드하고 환경변수를 설정합니다.
+                    // jenkins_kiwi_ai.env 파일을 로드하여 환경변수 설정
                     def props = readProperties(file: env.KIWI_ENV)
                     env.DOCKER_IMAGE = props['DOCKER_IMAGE']
                     env.DOCKER_IMAGE_FILE = props['DOCKER_IMAGE_FILE']
                     env.DEPLOY_LOG_PATH = props['DEPLOY_LOG_PATH']
                     env.FAST_API_DIR = props['FAST_API_DIR']
-                    env.REMOTE_DIR = props['REMOTE_DIR']  // REMOTE_DIR 환경변수 추가
+                    env.REMOTE_DIR = props['REMOTE_DIR']  // 올바른 경로 확인
                 }
             }
         }
@@ -46,17 +46,25 @@ pipeline {
                                 configName: 'D205-Server',
                                 transfers: [
                                     sshTransfer(
-                                        sourceFiles: "**/$DOCKER_IMAGE_FILE", // 전체 경로에서 찾기
-                                        removePrefix: '', // 상대경로 제거
-                                        remoteDirectory: env.REMOTE_DIR, // 올바른 디렉토리로 설정
-                                        execCommand: 'echo "Transferring $DOCKER_IMAGE_FILE to $REMOTE_DIR" && ls -al $REMOTE_DIR',
+                                        sourceFiles: "**/$DOCKER_IMAGE_FILE", 
+                                        removePrefix: '', 
+                                        remoteDirectory: env.REMOTE_DIR,
+                                        execCommand: '''
+                                            echo "Transferred $DOCKER_IMAGE_FILE to $REMOTE_DIR"
+                                            pwd
+                                            ls -al $REMOTE_DIR
+                                        ''',
                                         execTimeout: 120000
                                     ),
                                     sshTransfer(
                                         sourceFiles: 'KIWI-AI/pythonProject1/compose.yml',
                                         removePrefix: '',
                                         remoteDirectory: env.REMOTE_DIR,
-                                        execCommand: 'echo "Transferring compose.yml to $REMOTE_DIR" && ls -al $REMOTE_DIR',
+                                        execCommand: '''
+                                            echo "Transferred compose.yml to $REMOTE_DIR"
+                                            pwd
+                                            ls -al $REMOTE_DIR
+                                        ''',
                                         execTimeout: 120000
                                     )
                                 ]
@@ -95,7 +103,6 @@ pipeline {
     post {
         always {
             echo 'This will always run, regardless of success or failure.'
-            // 추가적인 후속 작업을 여기에 작성할 수 있습니다.
         }
     }
 }
