@@ -17,4 +17,6 @@ class MemberService
             }
 
         suspend fun searchMemberById(id: Int): Result<MemberInfoResponse> = client.getResult("api/members/$id")
+
+        suspend fun searchAllMember(): Result<List<MemberInfoResponse>> = client.getResult("api/members/all")
     }

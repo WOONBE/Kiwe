@@ -1,13 +1,13 @@
 package com.kiwe.manager.ui.login
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.ViewModel
 import com.kiwe.domain.exception.APIException
+import com.kiwe.domain.usecase.manager.search.SearchAllMemberUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMemberByEmailUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMemberByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +23,8 @@ class FindPasswordViewModel
     @Inject
     constructor(
         private val searchMemberByEmailUseCase: SearchMemberByEmailUseCase,
-        private val searchMemberByIdUseCase: SearchMemberByIdUseCase
+        private val searchMemberByIdUseCase: SearchMemberByIdUseCase,
+        private val searchAllMemberUseCase: SearchAllMemberUseCase
     ) : ViewModel(),
         ContainerHost<FindPasswordState, FindPasswordSideEffect> {
         override val container: Container<FindPasswordState, FindPasswordSideEffect> =
@@ -52,69 +53,24 @@ class FindPasswordViewModel
                 },
             )
 
-        fun onSearchMemberByEmailUseCase() =
+        fun onSearchMemberByEmail() =
             intent {
                 val response = searchMemberByEmailUseCase(state.searchMemberByEmail).getOrThrow()
                 postSideEffect(FindPasswordSideEffect.Toast(response.toString()))
             }
 
-        fun onSearchMemberByIdUseCase() =
+        fun onSearchMemberById() =
             intent {
                 val response = searchMemberByIdUseCase(state.id).getOrThrow()
                 postSideEffect(FindPasswordSideEffect.Toast(response.toString()))
             }
 
-        fun onPasswordChange(password: String) =
-            blockingIntent {
-                reduce {
-                    state.copy(password = password)
-                }
-            }
-
-        fun onPasswordRepeatChange(repeatPassword: String) =
-            blockingIntent {
-                reduce {
-                    state.copy(passwordRepeat = repeatPassword)
-                }
-            }
-
-        fun onShowPasswordChange() =
+        fun onSearchAllMember() =
             intent {
-                reduce {
-                    if (!state.showPassword) {
-                        state.copy(
-                            showPassword = true,
-                            passwordImageVector = Icons.Filled.Visibility,
-                            passwordVisualTransformation = VisualTransformation.None,
-                        )
-                    } else {
-                        state.copy(
-                            showPassword = false,
-                            passwordImageVector = Icons.Filled.VisibilityOff,
-                            passwordVisualTransformation = PasswordVisualTransformation(),
-                        )
-                    }
-                }
+                val response = searchAllMemberUseCase().getOrThrow()
+                postSideEffect(FindPasswordSideEffect.Toast(response.toString()))
             }
 
-        fun onShowPasswordRepeatChange() =
-            intent {
-                reduce {
-                    if (!state.showPasswordRepeat) {
-                        state.copy(
-                            showPasswordRepeat = true,
-                            passwordRepeatImageVector = Icons.Filled.Visibility,
-                            passwordRepeatVisualTransformation = VisualTransformation.None,
-                        )
-                    } else {
-                        state.copy(
-                            showPasswordRepeat = false,
-                            passwordRepeatImageVector = Icons.Filled.VisibilityOff,
-                            passwordRepeatVisualTransformation = PasswordVisualTransformation(),
-                        )
-                    }
-                }
-            }
     }
 
 @Immutable
