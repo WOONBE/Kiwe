@@ -64,6 +64,11 @@ pipeline {
                 }
             }
         }
+        stage('Cleanup Git References') {
+            steps {
+                sh 'git remote prune origin'
+            }
+        }
         stage('Checkout') {
             steps {
                 checkout scm
