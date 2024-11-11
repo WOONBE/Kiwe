@@ -1,5 +1,6 @@
 package com.kiwe.manager.ui.login
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -15,6 +16,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.kiwe.manager.ui.theme.KIWEAndroidTheme
 import org.orbitmvi.orbit.compose.collectSideEffect
 
+private const val TAG = "FindPassWordScreen 싸피"
+
 @Composable
 fun FindPassWordScreen(
     viewModel: FindPasswordViewModel = hiltViewModel(),
@@ -25,13 +28,17 @@ fun FindPassWordScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is FindPasswordSideEffect.Toast ->
+            is FindPasswordSideEffect.Toast ->{
                 Toast
                     .makeText(
                         context,
                         sideEffect.message,
                         Toast.LENGTH_SHORT,
                     ).show()
+
+                Log.d(TAG, "FindPassWordScreen: ${sideEffect.message}")
+            }
+
 
             FindPasswordSideEffect.NavigateToLoginScreen -> {}
         }

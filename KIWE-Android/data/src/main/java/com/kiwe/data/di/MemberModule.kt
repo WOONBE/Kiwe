@@ -1,8 +1,10 @@
 package com.kiwe.data.di
 
+import com.kiwe.data.usecase.manager.login.LogoutUseCaseImpl
 import com.kiwe.data.usecase.manager.search.SearchAllMemberUseCaseImpl
 import com.kiwe.data.usecase.manager.search.SearchMemberByEmailUseCaseImpl
 import com.kiwe.data.usecase.manager.search.SearchMemberByIdUseCaseImpl
+import com.kiwe.domain.usecase.manager.login.LogoutUseCase
 import com.kiwe.domain.usecase.manager.search.SearchAllMemberUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMemberByEmailUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMemberByIdUseCase
@@ -22,4 +24,7 @@ interface MemberModule {
 
     @Binds
     fun bindSearchAllMemberUseCase(uc: SearchAllMemberUseCaseImpl): SearchAllMemberUseCase
+
+    @Binds
+    fun bindLogoutUseCase(uc: LogoutUseCaseImpl): LogoutUseCase
 }
