@@ -9,5 +9,5 @@ class ClearTokenUseCaseImpl
     constructor(
         private val tokenDataSource: TokenDataSource,
     ) : ClearTokenUseCase {
-        override suspend fun invoke(): Unit = tokenDataSource.clearToken()
+        override suspend fun invoke() = tokenDataSource.clearToken()
     }

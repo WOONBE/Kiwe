@@ -28,7 +28,7 @@ fun FindPassWordScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is FindPasswordSideEffect.Toast ->{
+            is FindPasswordSideEffect.Toast -> {
                 Toast
                     .makeText(
                         context,
@@ -38,7 +38,6 @@ fun FindPassWordScreen(
 
                 Log.d(TAG, "FindPassWordScreen: ${sideEffect.message}")
             }
-
 
             FindPasswordSideEffect.NavigateToLoginScreen -> {}
         }
@@ -51,6 +50,7 @@ fun FindPassWordScreen(
         onSearchAllMember = viewModel::onSearchAllMember,
         onEditMemberInfo = viewModel::onEditMemberInfo,
         onGetMenuById = viewModel::onGetMenuById,
+        onGetAllMenuList = viewModel::onGetAllMenu,
     )
 }
 
@@ -63,6 +63,7 @@ private fun FindPassWordScreen(
     onSearchAllMember: () -> Unit,
     onEditMemberInfo: () -> Unit,
     onGetMenuById: () -> Unit,
+    onGetAllMenuList: () -> Unit,
 ) {
     Surface(
         modifier = Modifier.systemBarsPadding(),
@@ -140,7 +141,7 @@ private fun FindPassWordScreen(
             }
             Button(
                 onClick = {
-                    onNavigateToLoginScreen()
+                    onGetAllMenuList()
                 },
             ) {
                 Text("메뉴 전체 조회")

@@ -21,4 +21,6 @@ class MenuService
                 }
 
         suspend fun getMenuById(menuId: Int): Result<MenuCategoryParam> = client.getResult("api/menus/$menuId")
+
+        suspend fun getAllMenuList(): Result<List<MenuCategoryParam>> = client.getResult("api/menus/all")
     }

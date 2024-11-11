@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import com.kiwe.domain.exception.APIException
 import com.kiwe.domain.model.EditMemberParam
 import com.kiwe.domain.usecase.manager.edit.EditMemberInfoUseCase
+import com.kiwe.domain.usecase.manager.menu.GetAllMenuListUseCase
 import com.kiwe.domain.usecase.manager.menu.GetMenuByIdUseCase
 import com.kiwe.domain.usecase.manager.search.SearchAllMemberUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMemberByEmailUseCase
@@ -29,7 +30,8 @@ class FindPasswordViewModel
         private val searchMemberByIdUseCase: SearchMemberByIdUseCase,
         private val searchAllMemberUseCase: SearchAllMemberUseCase,
         private val editMemberInfoUseCase: EditMemberInfoUseCase,
-        private val getMenuByIdUseCase: GetMenuByIdUseCase
+        private val getMenuByIdUseCase: GetMenuByIdUseCase,
+        private val getAllMenuListUseCase: GetAllMenuListUseCase
     ) : ViewModel(),
         ContainerHost<FindPasswordState, FindPasswordSideEffect> {
         override val container: Container<FindPasswordState, FindPasswordSideEffect> =
@@ -91,10 +93,17 @@ class FindPasswordViewModel
                 postSideEffect(FindPasswordSideEffect.Toast(response.getOrThrow().toString()))
             }
 
-        fun onGetMenuById() = intent {
-            val response = getMenuByIdUseCase(state.id)
-            postSideEffect(FindPasswordSideEffect.Toast(response.getOrThrow().toString()))
-        }
+        fun onGetMenuById() =
+            intent {
+                val response = getMenuByIdUseCase(state.id)
+                postSideEffect(FindPasswordSideEffect.Toast(response.getOrThrow().toString()))
+            }
+
+        fun onGetAllMenu() =
+            intent {
+                val response = getAllMenuListUseCase()
+                postSideEffect(FindPasswordSideEffect.Toast(response.getOrThrow().toString()))
+            }
     }
 
 @Immutable
