@@ -19,4 +19,6 @@ class MenuService
                     parameter("category", category)
                     contentType(ContentType.Application.Json)
                 }
+
+        suspend fun getMenuById(menuId: Int): Result<MenuCategoryParam> = client.getResult("api/menus/$menuId")
     }
