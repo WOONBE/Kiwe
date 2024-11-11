@@ -43,9 +43,13 @@ public class MenuService {
     @Transactional
 //    @CachePut(cacheNames = "menusByCategory", key = "#request.category", cacheManager = "rcm")
     public MenuResponse createMenu(MenuRequest request) {
+
+        Integer categoryNumber = menuRepository.findMaxCategoryNumberByCategory(request.getCategory())
+            .orElse(0) + 1;
+
         Menu menu = Menu.builder()
             .category(request.getCategory())
-            .categoryNumber(request.getCategoryNumber())
+            .categoryNumber(categoryNumber)
             .hotOrIce(request.getHotOrIce())
             .name(request.getName())
             .price(request.getPrice())
@@ -91,11 +95,12 @@ public class MenuService {
         Menu menu = menuRepository.findById(id)
             .orElseThrow(() ->  new BadRequestException(NOT_FOUND_MENU));
 
+
         // 빌더 패턴을 사용하여 기존 메뉴 정보 수정
         Menu updatedMenu = Menu.builder()
             .id(menu.getId()) // 기존 ID를 유지
             .category(request.getCategory())
-            .categoryNumber(request.getCategoryNumber())
+            .categoryNumber(menu.getCategoryNumber())
             .hotOrIce(request.getHotOrIce())
             .name(request.getName())
             .price(request.getPrice())
