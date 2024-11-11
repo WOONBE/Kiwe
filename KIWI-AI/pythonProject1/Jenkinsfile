@@ -66,7 +66,7 @@ pipeline {
                                             pwd
                                             ls -al $REMOTE_DIR
                                         ''',
-                                        execTimeout: 120000
+                                        execTimeout: 120000,
                                         verbose: true
                                     )
                                 ]
