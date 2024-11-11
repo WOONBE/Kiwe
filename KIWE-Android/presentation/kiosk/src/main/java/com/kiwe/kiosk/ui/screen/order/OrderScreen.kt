@@ -178,7 +178,7 @@ fun OrderScreen(
                         onClick = {
                             animationScope.launch {
                                 pagerState.animateScrollToPage(
-                                    (pagerState.currentPage - 1).coerceAtMost(
+                                    (pagerState.currentPage - 1).coerceAtLeast(
                                         0,
                                     ),
                                 )
