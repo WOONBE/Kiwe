@@ -1,5 +1,6 @@
 package com.kiwe.data.network.service
 
+import com.kiwe.data.di.Spring
 import com.kiwe.data.model.request.SignOutKioskRequest
 import com.kiwe.data.network.util.deleteResult
 import com.kiwe.data.network.util.getResult
@@ -14,6 +15,7 @@ import javax.inject.Inject
 class KioskManagerService
     @Inject
     constructor(
+        @Spring
         private val client: HttpClient,
     ) {
         /**

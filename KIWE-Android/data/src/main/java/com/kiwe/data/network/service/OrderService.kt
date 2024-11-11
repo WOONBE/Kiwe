@@ -1,5 +1,6 @@
 package com.kiwe.data.network.service
 
+import com.kiwe.data.di.Spring
 import com.kiwe.data.model.request.OrderRequest
 import com.kiwe.data.model.response.OrderResponse
 import io.ktor.client.HttpClient
@@ -17,6 +18,7 @@ import javax.inject.Inject
 class OrderService
     @Inject
     constructor(
+        @Spring
         private val client: HttpClient,
     ) {
         suspend fun order(requestBody: OrderRequest): OrderResponse =

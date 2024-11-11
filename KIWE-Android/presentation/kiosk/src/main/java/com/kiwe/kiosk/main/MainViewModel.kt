@@ -2,6 +2,8 @@ package com.kiwe.kiosk.main
 
 import androidx.compose.ui.geometry.Offset
 import com.kiwe.domain.model.Category
+import com.kiwe.domain.model.VoiceOrderRequest
+import com.kiwe.domain.usecase.VoiceOrderUseCase
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
@@ -25,6 +27,7 @@ class MainViewModel
     @Inject
     constructor(
         private val speechRecognizerManager: SpeechRecognizerManager,
+        private val voiceOrderUseCase: VoiceOrderUseCase,
     ) : BaseViewModel<MainState, MainSideEffect>(MainState()),
         SpeechResultListener {
         private var personDetectedRecently = false
@@ -40,6 +43,7 @@ class MainViewModel
         }
 
         init {
+            testOrder()
             getMenuCategory()
             initSpeechRecognizer()
         }
@@ -118,6 +122,18 @@ class MainViewModel
                 }
             }
         }
+
+        fun testOrder() =
+            intent {
+                voiceOrderUseCase(
+                    voiceOrder =
+                        VoiceOrderRequest(
+                            sentence = "아메리카노 한 잔 주세요",
+                            have_temp = false,
+                            order_items = emptyList(),
+                        ),
+                )
+            }
 
         fun getMenuCategory() =
             intent {

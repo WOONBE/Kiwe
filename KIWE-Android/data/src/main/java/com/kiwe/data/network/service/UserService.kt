@@ -1,5 +1,6 @@
 package com.kiwe.data.network.service
 
+import com.kiwe.data.di.Spring
 import com.kiwe.data.network.util.postResult
 import com.kiwe.domain.model.LoginParam
 import com.kiwe.domain.model.LoginResponse
@@ -14,6 +15,7 @@ import javax.inject.Inject
 class UserService
     @Inject
     constructor(
+        @Spring
         private val client: HttpClient,
     ) {
         suspend fun signUp(signUpParam: SignUpParam): Result<SignUpResponse> =
