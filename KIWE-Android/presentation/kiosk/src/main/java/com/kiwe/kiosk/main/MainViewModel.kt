@@ -1,5 +1,6 @@
 package com.kiwe.kiosk.main
 
+import androidx.compose.ui.geometry.Offset
 import com.kiwe.domain.model.Category
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
@@ -192,6 +193,11 @@ class MainViewModel
                 }
             }
         }
+
+        fun updateGazePoint(gazePoint: Offset?) =
+            intent {
+                reduce { state.copy(gazePoint = gazePoint) }
+            }
     }
 
 data class MainState(
@@ -202,6 +208,7 @@ data class MainState(
     val recognizedText: String = "",
     val shouldShowRetryMessage: Boolean = false,
     val isExistPerson: Boolean = false,
+    val gazePoint: Offset? = null,
 ) : BaseState
 
 sealed interface MainSideEffect : BaseSideEffect {
