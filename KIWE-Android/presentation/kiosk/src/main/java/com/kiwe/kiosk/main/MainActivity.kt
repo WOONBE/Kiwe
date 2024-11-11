@@ -81,8 +81,8 @@ class MainActivity : ComponentActivity() {
 
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-//            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
             val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+//            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA // 좌표는 현재 후면카메라에 맞춰져있음
 
             val imageAnalysis =
                 ImageAnalysis
@@ -95,6 +95,7 @@ class MainActivity : ComponentActivity() {
                     context = this,
                     imageProxy = imageProxy,
                     faceDetection = { detect -> mainViewModel.detectPerson(detect) },
+                    gazeDetection = { gazePoint -> mainViewModel.updateGazePoint(gazePoint) },
                 )
             })
 

@@ -27,6 +27,7 @@ hiltCompiler = "1.2.0"
 ksp = "2.0.0-1.0.24"
 detekt = "1.23.5"
 retrofit = "2.9.0"
+tasksVision = "latest.release"
 timberVersion = "5.0.1"
 constraintlayoutComposeAndroid = "1.1.0"
 activity = "1.8.0"
@@ -108,6 +109,7 @@ detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", 
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraCore" }
+tasks-vision = { module = "com.google.mediapipe:tasks-vision", version.ref = "tasksVision" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

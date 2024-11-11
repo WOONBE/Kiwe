@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,12 +26,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.AnimatedImageSwitcher
@@ -41,6 +46,7 @@ import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import com.kiwe.kiosk.utils.MainEnum
 import org.orbitmvi.orbit.compose.collectAsState
+import timber.log.Timber
 
 @Composable
 fun ContainerScreen(
@@ -72,13 +78,13 @@ fun ContainerScreen(
             onClickPayment = onClickPayment,
         )
     }
-
     ContainerScreen(
         page = state.page,
         mode = state.mode,
         onBackClick = onBackClick,
         onShoppingCartDialogClick = { isShoppingCartDialogOpen = true },
         onOrderListDialogClick = { isOrderListDialogOpen = true },
+        gazePoint = state.gazePoint,
         content = content,
     )
 }
@@ -90,8 +96,10 @@ private fun ContainerScreen(
     onBackClick: () -> Unit,
     onShoppingCartDialogClick: () -> Unit,
     onOrderListDialogClick: () -> Unit,
+    gazePoint: Offset?,
     content: @Composable () -> Unit,
 ) {
+    gazePoint // TODO
     Scaffold(
         topBar = {
             mode // TODO
@@ -113,6 +121,9 @@ private fun ContainerScreen(
                     content()
                 },
             )
+//            gazePoint?.let { gazePoint ->
+//                GazeIndicator(gazePoint = gazePoint)
+//            }
         },
         bottomBar = {
             if (page == 2) {
@@ -150,6 +161,23 @@ private fun ContainerScreen(
                 PreviousButton(onBackClick = onBackClick)
             }
         },
+    )
+}
+
+@Composable
+fun GazeIndicator(gazePoint: Offset) {
+    Timber.tag("GazeIndicator").d("gazePoint: $gazePoint")
+
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    Box(
+        modifier =
+            Modifier
+                .offset(
+                    x = gazePoint.x * screenWidth,
+                    y = gazePoint.y * screenHeight,
+                ).size(20.dp)
+                .background(Color.Red.copy(alpha = 0.5f)),
     )
 }
 
@@ -254,6 +282,7 @@ fun ContainerScreenPreview() {
             onBackClick = {},
             onShoppingCartDialogClick = {},
             onOrderListDialogClick = {},
+            gazePoint = Offset(0f, 0f),
             content = {},
         )
     }
