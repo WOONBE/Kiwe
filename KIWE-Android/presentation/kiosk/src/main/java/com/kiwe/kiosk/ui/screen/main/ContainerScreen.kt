@@ -99,6 +99,7 @@ private fun ContainerScreen(
     gazePoint: Offset?,
     content: @Composable () -> Unit,
 ) {
+    gazePoint // TODO
     Scaffold(
         topBar = {
             mode // TODO

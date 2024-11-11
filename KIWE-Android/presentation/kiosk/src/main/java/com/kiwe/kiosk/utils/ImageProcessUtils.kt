@@ -190,13 +190,13 @@ fun estimateGaze(
         val gazeVectorX = tan(yawRadians).toFloat() * yawWeight
         val gazeVectorY = -tan(pitchRadians).toFloat() * pitchWeight
         // 스케일링 팩터 적용
-        val scalingFactor = 1.2f // 필요에 따라 조정
+        val scalingFactor = 1.2f
         val adjustedGazeX = normalizedX + gazeVectorX * scalingFactor
         val adjustedGazeY = normalizedY + gazeVectorY * scalingFactor
 
         // 좌표 반전 적용
         val invertedX = 1f - adjustedGazeX // 좌우 반전
-        val invertedY = 1f - adjustedGazeY // 상하 반전
+//        val invertedY = 1f - adjustedGazeY // 상하 반전
 
         // 값 범위를 0과 1 사이로 제한
         val clampedX = invertedX.coerceIn(0f, 1f)
