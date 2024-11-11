@@ -6,10 +6,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,27 +66,79 @@ fun HomeScreen(
         }
     }
 
-    Column {
-        Text("Home 화면")
-        Button(
-            onClick =
+    LazyColumn {
+        item {
+
+            Text("Home 화면")
+            Button(
+                onClick =
                 viewModel::onLogout,
-        ) {
-            Text("로그아읏 api 연동 및 테스트")
-        }
-        Button(
-            onClick = {
-                viewModel.onEditMyInfo()
-            },
-        ) {
-            Text("자신의 정보 수정")
-        }
-        Button(
-            onClick = {
-                viewModel.onSearchMyInfo()
-            },
-        ) {
-            Text("자신의 정보 조회")
+            ) {
+                Text("로그아읏 api 연동 및 테스트")
+            }
+            Button(
+                onClick = {
+                    viewModel.onEditMyInfo()
+                },
+            ) {
+                Text("자신의 정보 수정")
+            }
+            Button(
+                onClick = {
+                    viewModel.onGetLastMonthIncome()
+                },
+            ) {
+                Text("한달간 총 주문 금액")
+            }
+            Button(
+                onClick = {
+                    viewModel.onSearchMyInfo()
+                },
+            ) {
+                Text("주문 단건 조회")
+            }
+            Button(
+                onClick = {
+                    viewModel.onSearchMyInfo()
+                },
+            ) {
+                Text("주문 상태 확인")
+            }
+            Button(
+                onClick = {
+                    viewModel.onSearchMyInfo()
+                },
+            ) {
+                Text("특정 키오스크의 6개월간 주문 금액")
+            }
+            Button(
+                onClick = {
+                    viewModel.onSearchMyInfo()
+                },
+            ) {
+                Text("특정 키오스크의 한달간 총 주문 금액")
+            }
+            Button(
+                onClick = {
+                    viewModel.onSearchMyInfo()
+                },
+            ) {
+                Text("주문 전체 조회")
+            }
+            Button(
+                onClick = {
+                    viewModel.onSearchMyInfo()
+                },
+            ) {
+                Text("키오스크 조회 API 연동 및 테스트")
+            }
+            Button(
+                onClick = {
+                    viewModel.onSearchMyInfo()
+                },
+            ) {
+                Text("키오스크 생성 API 연동 및 테스트")
+            }
         }
     }
 }

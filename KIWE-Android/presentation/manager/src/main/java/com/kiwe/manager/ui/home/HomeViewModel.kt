@@ -10,6 +10,7 @@ import com.kiwe.domain.usecase.manager.login.ClearTokenUseCase
 import com.kiwe.domain.usecase.manager.login.LogoutUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMyInfoUseCase
 import com.kiwe.domain.usecase.manager.token.GetTokenUseCase
+import com.kiwe.domain.usecase.order.GetLastMonthIncomeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.orbitmvi.orbit.Container
@@ -29,6 +30,7 @@ class HomeViewModel
         private val clearTokenUseCase: ClearTokenUseCase,
         private val searchMyInfoUseCase: SearchMyInfoUseCase,
         private val editMyInfoUseCase: EditMyInfoUseCase,
+        private val getLastMonthIncomeUseCase: GetLastMonthIncomeUseCase
     ) : ViewModel(),
         ContainerHost<HomeState, HomeSideEffect> {
         override val container: Container<HomeState, HomeSideEffect> =
@@ -95,6 +97,12 @@ class HomeViewModel
                                 kioskIds = state.kioskIds,
                             ),
                     ).getOrThrow()
+                postSideEffect(HomeSideEffect.Toast(response.toString()))
+            }
+
+        fun onGetLastMonthIncome() =
+            intent {
+                val response = getLastMonthIncomeUseCase().getOrThrow()
                 postSideEffect(HomeSideEffect.Toast(response.toString()))
             }
     }

@@ -3,9 +3,11 @@ package com.kiwe.data.di
 import com.kiwe.data.usecase.CancelPaymentUseCaseImpl
 import com.kiwe.data.usecase.ConfirmPaymentUseCaseImpl
 import com.kiwe.data.usecase.PostOrderUseCaseImpl
+import com.kiwe.data.usecase.manager.order.GetLastMonthIncomeUseCaseImpl
 import com.kiwe.domain.usecase.kiosk.CancelPaymentUseCase
 import com.kiwe.domain.usecase.kiosk.ConfirmPaymentUseCase
 import com.kiwe.domain.usecase.kiosk.PostOrderUseCase
+import com.kiwe.domain.usecase.order.GetLastMonthIncomeUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -22,4 +24,7 @@ interface OrderModule {
 
     @Binds
     fun bindCancelPaymentUseCase(uc: CancelPaymentUseCaseImpl): CancelPaymentUseCase
+
+    @Binds
+    fun bindGetLastMonthIncomeUseCase(uc: GetLastMonthIncomeUseCaseImpl): GetLastMonthIncomeUseCase
 }

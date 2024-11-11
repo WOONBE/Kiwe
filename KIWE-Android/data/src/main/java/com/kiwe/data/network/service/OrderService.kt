@@ -2,6 +2,7 @@ package com.kiwe.data.network.service
 
 import com.kiwe.data.model.request.OrderRequest
 import com.kiwe.data.model.response.OrderResponse
+import com.kiwe.data.network.util.getResult
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -55,4 +56,6 @@ class OrderService
             }.onFailure { e ->
                 Timber.tag(javaClass.simpleName).e("결제 취소 실패: ${e.message}")
             }.getOrDefault(false)
+
+        suspend fun getLastMonthIncome(): Result<Int> = client.getResult("api/orders/total-price/last-month")
     }
