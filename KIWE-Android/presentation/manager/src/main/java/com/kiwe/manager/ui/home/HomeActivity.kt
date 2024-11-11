@@ -113,7 +113,7 @@ fun HomeScreen(
             }
             Button(
                 onClick = {
-                    viewModel.onSearchMyInfo()
+                    viewModel.onGetKioskTotalOrdersLastMonth()
                 },
             ) {
                 Text("특정 키오스크의 한달간 총 주문 금액")

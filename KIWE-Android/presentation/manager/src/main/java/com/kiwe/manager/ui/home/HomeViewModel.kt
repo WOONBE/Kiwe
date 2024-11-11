@@ -12,6 +12,7 @@ import com.kiwe.domain.usecase.manager.search.SearchMyInfoUseCase
 import com.kiwe.domain.usecase.manager.token.GetTokenUseCase
 import com.kiwe.domain.usecase.order.CheckOrderStatusUseCase
 import com.kiwe.domain.usecase.order.GetKioskTotalOrdersLast6MonthsUseCase
+import com.kiwe.domain.usecase.order.GetKioskTotalOrdersLastMonthUseCase
 import com.kiwe.domain.usecase.order.GetLastMonthIncomeUseCase
 import com.kiwe.domain.usecase.order.GetOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +38,7 @@ class HomeViewModel
         private val getOrderUseCase: GetOrderUseCase,
         private val checkOrderStatusUseCase: CheckOrderStatusUseCase,
         private val getKioskTotalOrdersLast6MonthsUseCase: GetKioskTotalOrdersLast6MonthsUseCase,
+        private val getKioskTotalOrdersLastMonthUseCase: GetKioskTotalOrdersLastMonthUseCase,
     ) : ViewModel(),
         ContainerHost<HomeState, HomeSideEffect> {
         override val container: Container<HomeState, HomeSideEffect> =
@@ -129,6 +131,12 @@ class HomeViewModel
                 val response = getKioskTotalOrdersLast6MonthsUseCase(state.kioskId).getOrThrow()
                 postSideEffect(HomeSideEffect.Toast(response.toString()))
             }
+
+    fun onGetKioskTotalOrdersLastMonth() =
+        intent {
+            val response = getKioskTotalOrdersLastMonthUseCase(state.kioskId).getOrThrow()
+            postSideEffect(HomeSideEffect.Toast(response.toString()))
+        }
     }
 
 @Immutable
