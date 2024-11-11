@@ -53,7 +53,7 @@ fun FindPassWordScreen(
         onGetAllMenuList = viewModel::onGetAllMenu,
         onCreateMenu = viewModel::onCreateMenu,
         onEditMenu = viewModel::onEditMenu,
-        onDeleteMenu = viewModel::onDeleteMenu
+        onDeleteMenu = viewModel::onDeleteMenu,
     )
 }
 
@@ -88,20 +88,6 @@ private fun FindPassWordScreen(
                 },
             ) {
                 Text("이메일로 회원 조회")
-            }
-            Button(
-                onClick = {
-                    onNavigateToLoginScreen()
-                },
-            ) {
-                Text("자신의 정보 수정")
-            }
-            Button(
-                onClick = {
-                    onNavigateToLoginScreen()
-                },
-            ) {
-                Text("자신의 정보 조회")
             }
             Button(
                 onClick = {

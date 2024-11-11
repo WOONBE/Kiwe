@@ -2,7 +2,6 @@ package com.kiwe.manager.ui.home
 
 import android.util.Log
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -12,7 +11,9 @@ import com.kiwe.domain.exception.APIException
 import com.kiwe.domain.model.LogoutParam
 import com.kiwe.domain.usecase.manager.login.ClearTokenUseCase
 import com.kiwe.domain.usecase.manager.login.LogoutUseCase
+import com.kiwe.domain.usecase.manager.search.SearchMyInfoUseCase
 import com.kiwe.domain.usecase.manager.token.GetTokenUseCase
+import com.kiwe.manager.ui.login.FindPasswordSideEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.orbitmvi.orbit.Container
@@ -30,6 +31,7 @@ class HomeViewModel
         private val getTokenUseCase: GetTokenUseCase,
         private val logoutUseCase: LogoutUseCase,
         private val clearTokenUseCase: ClearTokenUseCase,
+        private val searchMyInfoUseCase: SearchMyInfoUseCase,
     ) : ViewModel(),
         ContainerHost<HomeState, HomeSideEffect> {
         override val container: Container<HomeState, HomeSideEffect> =
@@ -78,70 +80,10 @@ class HomeViewModel
                 }
             }
 
-        fun onNameChange(name: String) =
-            blockingIntent {
-                reduce {
-                    state.copy(name = name)
-                }
-            }
-
-        fun onIdChange(id: String) =
-            blockingIntent {
-                reduce {
-                    state.copy(id = id)
-                }
-            }
-
-        fun onPasswordChange(password: String) =
-            blockingIntent {
-                reduce {
-                    state.copy(password = password)
-                }
-            }
-
-        fun onPasswordRepeatChange(repeatPassword: String) =
-            blockingIntent {
-                reduce {
-                    state.copy(passwordRepeat = repeatPassword)
-                }
-            }
-
-        fun onShowPasswordChange() =
+        fun onSearchMyInfo() =
             intent {
-                reduce {
-                    if (!state.showPassword) {
-                        state.copy(
-                            showPassword = true,
-                            passwordImageVector = Icons.Filled.Visibility,
-                            passwordVisualTransformation = VisualTransformation.None,
-                        )
-                    } else {
-                        state.copy(
-                            showPassword = false,
-                            passwordImageVector = Icons.Filled.VisibilityOff,
-                            passwordVisualTransformation = PasswordVisualTransformation(),
-                        )
-                    }
-                }
-            }
-
-        fun onShowPasswordRepeatChange() =
-            intent {
-                reduce {
-                    if (!state.showPasswordRepeat) {
-                        state.copy(
-                            showPasswordRepeat = true,
-                            passwordRepeatImageVector = Icons.Filled.Visibility,
-                            passwordRepeatVisualTransformation = VisualTransformation.None,
-                        )
-                    } else {
-                        state.copy(
-                            showPasswordRepeat = false,
-                            passwordRepeatImageVector = Icons.Filled.VisibilityOff,
-                            passwordRepeatVisualTransformation = PasswordVisualTransformation(),
-                        )
-                    }
-                }
+                val response = searchMyInfoUseCase().getOrThrow()
+                postSideEffect(HomeSideEffect.Toast(response.toString()))
             }
     }
 

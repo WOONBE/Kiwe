@@ -73,6 +73,20 @@ fun HomeScreen(
         ) {
             Text("로그아읏 api 연동 및 테스트")
         }
+        Button(
+            onClick = {
+                onNavigateToLoginScreen()
+            },
+        ) {
+            Text("자신의 정보 수정")
+        }
+        Button(
+            onClick = {
+                viewModel.onSearchMyInfo()
+            },
+        ) {
+            Text("자신의 정보 조회")
+        }
     }
 }
 

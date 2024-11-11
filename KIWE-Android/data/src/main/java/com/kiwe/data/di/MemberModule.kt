@@ -5,11 +5,13 @@ import com.kiwe.data.usecase.manager.login.LogoutUseCaseImpl
 import com.kiwe.data.usecase.manager.search.SearchAllMemberUseCaseImpl
 import com.kiwe.data.usecase.manager.search.SearchMemberByEmailUseCaseImpl
 import com.kiwe.data.usecase.manager.search.SearchMemberByIdUseCaseImpl
+import com.kiwe.data.usecase.manager.search.SearchMyInfoUseCaseImpl
 import com.kiwe.domain.usecase.manager.edit.EditMemberInfoUseCase
 import com.kiwe.domain.usecase.manager.login.LogoutUseCase
 import com.kiwe.domain.usecase.manager.search.SearchAllMemberUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMemberByEmailUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMemberByIdUseCase
+import com.kiwe.domain.usecase.manager.search.SearchMyInfoUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -32,4 +34,7 @@ interface MemberModule {
 
     @Binds
     fun bindEditMemberInfoUseCase(uc: EditMemberInfoUseCaseImpl): EditMemberInfoUseCase
+
+    @Binds
+    fun bindSearchMyInfoUseCase(uc: SearchMyInfoUseCaseImpl): SearchMyInfoUseCase
 }

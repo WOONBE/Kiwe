@@ -37,4 +37,6 @@ class MemberService
             client.putResult("api/members/$memberId") {
                 setBody(newMemberInfo)
             }
+
+        suspend fun searchMyInfo(): Result<MemberInfoResponse> = client.getResult("api/members")
     }
