@@ -62,4 +62,7 @@ class OrderService
         suspend fun getOrder(orderId: Int): Result<com.kiwe.domain.model.OrderResponse> = client.getResult("api/orders/$orderId")
 
         suspend fun checkOrderStatus(kioskId: Int): Result<String> = client.getResult("api/orders/payment/$kioskId")
+
+        suspend fun getKioskTotalOrdersLast6Months(kioskId: Int): Result<Map<String, Int>> =
+            client.getResult("api/orders/monthly-sales/last-six-months/$kioskId")
     }
