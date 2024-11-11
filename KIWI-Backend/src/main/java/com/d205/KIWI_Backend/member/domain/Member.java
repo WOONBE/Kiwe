@@ -34,7 +34,7 @@ public class Member extends BaseEntity {
     @Column(name = "MEMBER_NAME", nullable = false)
     private String name;
 
-    @Column(name = "MEMBER_EMAIL", unique = true, nullable = false)
+    @Column(name = "MEMBER_EMAIL", nullable = false)
     private String email;
 
     @Column(name = "MEMBER_PASSWORD", nullable = false)
@@ -44,7 +44,7 @@ public class Member extends BaseEntity {
     private MemberType type;
 
     @Builder.Default
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Kiosk> kiosks = new ArrayList<>(); //키오스크 목록
 
     //비즈니스 로직
