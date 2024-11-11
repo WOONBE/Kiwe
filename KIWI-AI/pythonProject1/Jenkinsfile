@@ -12,7 +12,6 @@ pipeline {
                     env.DOCKER_IMAGE = props['DOCKER_IMAGE']
                     env.DOCKER_IMAGE_FILE = props['DOCKER_IMAGE_FILE']
                     env.DEPLOY_LOG_PATH = props['DEPLOY_LOG_PATH']
-                    env.FAST_API_DIR = props['FAST_API_DIR']
                     env.REMOTE_DIR = props['REMOTE_DIR']  // 올바른 경로 확인
                 }
             }
@@ -76,7 +75,6 @@ pipeline {
                 }
             }
         }
-
         stage('Deploy FastApi Server') {
             steps {
                 script {
@@ -89,7 +87,15 @@ pipeline {
                                         execCommand: """
                                             set -x  # 디버깅 모드 활성화
                                             exec > >(tee $DEPLOY_LOG_PATH) 2>&1
-                                            cd $FAST_API_DIR
+                                            cd $REMOTE_DIR
+                                            
+                                            # 이미지 추출
+                                            docker load -i $DOCKER_IMAGE_FILE
+                                            
+                                            # 기존 FastAPI 컨테이너 종료
+                                            docker compose down
+                                            
+                                            # 새 이미지로 FastAPI 서버 시작
                                             docker compose up -d
                                         """
                                     )
