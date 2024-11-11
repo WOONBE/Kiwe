@@ -1,7 +1,7 @@
 package com.kiwe.manager.ui.login
 
-import android.content.Intent
 import android.widget.Toast
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,13 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.kiwe.manager.ui.main.MainActivity
 import com.kiwe.manager.ui.theme.KIWEAndroidTheme
 import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun FindPassWordScreen(
-    viewModel: LoginViewModel = hiltViewModel(),
+    viewModel: FindPasswordViewModel = hiltViewModel(),
     onNavigateToLoginScreen: () -> Unit,
 ) {
 //    val state = viewModel.collectAsState().value
@@ -26,7 +25,7 @@ fun FindPassWordScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is LoginSideEffect.Toast ->
+            is FindPasswordSideEffect.Toast ->
                 Toast
                     .makeText(
                         context,
@@ -34,36 +33,124 @@ fun FindPassWordScreen(
                         Toast.LENGTH_SHORT,
                     ).show()
 
-            LoginSideEffect.NavigateToHomeActivity -> {
-                context.startActivity(
-                    Intent(
-                        context,
-                        MainActivity::class.java,
-                    ).apply {
-                        flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                    },
-                )
-            }
+            FindPasswordSideEffect.NavigateToLoginScreen -> {}
         }
     }
 
     FindPassWordScreen(
         onNavigateToLoginScreen = onNavigateToLoginScreen,
+        onSearchMemberByEmail = viewModel::onSearchMemberByEmailUseCase,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FindPassWordScreen(onNavigateToLoginScreen: () -> Unit) {
+private fun FindPassWordScreen(
+    onNavigateToLoginScreen: () -> Unit,
+    onSearchMemberByEmail: () -> Unit
+) {
     Surface(
         modifier = Modifier.systemBarsPadding(),
     ) {
-        Button(
-            onClick = {
-                onNavigateToLoginScreen()
-            },
-        ) {
-            Text("FindPassWordScreen")
+        Column {
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("FindPassWordScreen")
+            }
+            Button(
+                onClick = {
+                    onSearchMemberByEmail()
+                },
+            ) {
+                Text("이메일로 회원 조회")
+            }
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("자신의 정보 수정")
+            }
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("자신의 정보 조회")
+            }
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("회원 수정")
+            }
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("ID로 회원 조회")
+            }
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("모든 회원 조회")
+            }
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("로그아웃")
+            }
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("메뉴 카테고리별 조회")
+            }
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("메뉴 삭제")
+            }
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("메뉴 생성")
+            }
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("메뉴 전체 조회")
+            }
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("메뉴 수정")
+            }
+            Button(
+                onClick = {
+                    onNavigateToLoginScreen()
+                },
+            ) {
+                Text("메뉴 단건 조회")
+            }
         }
     }
 }
