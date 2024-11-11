@@ -75,7 +75,7 @@ fun HomeScreen(
         }
         Button(
             onClick = {
-                onNavigateToLoginScreen()
+                viewModel.onEditMyInfo()
             },
         ) {
             Text("자신의 정보 수정")

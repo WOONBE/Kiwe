@@ -39,4 +39,9 @@ class MemberService
             }
 
         suspend fun searchMyInfo(): Result<MemberInfoResponse> = client.getResult("api/members")
+
+        suspend fun editMyInfo(editMemberParam: EditMemberParam): Result<MemberInfoResponse> =
+            client.putResult("api/members") {
+                setBody(editMemberParam)
+            }
     }

@@ -91,7 +91,8 @@ class FindPasswordViewModel
                             EditMemberParam(
                                 name = state.name,
                                 email = state.email,
-                                kioskIds = listOf(),
+                                password = state.password,
+                                kioskIds = listOf()
                             ),
                     )
                 postSideEffect(FindPasswordSideEffect.Toast(response.getOrThrow().toString()))

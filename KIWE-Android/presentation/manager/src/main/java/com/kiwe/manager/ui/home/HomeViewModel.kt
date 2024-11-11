@@ -1,19 +1,15 @@
 package com.kiwe.manager.ui.home
 
 import android.util.Log
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.ViewModel
 import com.kiwe.domain.exception.APIException
+import com.kiwe.domain.model.EditMemberParam
 import com.kiwe.domain.model.LogoutParam
+import com.kiwe.domain.usecase.manager.edit.EditMyInfoUseCase
 import com.kiwe.domain.usecase.manager.login.ClearTokenUseCase
 import com.kiwe.domain.usecase.manager.login.LogoutUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMyInfoUseCase
 import com.kiwe.domain.usecase.manager.token.GetTokenUseCase
-import com.kiwe.manager.ui.login.FindPasswordSideEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.orbitmvi.orbit.Container
@@ -32,6 +28,7 @@ class HomeViewModel
         private val logoutUseCase: LogoutUseCase,
         private val clearTokenUseCase: ClearTokenUseCase,
         private val searchMyInfoUseCase: SearchMyInfoUseCase,
+        private val editMyInfoUseCase: EditMyInfoUseCase,
     ) : ViewModel(),
         ContainerHost<HomeState, HomeSideEffect> {
         override val container: Container<HomeState, HomeSideEffect> =
@@ -85,20 +82,30 @@ class HomeViewModel
                 val response = searchMyInfoUseCase().getOrThrow()
                 postSideEffect(HomeSideEffect.Toast(response.toString()))
             }
+
+        fun onEditMyInfo() =
+            intent {
+                val response =
+                    editMyInfoUseCase(
+                        editMemberParam =
+                            EditMemberParam(
+                                name = state.name,
+                                email = state.email,
+                                password = state.password,
+                                kioskIds = state.kioskIds,
+                            ),
+                    ).getOrThrow()
+                postSideEffect(HomeSideEffect.Toast(response.toString()))
+            }
     }
 
 @Immutable
 data class HomeState(
-    val name: String = "",
-    val id: String = "",
-    val password: String = "",
-    val passwordRepeat: String = "",
-    val showPassword: Boolean = false,
-    val passwordImageVector: ImageVector = Icons.Filled.VisibilityOff,
-    val passwordRepeatImageVector: ImageVector = Icons.Filled.VisibilityOff,
-    val passwordVisualTransformation: VisualTransformation = PasswordVisualTransformation(),
-    val passwordRepeatVisualTransformation: VisualTransformation = PasswordVisualTransformation(),
-    val showPasswordRepeat: Boolean = false,
+    val name: String = "5",
+    val id: String = "5",
+    val password: String = "5",
+    val email: String = "5",
+    val kioskIds: List<Int> = listOf(),
 )
 
 sealed interface HomeSideEffect {

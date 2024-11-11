@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class EditMemberParam(
     val name: String,
     val email: String,
+    val password: String,
     val kioskIds: List<Int>,
 )
