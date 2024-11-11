@@ -27,7 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kiwe.domain.model.MenuCategory
+import com.kiwe.domain.model.MenuCategoryGroup
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KiweBlack1
@@ -40,10 +40,10 @@ import timber.log.Timber
 @Composable
 fun CategorySelector(
     modifier: Modifier = Modifier,
-    categoryState: MenuCategory = MenuCategory.NEW,
-    onCategoryClick: (MenuCategory) -> Unit = {},
+    categoryState: MenuCategoryGroup = MenuCategoryGroup.NEW,
+    onCategoryClick: (MenuCategoryGroup) -> Unit = {},
 ) {
-    val categories = MenuCategory.entries
+    val categories = MenuCategoryGroup.entries
     val itemsPerPage = 4
     val pageCount = (categories.size + itemsPerPage - 1) / itemsPerPage
     var currentPage by remember { mutableIntStateOf(categories.indexOf(categoryState) / itemsPerPage) }
