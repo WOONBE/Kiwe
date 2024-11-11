@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -37,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.kiwe.kiosk.BuildConfig.BASE_IMAGE_URL
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.model.ShoppingCartItem
 import com.kiwe.kiosk.ui.screen.order.component.OrderDialog
@@ -171,7 +174,7 @@ private fun ShoppingCartDialog(
                     modifier =
                         Modifier
                             .background(Color.Transparent)
-                            .padding(vertical = 10.dp, horizontal = 10.dp)
+                            .padding(vertical = 5.dp, horizontal = 10.dp)
                             .dropShadow(
                                 shape = RoundedCornerShape(10.dp),
                                 color = Color.Black.copy(alpha = 0.25F),
@@ -184,13 +187,14 @@ private fun ShoppingCartDialog(
                         modifier =
                             Modifier
                                 .background(Color.White)
-                                .padding(horizontal = 10.dp, vertical = 5.dp),
+                                .fillMaxHeight()
+                                .padding(horizontal = 5.dp, vertical = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AsyncImage(
-                            model = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+                            model = "https://" + BASE_IMAGE_URL + shoppingCartItemList[it].menuImgPath,
                             contentDescription = "메뉴 이미지 주소",
-                            modifier = Modifier.weight(1F),
+                            modifier = Modifier.weight(1F).aspectRatio(1F),
                         )
                         ShoppingCartDataInfo(
                             shoppingCartItemList[it],
@@ -215,8 +219,8 @@ private fun ShoppingCartDataInfo(
     onMinusItem: (String, Map<String, Pair<String, Int>>) -> Unit,
 ) {
     Column(
-        modifier = modifier.padding(start = 15.dp),
-        verticalArrangement = Arrangement.Top,
+        modifier = modifier.padding(start = 5.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Row(
             modifier =
@@ -352,21 +356,24 @@ fun ShoppingCartDialogPreview() {
     ShoppingCartDialog(
         listOf(
             ShoppingCartItem(
+                menuId = 1,
                 menuTitle = "딸111기쿠키프라페",
 //                menuPrice = 5000,
-//                menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+                menuImgPath = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                 count = 99,
             ),
             ShoppingCartItem(
+                menuId = 1,
                 menuTitle = "딸111기쿠키프라페",
 //                menuPrice = 5000,
-//                menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+                menuImgPath = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                 count = 99,
             ),
             ShoppingCartItem(
+                menuId = 1,
                 menuTitle = "딸111기쿠키프라페",
 //                menuPrice = 5000,
-//                menuImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+                menuImgPath = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                 count = 99,
             ),
         ),

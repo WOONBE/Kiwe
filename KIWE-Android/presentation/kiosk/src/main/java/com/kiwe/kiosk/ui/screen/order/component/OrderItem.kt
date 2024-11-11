@@ -34,7 +34,7 @@ import java.util.Locale
 fun OrderItem(
     orderItem: MenuCategoryParam,
     modifier: Modifier = Modifier,
-    onClick: (String, Int) -> Unit,
+    onClick: (Int, String, String, Int) -> Unit,
 ) {
     Box(
         modifier =
@@ -48,12 +48,19 @@ fun OrderItem(
                     spread = 0.dp,
                 ).clip(RoundedCornerShape(5.dp))
                 .background(color = Color.White)
-                .clickable { onClick(orderItem.name, orderItem.price) },
+                .clickable {
+                    onClick(
+                        orderItem.id,
+                        orderItem.imgPath,
+                        orderItem.name,
+                        orderItem.price,
+                    )
+                },
     ) {
         Column(
             modifier =
                 Modifier
-                    .padding(2.dp),
+                    .padding(1.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 //            Log.d(TAG, "https://" + BASE_IMAGE_URL + URLEncoder.encode(orderItem.imgPath, StandardCharsets.UTF_8.toString()))
@@ -64,7 +71,7 @@ fun OrderItem(
                     Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .padding(bottom = 5.dp),
+                        .padding(bottom = 2.dp),
                 model = "https://" + BASE_IMAGE_URL + orderItem.imgPath,
                 contentScale = ContentScale.Crop,
                 contentDescription = "Translated description of what the image contains",
@@ -76,21 +83,25 @@ fun OrderItem(
                     orderItem.name
                 }
             val fontSizeSp = 8.sp
-            val lineHeight = fontSizeSp.value * 1.2f // 여유 높이 1.2배로 설정 (필요에 따라 조절)
+            val lineHeight = fontSizeSp.value * 1.2f // 여유 높이 1.7배로 설정 (필요에 따라 조절)
             val maxLines = 2
             // sp 값을 dp 값으로 변환
             val boxHeightDp = with(LocalDensity.current) { (lineHeight * maxLines).toDp() }
             Box(
                 modifier =
                     Modifier
-                        .height(boxHeightDp) // 두 줄 높이에 맞게 고정
+                        .height(boxHeightDp + 10.dp) // 두 줄 높이에 맞게 고정
                         .fillMaxWidth(),
                 // 텍스트가 가로로도 중앙에 위치하도록
                 contentAlignment = Alignment.Center, // 수직 및 수평 중앙 정렬
             ) {
                 Text(
                     text = title,
-                    style = Typography.bodySmall.copy(fontSize = 8.sp),
+                    style =
+                        Typography.bodySmall.copy(
+                            fontSize = fontSizeSp,
+                            lineHeight = fontSizeSp * 1.0,
+                        ),
                     textAlign = TextAlign.Center,
                     maxLines = maxLines, // 두 줄까지만 표시
                 )
@@ -98,7 +109,7 @@ fun OrderItem(
             Text(
                 text = String.format(Locale.getDefault(), "%,d원", orderItem.price),
                 color = colorResource(R.color.KIWE_orange1),
-                style = Typography.bodySmall.copy(fontSize = 10.sp),
+                style = Typography.bodySmall.copy(fontSize = 8.sp),
                 textAlign = TextAlign.Center,
             )
         }
@@ -119,6 +130,6 @@ fun OrderItemPreview() {
             description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
             imgPath = "drinks/HOT_디카페인 아메리카노.jpg",
         ),
-        onClick = { _, _ -> },
+        onClick = { _, _, _, _ -> },
     )
 }

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
@@ -55,7 +56,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalGetImage::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge() // 이거 끄면 덜컹거리는 거 없음
+        enableEdgeToEdge() // 이거 끄면 덜컹거리는 거 없음
         setContent {
             KIWEAndroidTheme {
                 MainNavHost()
