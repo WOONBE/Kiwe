@@ -38,6 +38,14 @@ public class KioskService {
         Kiosk savedKiosk = kioskRepository.save(kiosk);
         return KioskResponse.fromKiosk(savedKiosk);
     }
+    @Transactional(readOnly = true)
+    public KioskResponse getKioskById(Integer kioskId) {
+        Kiosk kiosk = kioskRepository.findById(kioskId)
+            .orElseThrow(() -> new BadRequestException(ExceptionCode.NOT_FOUND_KIOSK_ID));
+        return KioskResponse.fromKiosk(kiosk);
+    }
+
+
 
     @Transactional
     public KioskResponse updateKiosk(Integer id, KioskRequest request) {
