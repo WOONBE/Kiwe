@@ -46,19 +46,20 @@ pipeline {
                                 configName: 'D205-Server',
                                 transfers: [
                                     sshTransfer(
-                                        sourceFiles: "**/$DOCKER_IMAGE_FILE", 
-                                        removePrefix: '', 
+                                        sourceFiles: "KIWI-AI/pythonProject1/$DOCKER_IMAGE_FILE", 
+                                        removePrefix: 'KIWI-AI/pythonProject1', 
                                         remoteDirectory: env.REMOTE_DIR,
                                         execCommand: '''
                                             echo "Transferred $DOCKER_IMAGE_FILE to $REMOTE_DIR"
                                             pwd
                                             ls -al $REMOTE_DIR
                                         ''',
-                                        execTimeout: 120000
+                                        execTimeout: 120000,
+                                        verbose: true
                                     ),
                                     sshTransfer(
                                         sourceFiles: 'KIWI-AI/pythonProject1/compose.yml',
-                                        removePrefix: '',
+                                        removePrefix: 'KIWI-AI/pythonProject1',
                                         remoteDirectory: env.REMOTE_DIR,
                                         execCommand: '''
                                             echo "Transferred compose.yml to $REMOTE_DIR"
@@ -66,6 +67,7 @@ pipeline {
                                             ls -al $REMOTE_DIR
                                         ''',
                                         execTimeout: 120000
+                                        verbose: true
                                     )
                                 ]
                             )
