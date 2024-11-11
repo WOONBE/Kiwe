@@ -7,6 +7,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.ViewModel
 import com.kiwe.domain.exception.APIException
+import com.kiwe.domain.model.EditMemberParam
+import com.kiwe.domain.usecase.manager.edit.EditMemberInfoUseCase
 import com.kiwe.domain.usecase.manager.search.SearchAllMemberUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMemberByEmailUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMemberByIdUseCase
@@ -24,7 +26,8 @@ class FindPasswordViewModel
     constructor(
         private val searchMemberByEmailUseCase: SearchMemberByEmailUseCase,
         private val searchMemberByIdUseCase: SearchMemberByIdUseCase,
-        private val searchAllMemberUseCase: SearchAllMemberUseCase
+        private val searchAllMemberUseCase: SearchAllMemberUseCase,
+        private val editMemberInfoUseCase: EditMemberInfoUseCase,
     ) : ViewModel(),
         ContainerHost<FindPasswordState, FindPasswordSideEffect> {
         override val container: Container<FindPasswordState, FindPasswordSideEffect> =
@@ -71,13 +74,30 @@ class FindPasswordViewModel
                 postSideEffect(FindPasswordSideEffect.Toast(response.toString()))
             }
 
+        fun onEditMemberInfo() =
+            intent {
+                val response =
+                    editMemberInfoUseCase(
+                        memberId = state.id,
+                        newMemberInfo =
+                            EditMemberParam(
+                                name = state.name,
+                                email = state.email,
+                                kioskIds = listOf(),
+                            ),
+                    )
+                postSideEffect(FindPasswordSideEffect.Toast(response.getOrThrow().toString()))
+            }
     }
 
 @Immutable
 data class FindPasswordState(
     val searchMemberByEmail: String = "2",
-    val id: Int = 2,
-    val password: String = "",
+    val id: Int = 3,
+    val name: String = "2",
+    val email: String = "2",
+    val password: String = "2",
+    val kioskIds: List<Int> = listOf(),
     val passwordRepeat: String = "",
     val showPassword: Boolean = false,
     val passwordImageVector: ImageVector = Icons.Filled.VisibilityOff,

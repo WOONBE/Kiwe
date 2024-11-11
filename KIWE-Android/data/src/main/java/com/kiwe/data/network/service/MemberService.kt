@@ -2,6 +2,8 @@ package com.kiwe.data.network.service
 
 import com.kiwe.data.network.util.getResult
 import com.kiwe.data.network.util.postResult
+import com.kiwe.data.network.util.putResult
+import com.kiwe.domain.model.EditMemberParam
 import com.kiwe.domain.model.LogoutParam
 import com.kiwe.domain.model.MemberInfoResponse
 import io.ktor.client.HttpClient
@@ -26,5 +28,13 @@ class MemberService
         suspend fun logout(logoutParam: LogoutParam): Result<Unit> =
             client.postResult<Unit>("api/members/log-out") {
                 setBody(logoutParam)
+            }
+
+        suspend fun editMemberInfo(
+            memberId: Int,
+            newMemberInfo: EditMemberParam,
+        ): Result<MemberInfoResponse> =
+            client.putResult("api/members/$memberId") {
+                setBody(newMemberInfo)
             }
     }

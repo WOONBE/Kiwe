@@ -48,7 +48,8 @@ fun FindPassWordScreen(
         onNavigateToLoginScreen = onNavigateToLoginScreen,
         onSearchMemberByEmail = viewModel::onSearchMemberByEmail,
         onSearchMemberById = viewModel::onSearchMemberById,
-        onSearchAllMember = viewModel::onSearchAllMember
+        onSearchAllMember = viewModel::onSearchAllMember,
+        onEditMemberInfo = viewModel::onEditMemberInfo
     )
 }
 
@@ -59,6 +60,7 @@ private fun FindPassWordScreen(
     onSearchMemberByEmail: () -> Unit,
     onSearchMemberById: () -> Unit,
     onSearchAllMember: () -> Unit,
+    onEditMemberInfo: () -> Unit,
 ) {
     Surface(
         modifier = Modifier.systemBarsPadding(),
@@ -94,7 +96,7 @@ private fun FindPassWordScreen(
             }
             Button(
                 onClick = {
-                    onNavigateToLoginScreen()
+                    onEditMemberInfo()
                 },
             ) {
                 Text("회원 수정")
@@ -112,13 +114,6 @@ private fun FindPassWordScreen(
                 },
             ) {
                 Text("모든 회원 조회")
-            }
-            Button(
-                onClick = {
-                    onNavigateToLoginScreen()
-                },
-            ) {
-                Text("로그아웃")
             }
             Button(
                 onClick = {
