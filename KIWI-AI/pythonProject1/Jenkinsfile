@@ -12,11 +12,50 @@ pipeline {
                     env.DOCKER_IMAGE = props['DOCKER_IMAGE']
                     env.DOCKER_IMAGE_FILE = props['DOCKER_IMAGE_FILE']
                     env.DEPLOY_LOG_PATH = props['DEPLOY_LOG_PATH']
+                    env.MATTERMOST_CHANNEL_NAME = props['MATTERMOST_CHANNEL_NAME']
+                    env.MATTERMOST_WEBHOOK_URL = props['MATTERMOST_WEBHOOK_URL']
                     env.REMOTE_DIR = props['REMOTE_DIR']  // 올바른 경로 확인
                 }
             }
         }
-        
+                stage('Notify Build Start') {
+            steps {
+                script {
+                    def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+                    def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+                    def Commit_Message = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+
+                    // 이전 커밋을 확인하고 기본값을 설정
+                    def previousCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT ?: 'HEAD'
+                    def allCommits = sh(script: "git log --pretty=format:'%h - %s (%an)' ${previousCommit}..HEAD", returnStdout: true).trim()
+
+                    // 커밋 메시지 이스케이프 처리
+                    def formattedCommits = allCommits.split('\n').collect { line ->
+                        // 이스케이프 문자를 제대로 처리하고, 필요없는 이스케이프 문자는 제거
+                        def escapedLine = line.replaceAll("([\\[\\]\\(\\)])", '\\\\$1') // 괄호나 대괄호는 이스케이프 처리
+                        "• ${escapedLine}"
+                    }.join('\n')  // 실제 줄바꿈을 사용
+
+                    def message = """
+                        #### 🌐BE 빌드 시작
+                        **빌드 번호:** $env.JOB_NAME #$env.BUILD_NUMBER
+                        **브랜치:** $env.GIT_BRANCH
+                        **작성자:** $Author_ID ($Author_Name)
+                        **빌드 URL:** [Details]($env.BUILD_URL)
+                        **포함된 커밋:**
+                        $formattedCommits
+                    """.stripIndent()
+
+                    mattermostSend(
+                        color: '#439FE0',
+                        message: message,
+                        endpoint: "$MATTERMOST_WEBHOOK_URL",
+                        channel: "$MATTERMOST_CHANNEL_NAME",
+                        icon: 'https://jenkins.io/images/logos/jenkins/jenkins.png'
+                    )
+                }
+            }
+        }
         stage('Checkout') {
             steps {
                 checkout scm
@@ -110,7 +149,31 @@ pipeline {
 
     post {
         always {
-            echo 'This will always run, regardless of success or failure.'
+            script {
+                def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+                def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+                def Commit_Message = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                def Build_Status = currentBuild.result ?: 'SUCCESS'
+                def Status_Color = Build_Status == 'SUCCESS' ? 'good' : (Build_Status == 'UNSTABLE' ? 'warning' : 'danger')
+                def Status_Text = Build_Status == 'SUCCESS' ? '빌드 성공' : (Build_Status == 'UNSTABLE' ? '빌드 불안정' : '빌드 실패')
+
+                def message = """
+                    #### 🌐BE $Status_Text
+                    **빌드 번호** $env.JOB_NAME #$env.BUILD_NUMBER
+                    **작성자:** $Author_ID ($Author_Name)
+                    **빌드 URL:** [Details]($env.BUILD_URL)
+                """.stripIndent()
+                mattermostSend(
+                    color: Status_Color,
+                    message: message,
+                    endpoint: "$env.MATTERMOST_WEBHOOK_URL",
+                    channel: "$env.MATTERMOST_CHANNEL_NAME",
+                    icon: 'https://jenkins.io/images/logos/jenkins/jenkins.png'
+                )
+            }
+            steps {
+                cleanws()  // 워크스페이스 클리닝
+            }
         }
     }
 }
