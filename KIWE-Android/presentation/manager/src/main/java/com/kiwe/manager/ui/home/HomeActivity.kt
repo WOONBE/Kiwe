@@ -99,7 +99,7 @@ fun HomeScreen(
             }
             Button(
                 onClick = {
-                    viewModel.onSearchMyInfo()
+                    viewModel.checkOrderStatus()
                 },
             ) {
                 Text("주문 상태 확인")
