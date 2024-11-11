@@ -15,4 +15,6 @@ class MemberService
             client.getResult("api/members/email") {
                 parameter("email", email)
             }
+
+        suspend fun searchMemberById(id: Int): Result<MemberInfoResponse> = client.getResult("api/members/$id")
     }

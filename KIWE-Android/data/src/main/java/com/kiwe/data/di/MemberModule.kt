@@ -1,7 +1,9 @@
 package com.kiwe.data.di
 
 import com.kiwe.data.usecase.manager.search.SearchMemberByEmailUseCaseImpl
+import com.kiwe.data.usecase.manager.search.SearchMemberByIdUseCaseImpl
 import com.kiwe.domain.usecase.manager.search.SearchMemberByEmailUseCase
+import com.kiwe.domain.usecase.manager.search.SearchMemberByIdUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -12,4 +14,7 @@ import dagger.hilt.components.SingletonComponent
 interface MemberModule {
     @Binds
     fun bindSearchMemberByEmailUseCase(uc: SearchMemberByEmailUseCaseImpl): SearchMemberByEmailUseCase
+
+    @Binds
+    fun bindSearchMemberByIdUseCase(uc: SearchMemberByIdUseCaseImpl): SearchMemberByIdUseCase
 }

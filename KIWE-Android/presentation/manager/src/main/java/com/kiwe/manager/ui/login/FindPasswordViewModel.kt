@@ -9,6 +9,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.ViewModel
 import com.kiwe.domain.exception.APIException
 import com.kiwe.domain.usecase.manager.search.SearchMemberByEmailUseCase
+import com.kiwe.domain.usecase.manager.search.SearchMemberByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.orbitmvi.orbit.Container
@@ -22,6 +23,7 @@ class FindPasswordViewModel
     @Inject
     constructor(
         private val searchMemberByEmailUseCase: SearchMemberByEmailUseCase,
+        private val searchMemberByIdUseCase: SearchMemberByIdUseCase
     ) : ViewModel(),
         ContainerHost<FindPasswordState, FindPasswordSideEffect> {
         override val container: Container<FindPasswordState, FindPasswordSideEffect> =
@@ -53,6 +55,12 @@ class FindPasswordViewModel
         fun onSearchMemberByEmailUseCase() =
             intent {
                 val response = searchMemberByEmailUseCase(state.searchMemberByEmail).getOrThrow()
+                postSideEffect(FindPasswordSideEffect.Toast(response.toString()))
+            }
+
+        fun onSearchMemberByIdUseCase() =
+            intent {
+                val response = searchMemberByIdUseCase(state.id).getOrThrow()
                 postSideEffect(FindPasswordSideEffect.Toast(response.toString()))
             }
 
@@ -112,7 +120,7 @@ class FindPasswordViewModel
 @Immutable
 data class FindPasswordState(
     val searchMemberByEmail: String = "2",
-    val id: String = "",
+    val id: Int = 2,
     val password: String = "",
     val passwordRepeat: String = "",
     val showPassword: Boolean = false,
