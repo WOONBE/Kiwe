@@ -51,6 +51,7 @@ fun FindPassWordScreen(
         onEditMemberInfo = viewModel::onEditMemberInfo,
         onGetMenuById = viewModel::onGetMenuById,
         onGetAllMenuList = viewModel::onGetAllMenu,
+        onCreateMenu = viewModel::onCreateMenu
     )
 }
 
@@ -64,6 +65,7 @@ private fun FindPassWordScreen(
     onEditMemberInfo: () -> Unit,
     onGetMenuById: () -> Unit,
     onGetAllMenuList: () -> Unit,
+    onCreateMenu: () -> Unit
 ) {
     Surface(
         modifier = Modifier.systemBarsPadding(),
@@ -134,7 +136,7 @@ private fun FindPassWordScreen(
             }
             Button(
                 onClick = {
-                    onNavigateToLoginScreen()
+                    onCreateMenu()
                 },
             ) {
                 Text("메뉴 생성")
