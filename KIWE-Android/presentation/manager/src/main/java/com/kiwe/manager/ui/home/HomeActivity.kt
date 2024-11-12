@@ -118,7 +118,7 @@ fun HomeScreen(
             }
             Button(
                 onClick = {
-                    viewModel.onSearchMyInfo()
+                    viewModel.onGetOrderAll()
                 },
             ) {
                 Text("주문 전체 조회")

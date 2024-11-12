@@ -15,6 +15,7 @@ import com.kiwe.domain.usecase.order.CheckOrderStatusUseCase
 import com.kiwe.domain.usecase.order.GetKioskTotalOrdersLast6MonthsUseCase
 import com.kiwe.domain.usecase.order.GetKioskTotalOrdersLastMonthUseCase
 import com.kiwe.domain.usecase.order.GetLastMonthIncomeUseCase
+import com.kiwe.domain.usecase.order.GetOrderAllUseCase
 import com.kiwe.domain.usecase.order.GetOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -41,6 +42,7 @@ class HomeViewModel
         private val getKioskTotalOrdersLast6MonthsUseCase: GetKioskTotalOrdersLast6MonthsUseCase,
         private val getKioskTotalOrdersLastMonthUseCase: GetKioskTotalOrdersLastMonthUseCase,
         private val getKioskByKioskIdUseCase: GetKioskByIdUseCase,
+        private val getOrderAllUseCase: GetOrderAllUseCase,
     ) : ViewModel(),
         ContainerHost<HomeState, HomeSideEffect> {
         override val container: Container<HomeState, HomeSideEffect> =
@@ -143,6 +145,12 @@ class HomeViewModel
         fun onGetKioskByKioskId() =
             intent {
                 val response = getKioskByKioskIdUseCase(state.kioskId).getOrThrow()
+                postSideEffect(HomeSideEffect.Toast(response.toString()))
+            }
+
+        fun onGetOrderAll() =
+            intent {
+                val response = getOrderAllUseCase().getOrThrow()
                 postSideEffect(HomeSideEffect.Toast(response.toString()))
             }
     }

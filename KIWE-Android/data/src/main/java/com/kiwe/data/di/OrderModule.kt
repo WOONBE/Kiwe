@@ -7,6 +7,7 @@ import com.kiwe.data.usecase.manager.order.CheckOrderStatusUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetKioskTotalOrdersLast6MonthsUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetKioskTotalOrdersLastMonthUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetLastMonthIncomeUseCaseImpl
+import com.kiwe.data.usecase.manager.order.GetOrderAllUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetOrderUseCaseImpl
 import com.kiwe.domain.usecase.kiosk.CancelPaymentUseCase
 import com.kiwe.domain.usecase.kiosk.ConfirmPaymentUseCase
@@ -15,6 +16,7 @@ import com.kiwe.domain.usecase.order.CheckOrderStatusUseCase
 import com.kiwe.domain.usecase.order.GetKioskTotalOrdersLast6MonthsUseCase
 import com.kiwe.domain.usecase.order.GetKioskTotalOrdersLastMonthUseCase
 import com.kiwe.domain.usecase.order.GetLastMonthIncomeUseCase
+import com.kiwe.domain.usecase.order.GetOrderAllUseCase
 import com.kiwe.domain.usecase.order.GetOrderUseCase
 import dagger.Binds
 import dagger.Module
@@ -47,4 +49,7 @@ interface OrderModule {
 
     @Binds
     fun bindGetKioskTotalOrdersLastMonthUseCase(uc: GetKioskTotalOrdersLastMonthUseCaseImpl): GetKioskTotalOrdersLastMonthUseCase
+
+    @Binds
+    fun bindGetOrderAllUseCase(uc: GetOrderAllUseCaseImpl): GetOrderAllUseCase
 }
