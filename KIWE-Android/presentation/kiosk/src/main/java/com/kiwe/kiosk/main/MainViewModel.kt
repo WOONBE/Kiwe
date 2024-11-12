@@ -2,6 +2,8 @@ package com.kiwe.kiosk.main
 
 import androidx.compose.ui.geometry.Offset
 import com.kiwe.domain.model.Category
+import com.kiwe.domain.model.VoiceOrderRequest
+import com.kiwe.domain.usecase.VoiceOrderUseCase
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
@@ -9,6 +11,7 @@ import com.kiwe.kiosk.ui.screen.utils.SpeechRecognizerManager
 import com.kiwe.kiosk.ui.screen.utils.SpeechResultListener
 import com.kiwe.kiosk.ui.screen.utils.helpPopupRegex
 import com.kiwe.kiosk.ui.screen.utils.menuRegex
+import com.kiwe.kiosk.ui.screen.utils.orderRegex
 import com.kiwe.kiosk.utils.MainEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -25,6 +28,7 @@ class MainViewModel
     @Inject
     constructor(
         private val speechRecognizerManager: SpeechRecognizerManager,
+        private val voiceOrderUseCase: VoiceOrderUseCase,
     ) : BaseViewModel<MainState, MainSideEffect>(MainState()),
         SpeechResultListener {
         private var personDetectedRecently = false
@@ -40,6 +44,7 @@ class MainViewModel
         }
 
         init {
+            testOrder()
             getMenuCategory()
             initSpeechRecognizer()
         }
@@ -83,15 +88,34 @@ class MainViewModel
                 }
             }
 
+        fun onDetectAgeGender(
+            age: Int,
+            gender: String,
+        ) {
+            Timber.tag("MainViewModel").d("age: $age, gender: $gender")
+        }
+
         fun onSpeechResult(result: String) =
             intent {
                 if (menuRegex.containsMatchIn(result)) { // 메뉴판에 있는 메뉴를 말했다면
-                    reduce {
-                        state.copy(
-                            isDialogShowing = false,
-                            recognizedText = result,
-                            shouldShowRetryMessage = false,
+                    // 정해둔 폼으로 문장이 끝나는 지 검사
+                    if (orderRegex.containsMatchIn(result)) {
+                        // 검사해서 fastapi로 통신
+                        voiceOrderUseCase(
+                            voiceOrder =
+                                VoiceOrderRequest(
+                                    sentence = result,
+                                    have_temp = false,
+                                    order_items = emptyList(),
+                                ),
                         )
+                        reduce {
+                            state.copy(
+                                isDialogShowing = false,
+                                recognizedText = result,
+                                shouldShowRetryMessage = false,
+                            )
+                        }
                     }
                 } else {
                     reduce {
@@ -118,6 +142,18 @@ class MainViewModel
                 }
             }
         }
+
+        fun testOrder() =
+            intent {
+                voiceOrderUseCase(
+                    voiceOrder =
+                        VoiceOrderRequest(
+                            sentence = "아메리카노 한 잔 주세요",
+                            have_temp = false,
+                            order_items = emptyList(),
+                        ),
+                )
+            }
 
         fun getMenuCategory() =
             intent {
