@@ -1,5 +1,6 @@
 package com.kiwe.data.network.service
 
+import com.kiwe.data.di.Spring
 import com.kiwe.data.network.util.getResult
 import com.kiwe.data.network.util.postResult
 import com.kiwe.data.network.util.putResult
@@ -14,7 +15,7 @@ import javax.inject.Inject
 class MemberService
     @Inject
     constructor(
-        private val client: HttpClient,
+        @Spring private val client: HttpClient,
     ) {
         suspend fun searchMemberByEmail(email: String): Result<MemberInfoResponse> =
             client.getResult("api/members/email") {

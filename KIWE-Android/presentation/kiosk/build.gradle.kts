@@ -131,5 +131,10 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.extensions)
+    // mediapipe
     implementation(libs.tasks.vision)
+    // tflite
+    implementation("org.tensorflow:tensorflow-lite:2.9.0")
+    implementation("org.tensorflow:tensorflow-lite-gpu:2.4.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.2")
 }

@@ -27,6 +27,7 @@ android {
 
         buildConfigField("String", "BASE_URL", properties["BASE_URL"] as String)
         buildConfigField("String", "BASE_IMAGE_URL", properties["BASE_IMAGE_URL"] as String)
+        buildConfigField("String", "FAST_URL", properties["FAST_URL"] as String)
     }
 
     buildTypes {
