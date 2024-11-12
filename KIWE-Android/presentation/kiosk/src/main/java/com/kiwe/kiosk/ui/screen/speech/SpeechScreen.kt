@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.WavyAnimation
+import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import com.kiwe.kiosk.ui.screen.utils.TextToSpeechManager
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.Typography
@@ -44,8 +45,11 @@ const val MAX_SPEECH_WAIT_TIME = 5
 private const val TAG = "SpeechScreen"
 
 @Composable
-fun SpeechScreen(viewModel: MainViewModel) {
-    val state = viewModel.collectAsState().value
+fun SpeechScreen(
+    mainViewModel: MainViewModel,
+    shoppingCartViewModel: ShoppingCartViewModel,
+) {
+    val state = mainViewModel.collectAsState().value
     val context = LocalContext.current
     val ttsManager = remember { TextToSpeechManager(context) }
 
@@ -56,10 +60,17 @@ fun SpeechScreen(viewModel: MainViewModel) {
         }
     }
 
+    LaunchedEffect(state.voiceResult) {
+        if (state.voiceResult.category > 0) { // 이러면 응답이 들어왔다는 의미
+            shoppingCartViewModel.onVoiceResult(state.voiceResult)
+            ttsManager.speak(state.voiceResult.response) // tts로 읽어준다
+            mainViewModel.clearVoiceRecord()
+        }
+    }
+
     SpeechScreen(
-        isDialogOpen = state.isDialogShowing, // 녹음중인 상태일 때 SpeechScreen을 보여준다
-        onResult = viewModel::onSpeechResult,
-        onDismissRequest = viewModel::onDismissRequest,
+        isOpen = state.isScreenShowing, // 녹음중인 상태일 때 SpeechScreen을 보여준다
+        onDismissRequest = mainViewModel::onDismissRequest,
         recognizedText = state.recognizedText,
         commandText = "\"차가운 아메리카노 한잔 주세요\"",
         shouldShowRetryMessage = state.shouldShowRetryMessage,
@@ -68,16 +79,14 @@ fun SpeechScreen(viewModel: MainViewModel) {
 
 @Composable
 private fun SpeechScreen(
-    isDialogOpen: Boolean,
-    onResult: (String) -> Unit,
+    isOpen: Boolean,
     onDismissRequest: () -> Unit,
     recognizedText: String,
     commandText: String,
     shouldShowRetryMessage: Boolean,
 ) {
-    if (isDialogOpen) {
+    if (isOpen) {
         var elapsedTime by remember { mutableLongStateOf(0L) }
-        onResult // TODO
         LaunchedEffect(Unit) {
             delay(1000)
             elapsedTime = 0L // 타이머 초기화
@@ -105,12 +114,6 @@ private fun SpeechScreen(
                     ).clickable { onDismissRequest() },
             color = Color.Transparent,
         ) {
-//            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.anim_kiwe_dynamic_recording))
-//            val progress by animateLottieCompositionAsState(
-//                composition = composition,
-//                iterations = LottieConstants.IterateForever,
-//            )
-
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
@@ -223,8 +226,7 @@ fun ExampleItem(
 fun SpeechScreenPreview() {
     KIWEAndroidTheme {
         SpeechScreen(
-            isDialogOpen = true,
-            onResult = {},
+            isOpen = true,
             onDismissRequest = {},
             recognizedText = "",
             shouldShowRetryMessage = false,

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class VoiceOrderResponse(
-    val category: Int,
+    val category: Int, // AnswerType
     val need_temp: Boolean,
     val message: String,
     val order: List<OrderList>,

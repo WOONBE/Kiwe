@@ -22,6 +22,7 @@ val orderCommands =
     listOf(
         "주세요",
         "주문",
+        "줘",
     )
 val orderPattern = orderCommands.joinToString("|") { "(?:$it)" } // 비포획 그룹으로 각 항목 감싸기
-val orderRegex = Regex("$orderPattern$")
+val orderRegex = Regex(orderPattern)

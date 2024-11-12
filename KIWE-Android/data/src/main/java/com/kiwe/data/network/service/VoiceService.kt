@@ -3,7 +3,7 @@ package com.kiwe.data.network.service
 import com.kiwe.data.di.Fast
 import com.kiwe.data.network.util.postResult
 import com.kiwe.domain.model.VoiceOrderRequest
-import com.kiwe.domain.model.VoiceOrderResponse
+import com.kiwe.domain.model.VoiceTempResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.request.setBody
 import javax.inject.Inject
@@ -14,7 +14,7 @@ class VoiceService
         @Fast
         private val client: HttpClient,
     ) {
-        suspend fun postVoiceOrder(request: VoiceOrderRequest): Result<VoiceOrderResponse> =
+        suspend fun postVoiceOrder(request: VoiceOrderRequest): Result<VoiceTempResponse> =
             client.postResult("order") {
                 setBody(request)
             }

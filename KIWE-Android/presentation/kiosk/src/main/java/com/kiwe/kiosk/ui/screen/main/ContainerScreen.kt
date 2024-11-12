@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,8 +58,13 @@ fun ContainerScreen(
     content: @Composable () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
+    val shoppingCartState = shoppingCartViewModel.collectAsState().value
     var isShoppingCartDialogOpen by remember { mutableStateOf(false) }
     var isOrderListDialogOpen by remember { mutableStateOf(false) }
+
+    LaunchedEffect(shoppingCartState.isVoiceOrderConfirm) {
+        isShoppingCartDialogOpen = shoppingCartState.isVoiceOrderConfirm
+    }
 
     if (isShoppingCartDialogOpen) {
         ShoppingCartDialog(
@@ -67,7 +73,10 @@ fun ContainerScreen(
                 isShoppingCartDialogOpen = false
                 isOrderListDialogOpen = true
             },
-            onClose = { isShoppingCartDialogOpen = false },
+            onClose = {
+                isShoppingCartDialogOpen = false
+                shoppingCartViewModel.onConfirmVoiceOrder()
+            },
         )
     }
 

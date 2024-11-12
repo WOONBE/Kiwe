@@ -8,7 +8,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -94,6 +93,7 @@ fun MainNavHost() {
                             ReceiptScreen(
                                 onEnterScreen = { page ->
                                     mainViewModel.setPage(page)
+                                    mainViewModel.stopSpeechRecognition()
                                 },
                                 onBackHome = {
                                     navController.navigate(MainRoute.AD.route) {
@@ -125,7 +125,8 @@ fun MainNavHost() {
 
         if (state.page > 0) {
             SpeechScreen(
-                viewModel = mainViewModel,
+                mainViewModel = mainViewModel,
+                shoppingCartViewModel = shoppingCartViewModel,
             )
         }
     }

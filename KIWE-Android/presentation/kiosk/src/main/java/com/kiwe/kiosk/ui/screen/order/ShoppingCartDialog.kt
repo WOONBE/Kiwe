@@ -113,6 +113,7 @@ fun ShoppingCartDialog(
                     shape = RoundedCornerShape(10.dp),
                     onClick = {
                         onClose()
+                        viewModel.onConfirmVoiceOrder()
                     },
                     colors =
                         ButtonColors(
