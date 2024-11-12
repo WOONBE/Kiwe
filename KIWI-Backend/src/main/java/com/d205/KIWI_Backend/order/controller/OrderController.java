@@ -46,6 +46,30 @@ public class OrderController {
         List<OrderResponse> orderResponses = orderService.getAllOrders();
         return ResponseEntity.ok(orderResponses);
     }
+
+    @GetMapping("/kiosk/{kioskId}")
+    @Operation(summary = "특정 키오스크의 주문 전체 조회", description = "특정 키오스크의 주문을 전체 조회하는 API")
+    public ResponseEntity<List<OrderResponse>> getOrdersByKioskId(@PathVariable Integer kioskId) {
+        List<OrderResponse> orderResponses = orderService.getOrdersByKioskId(kioskId);
+        if (orderResponses.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(orderResponses);
+    }
+
+    @GetMapping("/kiosk/top-selling-menus")
+    @Operation(summary = "키오스크별 연령대별 인기 메뉴 조회", description = "특정 키오스크에서 연령대별 인기 메뉴를 조회하는 API")
+    public Map<String, Map<String, Integer>> getTopSellingMenusByAgeGroupByKioskId(
+        @RequestParam Integer kioskId) {
+        return orderService.getTopSellingMenusByAgeGroupByKioskId(kioskId);
+    }
+
+    @GetMapping("/all/top-selling-menus")
+    @Operation(summary = "전체 주문 기반 연령대별 인기 메뉴 조회", description = "전체 주문을 기반으로 연령대별 인기 메뉴를 조회하는 API")
+    public Map<String, Map<String, Integer>> getTopSellingMenusByAgeGroup() {
+
+        return orderService.getTopSellingMenusByAgeGroup();
+    }
 //
 //    @PutMapping("/{orderId}")
 //    @Operation(summary = "주문 업데이트", description = "주문을 업데이트하는 API")

@@ -22,9 +22,16 @@ public class Order {
     private LocalDateTime orderDate;
     private String status;
 
+    @Column
+    private Integer age;
+
+    @Column
+    private Integer gender;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<OrderMenu> orderMenus =  new ArrayList<>();;
+    private List<OrderMenu> orderMenus = new ArrayList<>();
+    ;
 
     @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
@@ -51,9 +58,11 @@ public class Order {
             this.orderMenus.clear(); // Order에 연관된 모든 메뉴 항목 제거
         }
     }
+
     public void updateStatus(String status) {
         this.status = status;
     }
+
     public void addKioskOrder(KioskOrder kioskOrder) {
         this.kioskOrders.add(kioskOrder);
         if (kioskOrder.getOrder() != this) {
@@ -68,5 +77,35 @@ public class Order {
         return null;
     }
 
+    public void updateAge(Integer age) {
+        this.age = age;
+    }
+
+    public void updateGender(Integer gender) {
+        if (gender == 1 || gender == 2) {
+            this.gender = gender;
+        } else {
+            throw new IllegalArgumentException("Gender must be 1 or 2");
+        }
+    }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -56,6 +56,8 @@ public class OrderService {
         // 주문 객체 생성 (빌더 패턴 사용)
         Order order = Order.builder()
             .orderDate(LocalDateTime.now())
+            .age(orderRequest.getAge())
+            .gender(orderRequest.getGender())
             .status("PENDING")  // 기본 상태: PENDING
             .build();
 
@@ -293,12 +295,11 @@ public class OrderService {
     }
     @Transactional
     public int calculateTotalPriceForLastMonthByKioskId(Integer kioskId) {
-        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1); // 한 달 전 날짜 계산
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
 
-        // 특정 키오스크 ID와 한 달 내의 주문 목록 가져오기
+
         List<Order> orders = orderRepository.findByKioskIdAndOrderDateAfter(kioskId, oneMonthAgo);
 
-        // 주문 총 금액 계산
         return orders.stream()
             .flatMap(order -> order.getOrderMenus().stream())
             .mapToInt(orderMenu -> orderMenu.getMenu().getPrice() * orderMenu.getQuantity())
@@ -328,6 +329,169 @@ public class OrderService {
         }
 
         return monthlySales;
+    }
+
+    @Transactional
+    public List<OrderResponse> getOrdersByKioskId(Integer kioskId) {
+
+        List<Order> orders = orderRepository.findByKioskId(kioskId);
+
+
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        for (Order order : orders) {
+            List<OrderMenu> orderMenus = order.getOrderMenus();
+
+
+            int totalPrice = orderMenus.stream()
+                .mapToInt(orderMenu -> orderMenu.getMenu().getPrice() * orderMenu.getQuantity())
+                .sum();
+
+            // OrderResponse 객체 생성
+            OrderResponse orderResponse = OrderResponse.builder()
+                .orderId(order.getId())
+                .orderDate(order.getOrderDate())
+                .status(order.getStatus())
+                .menuOrders(createMenuOrderResponses(orderMenus))
+                .kioskId(order.getKioskOrders().get(0).getKiosk().getId())
+                .totalPrice(totalPrice)
+                .build();
+
+            orderResponses.add(orderResponse);
+        }
+        return orderResponses;
+    }
+
+    public Map<String, Map<String, Integer>> getTopSellingMenusByAgeGroup() {
+
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = endDate.minusMonths(1);
+
+        // 쿼리 호출 - 전체 주문 조회
+        List<Object[]> result = orderRepository.findTopSellingMenusByAgeGroup(startDate, endDate);
+
+        Map<String, Map<String, Integer>> ageGroupSales = new HashMap<>();
+
+        for (Object[] row : result) {
+            String menuName = (String) row[0];
+            Integer totalSales = ((Number) row[1]).intValue();
+            Integer age = (Integer) row[2];
+
+            if (age == null) {
+                age = 0; // 기본값 0으로 설정, 혹은 원하는 값으로 변경
+            }
+
+
+            String ageGroup = getAgeGroup(age);
+
+            // 해당 연령대에 대한 메뉴 판매량이 이미 기록되어 있으면, 더 높은 판매량만 저장
+            ageGroupSales.putIfAbsent(ageGroup, new HashMap<>());
+            Map<String, Integer> menuSales = ageGroupSales.get(ageGroup);
+
+            // 이미 해당 메뉴가 존재하는 경우, 판매량 비교 후 더 높은 판매량을 저장
+            if (menuSales.containsKey(menuName)) {
+                Integer currentSales = menuSales.get(menuName);
+                if (totalSales > currentSales) {
+                    menuSales.put(menuName, totalSales); // 더 많이 팔린 경우 교체
+                }
+            } else {
+                menuSales.put(menuName, totalSales); // 메뉴가 없으면 추가
+            }
+        }
+
+        // 각 연령대별로 가장 많이 팔린 메뉴만 남기기
+        Map<String, Map<String, Integer>> topSellingMenus = new HashMap<>();
+        for (String ageGroup : ageGroupSales.keySet()) {
+            Map<String, Integer> menuSales = ageGroupSales.get(ageGroup);
+
+            // 연령대별 가장 많이 팔린 메뉴만 추출
+            String topMenu = null;
+            Integer topSales = 0;
+            for (Map.Entry<String, Integer> entry : menuSales.entrySet()) {
+                if (entry.getValue() > topSales) {
+                    topSales = entry.getValue();
+                    topMenu = entry.getKey();
+                }
+            }
+
+            // 가장 많이 팔린 메뉴만 저장
+            if (topMenu != null) {
+                topSellingMenus.put(ageGroup, Map.of(topMenu, topSales));
+            }
+        }
+
+        return topSellingMenus;
+    }
+
+    public Map<String, Map<String, Integer>> getTopSellingMenusByAgeGroupByKioskId(Integer kioskId) {
+
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = endDate.minusMonths(1);
+
+        List<Object[]> result = orderRepository.findTopSellingMenusByAgeGroupByKioskId(kioskId, startDate, endDate);
+
+        Map<String, Map<String, Integer>> ageGroupSales = new HashMap<>();
+
+        for (Object[] row : result) {
+            String menuName = (String) row[0];
+            Integer totalSales = ((Number) row[1]).intValue();
+            Integer age = (Integer) row[2];
+
+            if (age == null) {
+                age = 0; // 기본값 0으로 설정, 혹은 원하는 값으로 변경
+            }
+
+            String ageGroup = getAgeGroup(age);
+
+            // 해당 연령대에 대한 메뉴 판매량이 이미 기록되어 있으면, 더 높은 판매량만 저장
+            ageGroupSales.putIfAbsent(ageGroup, new HashMap<>());
+            Map<String, Integer> menuSales = ageGroupSales.get(ageGroup);
+
+
+            if (menuSales.containsKey(menuName)) {
+                Integer currentSales = menuSales.get(menuName);
+                if (totalSales > currentSales) {
+                    menuSales.put(menuName, totalSales); // 더 많이 팔린 경우 교체
+                }
+            } else {
+                menuSales.put(menuName, totalSales); // 메뉴가 없으면 추가
+            }
+        }
+
+
+        Map<String, Map<String, Integer>> topSellingMenus = new HashMap<>();
+        for (String ageGroup : ageGroupSales.keySet()) {
+            Map<String, Integer> menuSales = ageGroupSales.get(ageGroup);
+
+            String topMenu = null;
+            Integer topSales = 0;
+            for (Map.Entry<String, Integer> entry : menuSales.entrySet()) {
+                if (entry.getValue() > topSales) {
+                    topSales = entry.getValue();
+                    topMenu = entry.getKey();
+                }
+            }
+            // 가장 많이 팔린 메뉴만 저장
+            if (topMenu != null) {
+                topSellingMenus.put(ageGroup, Map.of(topMenu, topSales));
+            }
+        }
+
+        return topSellingMenus;
+    }
+
+
+    private String getAgeGroup(Integer age) {
+        if (age >= 10 && age < 20) {
+            return "10대";
+        } else if (age >= 20 && age < 30) {
+            return "20대";
+        } else if (age >= 30 && age < 40) {
+            return "30대";
+        } else if (age >= 40 && age < 50) {
+            return "40대";
+        } else {
+            return "50대 이상";
+        }
     }
 
 }
