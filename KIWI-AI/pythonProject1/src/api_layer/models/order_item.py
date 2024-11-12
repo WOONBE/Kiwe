@@ -9,7 +9,7 @@ class OrderItem(BaseModel):
 
 class OrderRequest(BaseModel):
     sentence: str
-    have_temp: bool
+    need_temp: bool
     order_items: List[OrderItem]  # List of order items
 
 # Response Model

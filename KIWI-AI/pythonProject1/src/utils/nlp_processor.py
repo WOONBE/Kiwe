@@ -179,19 +179,6 @@ class NLPProcessor:
                 return quantity_value
         return 1  # Default to 1 if no quantity is mentioned
 
-    # def extract_menu_item_and_options(self, sentence):
-    #     """Extract the menu item and options for the current order."""
-    #     for menu_item in self.menu_items:
-    #         try:
-    #             if menu_item in sentence:
-    #                 sentence = sentence.replace(menu_item, '')  # Remove menu item for further processing
-    #                 # find Id of menu
-    #                 # check if word about tempretature is in
-    #                 return menu_item, sentence
-    #         except Exception as e:
-    #             raise HTTPException(status_code=500, detail=f"no matching menu {str(e)}")
-        # return None, sentence  # If no menu item is found
-
     def extract_options_for_each_item(self, sentence):
         """Extract options (shot and sugar) for the current order."""
         options = {"shot": False, "sugar": False}  # Default options
@@ -237,16 +224,6 @@ class NLPProcessor:
         if "설탕 추가" in sentence:
             updates["sugar"] = True
         return updates
-
-    # def extract_temperature(self, sentence):
-    #     """Identify temperature preference from the sentence."""
-    #     if "따뜻한" in sentence:
-    #         sentence = sentence.replace("따뜻한", '')
-    #         return "HOT", sentence
-    #     elif "차가운" in sentence:
-    #         sentence = sentence.replace("차가운", '')
-    #         return "ICE", sentence
-    #     return "default", sentence
 
     def extract_temperature(self,sentence):
         """Identify temperature preference from the sentence using lists of keywords."""

@@ -86,6 +86,7 @@ async def process_order(order_request: OrderRequest):
     """
 
     try:
+        print("order_request",order_request)
         # Route request through ServiceRouter
         response = service_router.route_request(order_request)
         print("response",response)
