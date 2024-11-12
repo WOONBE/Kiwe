@@ -18,13 +18,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import com.kiwe.kiosk.navigation.MainNavHost
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
-import com.kiwe.kiosk.utils.processImageProxyFromCamera
+import com.kiwe.kiosk.utils.ImageProcessUtils
 import dagger.hilt.android.AndroidEntryPoint
 
 @ExperimentalGetImage
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
+    private lateinit var imageProcessUtil: ImageProcessUtils
     private val requestPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
@@ -55,6 +56,8 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalGetImage::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        imageProcessUtil = ImageProcessUtils(this, mainViewModel::onDetectAgeGender)
+
 //        enableEdgeToEdge() // 이거 끄면 덜컹거리는 거 없음
         setContent {
             KIWEAndroidTheme {
@@ -95,9 +98,9 @@ class MainActivity : ComponentActivity() {
             imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), { imageProxy ->
                 val currentTime = System.currentTimeMillis()
                 if (currentTime - lastAnalyzedTime >= frameIntervalMillis) {
-                    lastAnalyzedTime = currentTime // 마지막 처리 시간 업데이트
-
-                    processImageProxyFromCamera(
+                    lastAnalyzedTime =
+                        currentTime // 마지막 처리 시간 업데이트
+                    imageProcessUtil.processImageProxyFromCamera(
                         context = this,
                         imageProxy = imageProxy,
                         faceDetection = { detect -> mainViewModel.detectPerson(detect) },
