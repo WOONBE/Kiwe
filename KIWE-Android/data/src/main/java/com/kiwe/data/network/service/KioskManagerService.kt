@@ -8,7 +8,10 @@ import com.kiwe.data.network.util.postResult
 import com.kiwe.data.network.util.putResult
 import com.kiwe.domain.model.CreateKioskRequest
 import com.kiwe.domain.model.Kiosk
+import com.kiwe.domain.model.KioskOrder
 import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.client.request.setBody
 import javax.inject.Inject
 
@@ -82,4 +85,13 @@ class KioskManagerService
             }
 
         suspend fun getKioskByKioskId(kioskId: Int): Result<Kiosk> = client.getResult("api/kiosks/$kioskId")
+
+        suspend fun getKioskOrder(
+            ownerId: Int,
+            kioskId: Int,
+        ): Result<KioskOrder> =
+            client.getResult("api/kiosks/kiosk-order") {
+                parameter("ownerId", ownerId)
+                parameter("kioskId", kioskId)
+            }
     }
