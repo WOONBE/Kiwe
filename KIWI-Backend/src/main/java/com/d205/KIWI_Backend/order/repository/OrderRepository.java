@@ -42,4 +42,34 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         "ORDER BY o.order_date DESC LIMIT 1", nativeQuery = true)
     Long findLatestOrderIdByKioskId(@Param("kioskId") Long kioskId);
 
+    @Query("SELECT o FROM Order o JOIN o.kioskOrders ko WHERE ko.kiosk.id = :kioskId" )
+    List<Order> findByKioskId(Integer kioskId);
+
+
+    @Query("SELECT m.name AS menuName, SUM(om.quantity) AS totalSales, o.age " +
+        "FROM Order o " +
+        "JOIN o.orderMenus om " +
+        "JOIN om.menu m " +
+        "JOIN o.kioskOrders ko " +
+        "WHERE ko.kiosk.id = :kioskId " +
+        "AND o.orderDate BETWEEN :startDate AND :endDate " +
+        "GROUP BY m.name, o.age " +
+        "ORDER BY totalSales DESC")
+    List<Object[]> findTopSellingMenusByAgeGroupByKioskId(
+        @Param("kioskId") Integer kioskId,
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT m.name AS menuName, SUM(om.quantity) AS totalSales, o.age " +
+        "FROM Order o " +
+        "JOIN o.orderMenus om " +
+        "JOIN om.menu m " +
+        "WHERE o.orderDate BETWEEN :startDate AND :endDate " +
+        "GROUP BY m.name, o.age " +
+        "ORDER BY totalSales DESC")
+    List<Object[]> findTopSellingMenusByAgeGroup(@Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate);
+
+
+
 }
