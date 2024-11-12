@@ -6,6 +6,9 @@ from src.api_layer.models.order_item import OrderItem, OrderRequest
 
 
 class NLPProcessor:
+
+    special_categories = ["디저트", "스무디&프라페", "에이드"]
+
     # Mapping Korean quantity words to numbers
     quantities1 = [
         ("하나", 1), ("둘", 2), ("셋", 3), ("넷", 4), ("다섯", 5),
@@ -26,14 +29,15 @@ class NLPProcessor:
         self.menu_items = self.fetch_menu_items()  # Preload menu items
         self.menu_data = self.fetch_menu_combinations()  # Fetch menu data with menu_id, name, etc.
         self.options = self.fetch_options()  # Placeholder for dynamic options fetching
+        print()
+        print()
+        print("hiiiiiiiiiiii",self.menu_data)
 
-        print("Menu Items:", self.menu_items)  # Debugging print
-        print("Menu Data:", self.menu_data)    # Debugging print
 
     def fetch_menu_items(self):
         """Fetch menu items from the database."""
-        menu_data = self.db.get_unique_menu_names()
-        return [item['menu_name'] for item in menu_data] if menu_data else []
+        menu_data_dist = self.db.get_unique_menu_names()
+        return [item['menu_name'] for item in menu_data_dist] if menu_data_dist else []
 
     def fetch_options(self):
         """Fetch available options (e.g., add-ons, customizations) from the database."""
@@ -44,25 +48,45 @@ class NLPProcessor:
         menu_data = self.db.get_unique_menu_combinations()
         if menu_data:
             # Convert to a dictionary for quick lookup by menu_name
-            return {item['menu_name']: item for item in menu_data}
+            return {item['menu_id']: item for item in menu_data}
         return {}
 
     def extract_menu_item_and_options(self, sentence):
         """Extract the menu item, options, and temperature preference."""
-        for menu_name, menu_info in self.menu_data.items():
-            if menu_name in sentence:
-                sentence = sentence.replace(menu_name, '')  # Remove menu item name from sentence
-                menu_id = menu_info["menu_id"]  # Retrieve menu_id based on name
 
-                # Check for temperature keywords in the sentence
-                temperature = "hot" if "따뜻한" in sentence else "cold" if "차가운" in sentence else "default"
+        # menu_info 여기 이상함
+        for menu_id, menu_info in self.menu_data.items():
+            # Use regular expression to find menu_name as a whole word in the sentence
+            pattern = r'\b' + re.escape(menu_info['menu_name']) + r'\b'
+            match = re.search(pattern, sentence)
 
-                # Remove temperature keywords to clean up remaining sentence
-                sentence = sentence.replace("따뜻한", "").replace("차가운", "")
+            if match:
+                # Remove the matched menu name from the sentence to process remaining words
+                sentence = sentence.replace(menu_info['menu_name'], '')
 
-                return menu_id, temperature, sentence
+                # Extract category and temperature
+                category = menu_info["menu_category"]
+                temperature, sentence = self.extract_temperature(sentence)
 
-        # Raise an error if no menu item is found
+                # Determine if menu_id can be found with just the name
+                if category in self.special_categories:
+                    menu_id = menu_info["menu_id"]  # Fetch by name only
+                else:
+                    print("path, coffee")
+                    if temperature == "default":
+                        print("no temp")
+                        temperature = "spike"
+                        menu_id = menu_info["menu_id"]
+                        return menu_info['menu_name'], menu_id, temperature, sentence
+                    # Find menu_id with additional temperature filtering
+                    menu_id = self.find_menu_id_with_temp(menu_info['menu_name'], temperature)
+                print("menu_id", menu_id)
+                # If menu_id is still not found, raise an error
+                if not menu_id:
+                    raise HTTPException(status_code=400, detail="No matching menu item found with specified details.")
+
+                return menu_info['menu_name'], menu_id, temperature, sentence
+
         raise HTTPException(status_code=400, detail="No matching menu item found in the sentence.")
 
     def process_request(self, request: OrderRequest):
@@ -86,10 +110,25 @@ class NLPProcessor:
             return "check_order"
         elif re.search(r"(추천|좋은거|뭐 없나)", sentence):
             return "recommendation"
-        elif re.search(r"(주문|주세요|요)", sentence):
+        elif re.search(r"(주문|주세요)", sentence):
             return "order"
         else:
             return "unknown"
+
+    def find_menu_id_with_temp(self, menu_name, temperature):
+        """Fetch menu_id based on menu_name and temperature (if needed)."""
+        print("self.menu_data.values()",self.menu_data.values())
+        for menu_info in self.menu_data.values():
+            # print("menu_info['menu_name']",menu_info['menu_name'],menu_info['hot_or_ice'])
+            if menu_info['menu_name'] in menu_name:
+                # If temperature matches or is not specified, return menu_id
+                # print("menu_info['hot_or_ice'']", menu_info["hot_or_ice"], temperature,"menu_info[name]",menu_info["menu_name"])
+                if menu_info['hot_or_ice'] == temperature or temperature == "default":
+                    # print("menu_info['menu_id'']",menu_info["menu_id"])
+                    return menu_info["menu_id"]
+                else:
+                    continue
+        return None
 
     def extract_data(self, sentence, order_type, orders):
         """Extract information based on order type."""
@@ -119,12 +158,13 @@ class NLPProcessor:
 
         for _ in range(quantity):
             # Each iteration extracts one order (with its options)
-            menuId, tmp, remaining_sentence = self.extract_menu_item_and_options(remaining_sentence)
+            menu_name, menuId, tmp, remaining_sentence = self.extract_menu_item_and_options(remaining_sentence)
 
             numbers = self.extract_quantity(remaining_sentence)
             options = self.extract_options_for_each_item(remaining_sentence)
             items.append({
                 "menuId": menuId,
+                "menu_name": menu_name,
                 "temp": tmp,
                 "count": numbers,  # As we're processing one item at a time
                 "options": options
@@ -197,3 +237,34 @@ class NLPProcessor:
         if "설탕 추가" in sentence:
             updates["sugar"] = True
         return updates
+
+    # def extract_temperature(self, sentence):
+    #     """Identify temperature preference from the sentence."""
+    #     if "따뜻한" in sentence:
+    #         sentence = sentence.replace("따뜻한", '')
+    #         return "HOT", sentence
+    #     elif "차가운" in sentence:
+    #         sentence = sentence.replace("차가운", '')
+    #         return "ICE", sentence
+    #     return "default", sentence
+
+    def extract_temperature(self,sentence):
+        """Identify temperature preference from the sentence using lists of keywords."""
+        # Lists of keywords for temperature preferences
+        hot_words = ["따뜻한", "뜨거운", "온기"]
+        ice_words = ["차가운", "시원한", "얼음"]
+
+        # Check if any hot word is in the sentence
+        for word in hot_words:
+            if word in sentence:
+                sentence = sentence.replace(word, '')  # Remove the hot word from the sentence
+                return "HOT", sentence
+
+        # Check if any cold word is in the sentence
+        for word in ice_words:
+            if word in sentence:
+                sentence = sentence.replace(word, '')  # Remove the cold word from the sentence
+                return "ICE", sentence
+
+        # Default case if no temperature keywords are found
+        return "default", sentence

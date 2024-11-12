@@ -1,44 +1,6 @@
 # src/commands/new_order_command.py
 from fastapi import HTTPException
-from src.api_layer.models.order_item import OrderRequest, OrderResponse
-
-# this code needs change to get data from DB
-
-# class NewOrderCommand:
-#     def __init__(self, infrastructure):
-#         self.database = infrastructure['database']
-#
-#     def execute(self, order_data, request: OrderRequest):
-#         """Process a new order and verify required options."""
-#         # order_id = order_data.get("order_id")
-#         # menu_item = order_data.get("menuTitle")
-#         # options = order_data.get("options", {})
-#         print("order_data",order_data)
-#
-#         items = order_data['data']['items']
-#         order_items = [
-#             {
-#                 "menuId": item['menuId'],
-#                 "count": item['count'],
-#                 "options": item['options'],
-#                 "temperature": item.get("temp", "default")  # Default to "default" if temperature is not specified
-#             } for item in items
-#         ]
-#
-#         # Check if any item requires a temperature preference
-#         need_temp = any(item['temperature'] != "default" for item in order_items)
-#
-#         # Build OrderResponse
-#         response = OrderResponse(
-#             category=1,  # Assuming category "1" represents an order
-#             need_temp=need_temp,
-#             # message=request.sentence,  # Original sentence for reference
-#             order=order_items,
-#             response="주문을 추가하였습니다"  # Placeholder response message for TTS or frontend
-#         )
-#
-#         return response
-
+from src.api_layer.models.order_item import OrderRequest, OrderResponse, OrderResponseItem, OrderOption
 
 class NewOrderCommand:
     def __init__(self, infrastructure):
@@ -58,26 +20,91 @@ class NewOrderCommand:
         if not items:
             raise HTTPException(status_code=400, detail="No items found in the order")
 
-        order_items = [
-            {
-                "menuId": item['menuId'],
-                "count": item['count'],
-                "options": item['options'],
-                "temperature": item.get("temp", "default")  # Default to "default" if temperature is not specified
-            } for item in items
-        ]
+        order_items = []
+        need_temp = False
+        check = []
+
+        #     {
+        #         "menuId": item['menuId'],
+        #         "menuName": item['menu_name'],
+        #         "count": item['count'],
+        #         "options": item['options'],
+        #         "temperature": item.get("temp", "default")  # Default to "default" if temperature is not specified
+        #     } for item in items
+        # ]
 
         # Check if any item requires a temperature preference
-        need_temp = any(item['temperature'] != "default" for item in order_items)
+        order_items = []
+        print("rq.items",request.order_items)
+        for prev_item in request.order_items:
+            print("prev_item",prev_item)
+            order_option = OrderOption(
+                shot=prev_item.option.get('shot'),
+                sugar=prev_item.option.get('sugar')
+            )
+            print("order_option",order_option)
+            order_items.append(OrderResponseItem(
+                menuId=prev_item.menuId,
+                count=prev_item.count,
+                option=order_option
+            ))
+
+
+        for item in order_data['items']:
+            # Validate required fields in each item
+            if 'menuId' not in item or 'count' not in item or 'options' not in item:
+                raise HTTPException(status_code=400, detail="Missing fields in one or more order items")
+
+            # Extract and process item details
+            menu_id = item['menuId']
+            menu_name = item.get('menu_name')  # Default if menu_name is missing
+            count = item['count']
+            options = item['options']
+            temperature = item.get("temp")  # Default to "default" if temperature is not specified
+
+            # Check for "spike" temperature and add to issues if found
+            if temperature == "spike":
+                check.append(menu_name)
+                need_temp = True
+
+            # Create OrderOption instance for options
+            order_option = OrderOption(
+                shot=options.get("shot", False),
+                sugar=options.get("sugar", False)
+            )
+
+            # Append the processed order item
+            order_items.append(OrderResponseItem(
+                menuId=menu_id,
+                count=count,
+                option=order_option,
+                temperature=temperature
+            ))
+        print("order_items",order_items)
+        # for item in order_items:
+        #     if item['temperature'] == "spike":
+        #         check.append(item['menuName'])
+        #         need_temp = True
+        # need_temp = any(item['temperature'] == "spike" for item in order_items)
+
+
 
         # Build OrderResponse
-        response = OrderResponse(
-            category=1,  # Assuming category "1" represents an order
-            need_temp=need_temp,
-            order=order_items,
-            response="주문을 추가하였습니다"  # Placeholder response message for TTS or frontend
-        )
 
+        if need_temp:
+            response_text = f"{check}의 온도를 확인해주세요"
+        else:
+            response_text = "주문을 추가하였습니다"
+
+        # Create the final OrderResponse
+        response = OrderResponse(
+            category=1,
+            need_temp=need_temp,
+            message=request.sentence,
+            order=order_items,
+            response=response_text
+        )
+        print("response",response)
         return response
 
 

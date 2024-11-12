@@ -104,7 +104,7 @@ class Database:
         cursor = self.connection.cursor(dictionary=True)
         try:
             cursor.execute("""
-                SELECT DISTINCT menu_id, menu_category, menu_name, menu_desc 
+                SELECT menu_id, menu_category, menu_name, menu_desc, hot_or_ice
                 FROM menu
             """)
             combinations = cursor.fetchall()
@@ -114,3 +114,4 @@ class Database:
             return None
         finally:
             cursor.close()
+

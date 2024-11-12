@@ -15,7 +15,7 @@ from src.infrastructure.elk_client import ELKClient
 from src.utils.nlp_processor import NLPProcessor
 from src.utils.response_formatter import format_success_response, format_error_response
 
-from src.api_layer.models.order_item import OrderRequest
+from src.api_layer.models.order_item import OrderRequest,OrderResponse
 
 from src.api_layer.api import api_router  # Import the APIRouter from api.py
 
