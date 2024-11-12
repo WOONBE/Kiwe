@@ -3,6 +3,8 @@ package com.kiwe.data.di
 import com.kiwe.data.usecase.CancelPaymentUseCaseImpl
 import com.kiwe.data.usecase.ConfirmPaymentUseCaseImpl
 import com.kiwe.data.usecase.PostOrderUseCaseImpl
+import com.kiwe.data.usecase.VoiceOrderUseCaseImpl
+import com.kiwe.domain.usecase.VoiceOrderUseCase
 import com.kiwe.data.usecase.manager.order.CheckOrderStatusUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetKioskTotalOrdersLast6MonthsUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetKioskTotalOrdersLastMonthUseCaseImpl
@@ -34,6 +36,9 @@ interface OrderModule {
 
     @Binds
     fun bindCancelPaymentUseCase(uc: CancelPaymentUseCaseImpl): CancelPaymentUseCase
+
+    @Binds
+    fun bindVoiceOrderUseCase(uc: VoiceOrderUseCaseImpl): VoiceOrderUseCase
 
     @Binds
     fun bindGetLastMonthIncomeUseCase(uc: GetLastMonthIncomeUseCaseImpl): GetLastMonthIncomeUseCase
