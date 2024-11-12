@@ -3,7 +3,7 @@ package com.kiwe.kiosk.main
 import androidx.compose.ui.geometry.Offset
 import com.kiwe.domain.model.Category
 import com.kiwe.domain.model.VoiceOrderRequest
-import com.kiwe.domain.model.VoiceTempResponse
+import com.kiwe.domain.model.VoiceOrderResponse
 import com.kiwe.domain.usecase.VoiceOrderUseCase
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
@@ -100,10 +100,11 @@ class MainViewModel
                 reduce {
                     state.copy(
                         voiceResult =
-                            VoiceTempResponse(
+                            VoiceOrderResponse(
                                 category = 0,
                                 need_temp = false,
                                 order = emptyList(),
+                                message = "",
                                 response = "",
                             ),
                     )
@@ -120,7 +121,7 @@ class MainViewModel
                             voiceOrder =
                                 VoiceOrderRequest(
                                     sentence = result,
-                                    have_temp = false,
+                                    need_temp = false,
                                     order_items = emptyList(),
                                 ),
                         ).onSuccess {
@@ -258,8 +259,14 @@ data class MainState(
     val shouldShowRetryMessage: Boolean = false,
     val isExistPerson: Boolean = false,
     val gazePoint: Offset? = null,
-    val voiceResult: VoiceTempResponse =
-        VoiceTempResponse(category = 0, need_temp = false, order = emptyList(), response = ""),
+    val voiceResult: VoiceOrderResponse =
+        VoiceOrderResponse(
+            category = 0,
+            need_temp = false,
+            order = emptyList(),
+            message = "",
+            response = "",
+        ),
 ) : BaseState
 
 sealed interface MainSideEffect : BaseSideEffect {

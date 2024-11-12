@@ -1,6 +1,6 @@
 package com.kiwe.kiosk.ui.screen.order
 
-import com.kiwe.domain.model.VoiceTempResponse
+import com.kiwe.domain.model.VoiceOrderResponse
 import com.kiwe.domain.usecase.manager.menu.GetMenuByIdUseCase
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
@@ -26,7 +26,7 @@ class ShoppingCartViewModel
             }
         }
 
-        fun onVoiceResult(voiceOrder: VoiceTempResponse) =
+        fun onVoiceResult(voiceOrder: VoiceOrderResponse) =
             intent {
                 // voice order -> 실제 장바구니 아이템 변환하고
                 val cartList = mutableListOf<ShoppingCartItem>()
@@ -34,13 +34,13 @@ class ShoppingCartViewModel
                     val menu = getMenuByIdUseCase(eachOrder.menuId).getOrThrow()
                     Timber.tag("VoiceOrder").d("menu: $menu")
                     val shot =
-                        if (eachOrder.options.shot) {
+                        if (eachOrder.option.shot) {
                             "샷 추가" to Pair("1샷 추가", 500)
                         } else {
                             "샷 추가" to Pair("없음", 0)
                         }
                     val sugar =
-                        if (eachOrder.options.sugar) {
+                        if (eachOrder.option.sugar) {
                             "설탕 추가" to Pair("1개 추가", 100)
                         } else {
                             "설탕 추가" to Pair("없음", 0)

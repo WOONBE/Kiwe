@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class VoiceOrderRequest(
     val sentence: String,
-    val have_temp: Boolean,
+    val need_temp: Boolean,
     val order_items: List<OrderList>,
 )
 
