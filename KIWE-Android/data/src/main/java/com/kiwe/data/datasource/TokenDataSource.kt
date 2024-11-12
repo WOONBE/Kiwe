@@ -43,4 +43,10 @@ class TokenDataSource
                         null
                     }
                 }.firstOrNull()
+
+        suspend fun clearToken() {
+            context.tokenDataStore.edit {
+                it.clear()
+            }
+        }
     }
