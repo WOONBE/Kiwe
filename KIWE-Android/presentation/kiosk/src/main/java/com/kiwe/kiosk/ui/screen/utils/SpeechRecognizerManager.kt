@@ -78,7 +78,6 @@ class SpeechRecognizerManager
 
                 override fun onEndOfSpeech() {
                     Timber.tag(TAG).d("onEndOfSpeech")
-//                    listener?.onSpeechEnded()
                 }
 
                 override fun onError(error: Int) {
@@ -92,7 +91,7 @@ class SpeechRecognizerManager
                         Timber.tag(TAG).d("onResults: $it")
                         listener?.onResultsReceived(it)
                     }
-                    restartListeningWithDelay()
+                    restartListeningImmediately() // 결과 후 즉시 다시 시작
                 }
 
                 override fun onPartialResults(partialResults: Bundle?) {
@@ -111,6 +110,13 @@ class SpeechRecognizerManager
                     Timber.tag(TAG).d("onEvent")
                 }
             }
+
+        private fun restartListeningImmediately() {
+            CoroutineScope(Dispatchers.Main).launch {
+                speechRecognizer?.stopListening() // 기존 인식 종료
+                startListening() // 바로 다시 시작
+            }
+        }
 
         private fun handleError(error: Int) {
             when (error) {

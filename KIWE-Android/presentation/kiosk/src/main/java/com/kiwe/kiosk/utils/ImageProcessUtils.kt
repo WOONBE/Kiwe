@@ -18,7 +18,6 @@ import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.google.mlkit.vision.face.FaceLandmark
-import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 import kotlin.math.tan
@@ -60,7 +59,7 @@ class ImageProcessUtils
                         if (faces.isEmpty()) {
                             initialTrackingId = null
                             faceDetection(false)
-                            Timber.tag("FaceTracking").d("얼굴 사라져서 initialTrackingId 초기화")
+//                            Timber.tag("FaceTracking").d("얼굴 사라져서 initialTrackingId 초기화")
                             return@addOnSuccessListener
                         }
 
@@ -69,7 +68,7 @@ class ImageProcessUtils
                             val trackingId = face.trackingId
                             if (initialTrackingId == null && trackingId != null) {
                                 initialTrackingId = trackingId
-                                Timber.tag("Tracking ID").d("Initial Tracking ID set to: $trackingId")
+//                                Timber.tag("Tracking ID").d("Initial Tracking ID set to: $trackingId")
                             }
 
                             // initialTrackingId와 일치하는 얼굴만 처리
@@ -84,7 +83,7 @@ class ImageProcessUtils
                                 } else {
                                     faceDetection(false)
                                 }
-                                Timber.tag("FC").d("Face width: $faceWidth, height: $faceHeight")
+//                                Timber.tag("FC").d("Face width: $faceWidth, height: $faceHeight")
 
                                 val bitmap = imageProxyToBitmap(imageProxy)
                                 detectAgeAndGender(bitmap, face)
@@ -121,9 +120,9 @@ class ImageProcessUtils
                                         blendList.get().flatMap { innerList -> innerList.orEmpty() }
 
                                     for (shape in shapeList) {
-                                        Timber
-                                            .tag("BlendShape")
-                                            .d("Blend shape: ${shape.categoryName()} || ${shape.score()} || ${shape.index()}")
+//                                        Timber
+//                                            .tag("BlendShape")
+//                                            .d("Blend shape: ${shape.categoryName()} || ${shape.score()} || ${shape.index()}")
                                     }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
@@ -131,7 +130,7 @@ class ImageProcessUtils
 
                                 faceLandmarker.close()
                             } else {
-                                Timber.tag("Tracking ID").d("Ignored face with ID: $trackingId")
+//                                Timber.tag("Tracking ID").d("Ignored face with ID: $trackingId")
                             }
                         }
                     }.addOnFailureListener { e ->
