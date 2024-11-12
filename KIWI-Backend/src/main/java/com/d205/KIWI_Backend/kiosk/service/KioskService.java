@@ -2,6 +2,7 @@ package com.d205.KIWI_Backend.kiosk.service;
 
 import com.d205.KIWI_Backend.global.exception.ExceptionCode;
 import com.d205.KIWI_Backend.kiosk.domain.Kiosk;
+import com.d205.KIWI_Backend.kiosk.dto.KioskOrderNumberResponse;
 import com.d205.KIWI_Backend.kiosk.dto.KioskRequest;
 import com.d205.KIWI_Backend.kiosk.dto.KioskResponse;
 import com.d205.KIWI_Backend.kiosk.repository.KioskRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -102,6 +104,22 @@ public class KioskService {
 
         Kiosk updatedKiosk = kioskRepository.save(kiosk);
         return KioskResponse.fromKiosk(updatedKiosk);
+    }
+
+
+
+    @Transactional(readOnly = true)
+    public KioskOrderNumberResponse getKioskOrderNumber(Long ownerId, Long kioskId) {
+
+        Long kioskOrderNumber = kioskRepository.findKioskOrderNumberByOwnerIdAndKioskId(ownerId, kioskId);
+        if (kioskOrderNumber == null) {
+            throw new BadRequestException(ExceptionCode.NOT_FOUND_KIOSK_ID);
+        }
+
+        return KioskOrderNumberResponse.builder()
+                .kioskId(kioskId)
+                .kioskOrderNumber(kioskOrderNumber)
+                .build();
     }
 
 }
