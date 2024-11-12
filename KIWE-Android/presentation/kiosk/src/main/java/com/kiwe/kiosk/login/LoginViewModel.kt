@@ -1,19 +1,29 @@
 package com.kiwe.kiosk.login
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.kiwe.domain.exception.APIException
 import com.kiwe.domain.model.CreateKioskRequest
 import com.kiwe.domain.model.LoginParam
 import com.kiwe.domain.model.Token
+import com.kiwe.domain.usecase.kiosk.GetKioskOrderNumber
+import com.kiwe.domain.usecase.kiosk.datasource.GetKioskIdUseCase
+import com.kiwe.domain.usecase.kiosk.datasource.GetOwnerIdUseCase
+import com.kiwe.domain.usecase.kiosk.datasource.SetKioskIdUseCase
+import com.kiwe.domain.usecase.kiosk.datasource.SetKioskNameUseCase
+import com.kiwe.domain.usecase.kiosk.datasource.SetOwnerIdUseCase
 import com.kiwe.domain.usecase.manager.kiosk.CreateKioskUseCase
 import com.kiwe.domain.usecase.manager.login.LoginUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMyInfoUseCase
+import com.kiwe.domain.usecase.manager.token.GetTokenUseCase
 import com.kiwe.domain.usecase.manager.token.SetTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
+import timber.log.Timber
 import javax.annotation.concurrent.Immutable
 import javax.inject.Inject
 
@@ -22,10 +32,16 @@ class LoginViewModel
     @Inject
     constructor(
         private val loginUseCase: LoginUseCase,
+        private val getTokenUseCase: GetTokenUseCase,
         private val setTokenUseCase: SetTokenUseCase,
         private val searchMyInfoUseCase: SearchMyInfoUseCase,
         private val createKioskUseCase: CreateKioskUseCase,
-//        private val setTokenUseCase: SetTokenUseCase,
+        private val getKioskOrderNumber: GetKioskOrderNumber,
+        private val setOwnerIdUseCase: SetOwnerIdUseCase,
+        private val getOwnerIdUseCase: GetOwnerIdUseCase,
+        private val setKioskIdUseCase: SetKioskIdUseCase,
+        private val getKioskIdUseCase: GetKioskIdUseCase,
+        private val setKioskNameUseCase: SetKioskNameUseCase,
     ) : ViewModel(),
         ContainerHost<LoginState, LoginSideEffect> {
         override val container: Container<LoginState, LoginSideEffect> =
@@ -54,6 +70,29 @@ class LoginViewModel
                 },
             )
 
+        init {
+            checkAutoLogin()
+        }
+
+        private fun checkAutoLogin() {
+            viewModelScope.launch {
+                val ownerId = getOwnerIdUseCase()
+                val kioskId = getKioskIdUseCase()
+                if (!ownerId.isNullOrBlank() && !kioskId.isNullOrBlank()) {
+                    performAutoLogin()
+                }
+            }
+        }
+
+        private fun performAutoLogin() =
+            intent {
+                try {
+                    postSideEffect(LoginSideEffect.NavigateToHomeActivity)
+                } catch (e: Exception) {
+                    postSideEffect(LoginSideEffect.Toast("자동 로그인 실패"))
+                }
+            }
+
         fun onLoginClick() =
             intent {
                 if (state.id.isEmpty() || state.password.isEmpty()) {
@@ -73,7 +112,14 @@ class LoginViewModel
                         response.refreshToken,
                     ),
                 )
-                val userInfo = searchMyInfoUseCase().getOrThrow()
+                onCreateKiosk(Token(response.accessToken, response.refreshToken))
+            }
+
+        private fun onCreateKiosk(token: Token) =
+            intent {
+                val userInfo =
+                    searchMyInfoUseCase(token).getOrThrow()
+                Timber.tag(javaClass.simpleName).d("$userInfo")
                 val ownerId = userInfo.id
                 val requestCreateKiosk =
                     CreateKioskRequest(
@@ -83,6 +129,15 @@ class LoginViewModel
                     )
                 val createKioskResponse =
                     createKioskUseCase(requestCreateKiosk).getOrThrow()
+                setKioskIdUseCase(createKioskResponse.id.toString())
+
+                val getMyInfoResponse =
+                    searchMyInfoUseCase(token).getOrThrow()
+                setOwnerIdUseCase(getMyInfoResponse.id.toString())
+
+                val getKioskNameResponse =
+                    getKioskOrderNumber(getMyInfoResponse.id, createKioskResponse.id).getOrThrow()
+                setKioskNameUseCase(getKioskNameResponse.kioskOrderNumber.toString())
 
                 postSideEffect(LoginSideEffect.Toast("환영합니다!"))
                 postSideEffect(LoginSideEffect.NavigateToHomeActivity)
@@ -114,5 +169,5 @@ sealed interface LoginSideEffect {
         val message: String,
     ) : LoginSideEffect
 
-    object NavigateToHomeActivity : LoginSideEffect
+    data object NavigateToHomeActivity : LoginSideEffect
 }
