@@ -26,11 +26,12 @@ fun PaymentScreen(
             PaymentStatus.entries.size
         })
     LaunchedEffect(Unit) {
-        onEnterScreen(3)
+        onEnterScreen(2)
     }
     LaunchedEffect(paymentState.completePayment) {
         if (paymentState.completePayment) {
             onCompletePayment()
+            shoppingCartViewModel.onClearAllItem()
         }
     }
     HorizontalPager(

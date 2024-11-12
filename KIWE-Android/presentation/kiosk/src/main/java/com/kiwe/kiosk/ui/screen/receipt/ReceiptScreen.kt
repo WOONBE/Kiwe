@@ -42,8 +42,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun ReceiptScreen(
     modifier: Modifier = Modifier,
-    receiptNumber: String = "",
     onEnterScreen: (Int) -> Unit = {},
+    onBackHome: () -> Unit = {},
 ) {
     var showReceipt by remember { mutableStateOf(false) }
     val translationY by animateFloatAsState(
@@ -55,10 +55,12 @@ fun ReceiptScreen(
     LaunchedEffect(Unit) {
         delay(500)
         showReceipt = true
+        delay(5000L)
+        onBackHome()
     }
 
     LaunchedEffect(showReceipt) {
-        onEnterScreen(4)
+        onEnterScreen(3)
     }
 
     Column(
@@ -134,18 +136,6 @@ fun ReceiptScreen(
                 fontSize = 92.sp,
                 style = Typography.bodyLarge.copy(fontSize = 48.sp),
                 color = Color.Black,
-            )
-        }
-
-        Spacer(Modifier.weight(1f))
-        Box(
-            modifier =
-                Modifier
-                    .padding(bottom = 24.dp),
-        ) {
-            Text(
-                text = "이용해 주셔서 감사합니다",
-                style = Typography.titleLarge,
             )
         }
     }

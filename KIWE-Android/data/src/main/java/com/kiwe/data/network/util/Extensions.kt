@@ -22,7 +22,7 @@ suspend inline fun <reified T> HttpClient.getResult(
     try {
         val response = get(urlString = url, block = httpRequestBuilder)
         if (response.status.isSuccess()) {
-            Result.success(decodeFromString(response.body()))
+            Result.success(response.body())
         } else {
             val errorBody = response.bodyAsText()
             val errorResponse = decodeFromString(ErrorResponse.serializer(), errorBody)
@@ -51,7 +51,7 @@ suspend inline fun <reified T> HttpClient.postResult(
     try {
         val response = post(urlString = url, block = httpRequestBuilder)
         if (response.status.isSuccess()) {
-            Result.success(decodeFromString(response.body()))
+            Result.success(response.body())
         } else {
             val errorBody = response.bodyAsText()
             val errorResponse = decodeFromString(ErrorResponse.serializer(), errorBody)
@@ -67,7 +67,7 @@ suspend inline fun <reified T> HttpClient.postResult(
         Result.failure(
             APIException(
                 message = e.message ?: "에러 메세지가 없습니다!",
-                code = 1,
+                code = -1,
                 throwable = e,
             ),
         )
@@ -80,7 +80,7 @@ suspend inline fun <reified T> HttpClient.deleteResult(
     try {
         val response = delete(urlString = url, block = httpRequestBuilder)
         if (response.status.isSuccess()) {
-            Result.success(decodeFromString(response.body()))
+            Result.success(response.body())
         } else {
             val errorBody = response.bodyAsText()
             val errorResponse = decodeFromString(ErrorResponse.serializer(), errorBody)
@@ -109,7 +109,7 @@ suspend inline fun <reified T> HttpClient.patchResult(
     try {
         val response = patch(urlString = url, block = httpRequestBuilder)
         if (response.status.isSuccess()) {
-            Result.success(decodeFromString(response.body()))
+            Result.success(response.body())
         } else {
             val errorBody = response.bodyAsText()
             val errorResponse = decodeFromString(ErrorResponse.serializer(), errorBody)
@@ -138,7 +138,7 @@ suspend inline fun <reified T> HttpClient.putResult(
     try {
         val response = put(urlString = url, block = httpRequestBuilder)
         if (response.status.isSuccess()) {
-            Result.success(decodeFromString(response.body()))
+            Result.success(response.body())
         } else {
             val errorBody = response.bodyAsText()
             val errorResponse = decodeFromString(ErrorResponse.serializer(), errorBody)

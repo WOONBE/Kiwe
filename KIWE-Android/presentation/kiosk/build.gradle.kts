@@ -131,8 +131,5 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.extensions)
-    implementation("com.google.mediapipe:tasks-vision:0.10.14")
-
-//    // SystemUi
-//    implementation("com.google.accompanist:accompanist-insets:1.0.0")
+    implementation(libs.tasks.vision)
 }
