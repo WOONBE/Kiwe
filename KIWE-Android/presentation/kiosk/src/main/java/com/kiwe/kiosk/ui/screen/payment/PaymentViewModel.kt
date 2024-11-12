@@ -168,7 +168,7 @@ class PaymentViewModel
     }
 
 data class PaymentState(
-    val kioskId: Int = 1,
+    val kioskId: Int = 1, // FIXME : DataStore로 변경
     val order: Order? = null,
     val showDialog: Boolean = false,
     val remainingTime: Long = 0,

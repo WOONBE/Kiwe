@@ -184,6 +184,8 @@ private fun OptionDialog(
                 onClick = {
                     onPurchase(
                         ShoppingCartItem(
+                            menuId = state.menuId,
+                            menuImgPath = state.menuImgPath,
                             menuTitle = state.menuTitle,
                             menuRadioOption = state.radioOptionCost,
                             defaultPrice = state.menuCost,
@@ -214,6 +216,8 @@ private fun OptionDialogPreview() {
     OptionDialog(
         state =
             OptionState(
+                menuId = 1,
+                menuImgPath = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                 menuTitle = "",
                 menuCost = 0,
                 optionList =

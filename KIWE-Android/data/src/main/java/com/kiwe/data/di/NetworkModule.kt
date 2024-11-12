@@ -1,6 +1,7 @@
 package com.kiwe.data.di
 
 import com.kiwe.data.BuildConfig
+import com.kiwe.domain.usecase.manager.token.GetTokenUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,6 +24,7 @@ import io.ktor.http.URLProtocol
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.utils.io.charsets.Charsets
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 import javax.inject.Singleton
@@ -96,7 +98,7 @@ object NetworkModule {
     @Provides
     @Fast
     @Singleton
-    fun provideHttpClient() =
+    fun provideHttpClient(getTokenUseCase: GetTokenUseCase) =
         HttpClient(Android) {
             install(ContentNegotiation) {
                 json(
@@ -145,6 +147,13 @@ object NetworkModule {
                     protocol = URLProtocol.HTTP
                     host = FAST_URL
                     port = 9988
+                }
+                runBlocking {
+                    val token = getTokenUseCase()
+                    if (token != null) {
+                        header("Authorization", "Bearer ${token.accessToken}")
+                        header("Refresh-Token", token.refreshToken)
+                    }
                 }
             }
         }

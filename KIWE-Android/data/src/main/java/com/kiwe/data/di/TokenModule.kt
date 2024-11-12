@@ -2,6 +2,8 @@ package com.kiwe.data.di
 
 import com.kiwe.data.usecase.GetTokenUseCaseImpl
 import com.kiwe.data.usecase.SetTokenUseCaseImpl
+import com.kiwe.data.usecase.manager.login.ClearTokenUseCaseImpl
+import com.kiwe.domain.usecase.manager.login.ClearTokenUseCase
 import com.kiwe.domain.usecase.manager.token.GetTokenUseCase
 import com.kiwe.domain.usecase.manager.token.SetTokenUseCase
 import dagger.Binds
@@ -17,4 +19,7 @@ interface TokenModule {
 
     @Binds
     fun bindSetTokenUseCase(uc: SetTokenUseCaseImpl): SetTokenUseCase
+
+    @Binds
+    fun bindClearTokenUseCase(uc: ClearTokenUseCaseImpl): ClearTokenUseCase
 }

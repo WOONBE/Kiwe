@@ -126,7 +126,7 @@ private fun ContainerScreen(
 //            }
         },
         bottomBar = {
-            if (page == 2) {
+            if (page == 1) {
                 Row(
                     modifier = Modifier.padding(horizontal = 10.dp),
                 ) {
@@ -203,7 +203,7 @@ fun PreviousButton(onBackClick: () -> Unit) {
 
 @Composable
 fun StepIndicator(currentStep: Int) {
-    val steps = listOf("메뉴", "주문", "결제", "확인")
+    val steps = listOf("주문", "결제", "확인")
     if (currentStep > 0) {
         Row(
             modifier =

@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MenuRequest {
     private String category;
-    private Integer categoryNumber;
     private String hotOrIce;
     private String name;
     private Integer price;

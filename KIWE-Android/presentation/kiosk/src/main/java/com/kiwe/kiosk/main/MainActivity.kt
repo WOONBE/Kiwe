@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
@@ -57,8 +58,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         imageProcessUtil = ImageProcessUtils(this, mainViewModel::onDetectAgeGender)
+        enableEdgeToEdge()
 
-//        enableEdgeToEdge() // 이거 끄면 덜컹거리는 거 없음
         setContent {
             KIWEAndroidTheme {
                 MainNavHost()
