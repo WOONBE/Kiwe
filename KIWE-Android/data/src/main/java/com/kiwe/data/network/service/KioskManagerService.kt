@@ -78,4 +78,6 @@ class KioskManagerService
             client.putResult<Unit>("api/kiosks/my/$kioskId") {
                 setBody(request)
             }
+
+        suspend fun getKioskByKioskId(kioskId: Int): Result<Kiosk> = client.getResult("api/kiosks/$kioskId")
     }

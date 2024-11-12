@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,11 +67,10 @@ fun HomeScreen(
 
     LazyColumn {
         item {
-
             Text("Home 화면")
             Button(
                 onClick =
-                viewModel::onLogout,
+                    viewModel::onLogout,
             ) {
                 Text("로그아읏 api 연동 및 테스트")
             }
@@ -127,17 +125,10 @@ fun HomeScreen(
             }
             Button(
                 onClick = {
-                    viewModel.onSearchMyInfo()
+                    viewModel.onGetKioskByKioskId()
                 },
             ) {
                 Text("키오스크 조회 API 연동 및 테스트")
-            }
-            Button(
-                onClick = {
-                    viewModel.onSearchMyInfo()
-                },
-            ) {
-                Text("키오스크 생성 API 연동 및 테스트")
             }
         }
     }

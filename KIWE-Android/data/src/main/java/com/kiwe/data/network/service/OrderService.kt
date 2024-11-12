@@ -67,4 +67,6 @@ class OrderService
             client.getResult("api/orders/monthly-sales/last-six-months/$kioskId")
 
         suspend fun getKioskTotalOrdersLastMonth(kioskId: Int): Result<Int> = client.getResult("api/orders/total-price/last-month/$kioskId")
+
+        // suspend fun getOrderAll():
     }

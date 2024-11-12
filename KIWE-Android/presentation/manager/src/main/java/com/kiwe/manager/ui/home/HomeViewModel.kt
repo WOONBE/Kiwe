@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.kiwe.domain.exception.APIException
 import com.kiwe.domain.model.EditMemberParam
 import com.kiwe.domain.model.LogoutParam
+import com.kiwe.domain.usecase.kiosk.GetKioskByIdUseCase
 import com.kiwe.domain.usecase.manager.edit.EditMyInfoUseCase
 import com.kiwe.domain.usecase.manager.login.ClearTokenUseCase
 import com.kiwe.domain.usecase.manager.login.LogoutUseCase
@@ -39,6 +40,7 @@ class HomeViewModel
         private val checkOrderStatusUseCase: CheckOrderStatusUseCase,
         private val getKioskTotalOrdersLast6MonthsUseCase: GetKioskTotalOrdersLast6MonthsUseCase,
         private val getKioskTotalOrdersLastMonthUseCase: GetKioskTotalOrdersLastMonthUseCase,
+        private val getKioskByKioskIdUseCase: GetKioskByIdUseCase,
     ) : ViewModel(),
         ContainerHost<HomeState, HomeSideEffect> {
         override val container: Container<HomeState, HomeSideEffect> =
@@ -132,11 +134,17 @@ class HomeViewModel
                 postSideEffect(HomeSideEffect.Toast(response.toString()))
             }
 
-    fun onGetKioskTotalOrdersLastMonth() =
-        intent {
-            val response = getKioskTotalOrdersLastMonthUseCase(state.kioskId).getOrThrow()
-            postSideEffect(HomeSideEffect.Toast(response.toString()))
-        }
+        fun onGetKioskTotalOrdersLastMonth() =
+            intent {
+                val response = getKioskTotalOrdersLastMonthUseCase(state.kioskId).getOrThrow()
+                postSideEffect(HomeSideEffect.Toast(response.toString()))
+            }
+
+        fun onGetKioskByKioskId() =
+            intent {
+                val response = getKioskByKioskIdUseCase(state.kioskId).getOrThrow()
+                postSideEffect(HomeSideEffect.Toast(response.toString()))
+            }
     }
 
 @Immutable
