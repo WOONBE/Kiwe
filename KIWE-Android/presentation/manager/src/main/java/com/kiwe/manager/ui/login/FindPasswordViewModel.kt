@@ -14,7 +14,6 @@ import com.kiwe.domain.usecase.manager.menu.GetMenuByIdUseCase
 import com.kiwe.domain.usecase.manager.search.SearchAllMemberUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMemberByEmailUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMemberByIdUseCase
-import com.kiwe.domain.usecase.manager.search.SearchMyInfoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.orbitmvi.orbit.Container
@@ -92,7 +91,7 @@ class FindPasswordViewModel
                                 name = state.name,
                                 email = state.email,
                                 password = state.password,
-                                kioskIds = listOf()
+                                kioskIds = listOf(),
                             ),
                     )
                 postSideEffect(FindPasswordSideEffect.Toast(response.getOrThrow().toString()))
@@ -150,7 +149,6 @@ class FindPasswordViewModel
                 val response = deleteMenuUseCase(state.menuId).getOrThrow()
                 postSideEffect(FindPasswordSideEffect.Toast(response.toString()))
             }
-
     }
 
 @Immutable
