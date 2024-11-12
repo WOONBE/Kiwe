@@ -1,12 +1,12 @@
 package com.d205.KIWI_Backend.kiosk.controller;
 
+import com.d205.KIWI_Backend.kiosk.dto.KioskOrderNumberResponse;
 import com.d205.KIWI_Backend.kiosk.dto.KioskRequest;
 import com.d205.KIWI_Backend.kiosk.dto.KioskResponse;
 import com.d205.KIWI_Backend.kiosk.dto.KioskSignOutRequest;
 import com.d205.KIWI_Backend.kiosk.service.KioskService;
 import com.d205.KIWI_Backend.member.service.BlackListService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -100,4 +100,13 @@ public class KioskController {
         KioskResponse updatedKiosk = kioskService.updateMyKiosk(kioskId, kioskRequest);
         return ResponseEntity.ok(updatedKiosk);
     }
+
+    @GetMapping("/kiosk-order")
+    @Operation(summary = "키오스크 순서 조회", description = "키오스크ID를 통해 owner의 몇 번째 키오스크인지 반환")
+    public ResponseEntity<KioskOrderNumberResponse> getKioskOrderNumber(
+            @RequestParam("ownerId") Long ownerId,
+            @RequestParam("kioskId") Long kioskId) {
+        return ResponseEntity.ok(kioskService.getKioskOrderNumber(ownerId, kioskId));
+    }
+
 }
