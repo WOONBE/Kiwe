@@ -11,4 +11,11 @@
     <color name="login_btn">#FF1A80E5</color>
     <color name="login_dark">#FF121417</color>
     <color name="login_text_field_inside">#FF1C2126</color>
+    <color name="home_side_bar_background">#FF4C7D38</color>
+    <color name="home_side_bar_item_selected">#FF864924</color>
+    <color name="dashboard_background">#FFebdfd7</color>
+    <color name="dashboard_card_background">#FFf2eae5</color>
+    <color name="dashboard_card_decrease">#FFEE201C</color>
+    <color name="dashboard_card_increase">#FF1A932E</color>
+    <color name="KIWE_orange1">#FFE14700</color>
 </resources>
