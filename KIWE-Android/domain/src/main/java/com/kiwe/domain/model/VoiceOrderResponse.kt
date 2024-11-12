@@ -21,6 +21,6 @@ enum class AnswerType(
     ;
 
     fun fromInt(value: Int): AnswerType =
-        entries.find { it -> it.value == value }
+        entries.find { it.value == value }
             ?: throw IllegalArgumentException("Unknown AnswerType for value: $value")
 }
