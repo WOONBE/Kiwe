@@ -7,8 +7,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -31,6 +35,8 @@ fun MainNavHost() {
     val mainViewModel: MainViewModel = hiltViewModel()
     val shoppingCartViewModel: ShoppingCartViewModel = hiltViewModel()
     val state = mainViewModel.collectAsState().value
+    var shoppingCartOffset by remember { mutableStateOf(Offset.Zero) }
+
     Surface {
         Scaffold(
             content = {
@@ -41,6 +47,7 @@ fun MainNavHost() {
                     onClickPayment = {
                         navController.navigate(MainRoute.PAYMENT.route)
                     },
+                    setShoppingCartOffset = { offset -> shoppingCartOffset = offset },
                 ) {
                     NavHost(
                         navController = navController,
@@ -67,6 +74,7 @@ fun MainNavHost() {
                         composable(route = MainRoute.ORDER.route) {
                             OrderScreen(
                                 shoppingCartViewModel = shoppingCartViewModel,
+                                getShoppingCartPosition = { shoppingCartOffset },
                             ) { page ->
                                 mainViewModel.setPage(page)
                             }

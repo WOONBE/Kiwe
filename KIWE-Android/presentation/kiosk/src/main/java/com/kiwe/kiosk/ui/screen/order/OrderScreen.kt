@@ -28,6 +28,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +39,7 @@ import com.kiwe.domain.model.MenuCategoryParam
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.ui.screen.order.component.CategorySelector
 import com.kiwe.kiosk.ui.screen.order.component.OrderItem
+import com.kiwe.kiosk.ui.screen.utils.Animation
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -47,14 +49,18 @@ import timber.log.Timber
 fun OrderScreen(
     viewModel: OrderViewModel = hiltViewModel(),
     shoppingCartViewModel: ShoppingCartViewModel,
+    getShoppingCartPosition: () -> Offset,
     onEnterScreen: (Int) -> Unit,
 ) {
     val categoryStatus = viewModel.collectAsState().value
     var isOrderOptionDialogOpen by remember { mutableStateOf(false) }
+    var showShoppingCartAnimation by remember { mutableStateOf(false) }
     var orderDialogMenuId by remember { mutableIntStateOf(0) }
     var orderDialogMenuImgPath by remember { mutableStateOf("") }
     var orderDialogMenuTitle by remember { mutableStateOf("") }
     var orderDialogMenuCost by remember { mutableIntStateOf(0) }
+    var targetOffset by remember { mutableStateOf(Offset.Zero) }
+
     val context = LocalContext.current
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
@@ -69,6 +75,18 @@ fun OrderScreen(
             OrderSideEffect.NavigateToNextScreen -> {
             }
         }
+    }
+
+    if (showShoppingCartAnimation) {
+        Animation(
+            { showShoppingCartAnimation = false },
+            orderDialogMenuImgPath,
+            Offset(
+                x = getShoppingCartPosition().x,
+                y = getShoppingCartPosition().y,
+            ),
+            targetOffset
+        )
     }
 
     val animationScope = rememberCoroutineScope()
@@ -123,6 +141,7 @@ fun OrderScreen(
     ShowDialog(
         show = isOrderOptionDialogOpen,
         onClose = { isOrderOptionDialogOpen = false },
+        onInsert = { showShoppingCartAnimation = true },
         optionViewModel = optionViewModel,
         shoppingCartViewModel = shoppingCartViewModel,
     )
@@ -154,12 +173,13 @@ fun OrderScreen(
             ) { index ->
                 OrderListScreen(
                     orderItemList = categoryStatus.menuList[index].chunked(4),
-                    onItemClick = { id, imgPath, title, cost ->
+                    onItemClick = { id, imgPath, title, cost, offset ->
                         orderDialogMenuId = id
                         orderDialogMenuImgPath = imgPath
                         orderDialogMenuTitle = title
                         orderDialogMenuCost = cost
                         isOrderOptionDialogOpen = true
+                        targetOffset = offset
                     },
                 )
             }
@@ -231,7 +251,7 @@ fun OrderScreen(
 @Composable
 private fun OrderListScreen(
     orderItemList: List<List<MenuCategoryParam>>,
-    onItemClick: (Int, String, String, Int) -> Unit,
+    onItemClick: (Int, String, String, Int, Offset) -> Unit,
 ) {
     val firstRowList = orderItemList[0]
     val secondRowList =
@@ -283,6 +303,7 @@ private fun OrderListScreen(
 private fun ShowDialog(
     show: Boolean,
     onClose: () -> Unit,
+    onInsert: () -> Unit,
     shoppingCartViewModel: ShoppingCartViewModel,
     optionViewModel: OptionViewModel,
 ) {
@@ -290,6 +311,7 @@ private fun ShowDialog(
         OptionDialog(
             shoppingCartViewModel = shoppingCartViewModel,
             onClose = onClose,
+            onInsert = onInsert,
             optionViewModel = optionViewModel,
         )
     }
@@ -302,5 +324,6 @@ private fun OrderScreenPreview() {
         viewModel = hiltViewModel(),
         shoppingCartViewModel = hiltViewModel(),
         onEnterScreen = {},
+        getShoppingCartPosition = { Offset.Zero },
     )
 }
