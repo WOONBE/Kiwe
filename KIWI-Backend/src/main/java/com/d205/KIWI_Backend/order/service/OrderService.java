@@ -4,20 +4,22 @@ import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_KIO
 import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_ORDER;
 
 import com.d205.KIWI_Backend.global.exception.BadRequestException;
-import com.d205.KIWI_Backend.global.exception.BusinessException;
-import com.d205.KIWI_Backend.global.exception.ExceptionCode;
 import com.d205.KIWI_Backend.kiosk.domain.Kiosk;
 import com.d205.KIWI_Backend.kiosk.repository.KioskRepository;
+import com.d205.KIWI_Backend.member.service.MemberService;
 import com.d205.KIWI_Backend.menu.domain.Menu;
 import com.d205.KIWI_Backend.menu.repository.MenuRepository;
 import com.d205.KIWI_Backend.menu.service.MenuService;
 import com.d205.KIWI_Backend.order.domain.KioskOrder;
 import com.d205.KIWI_Backend.order.domain.Order;
 import com.d205.KIWI_Backend.order.domain.OrderMenu;
+import com.d205.KIWI_Backend.order.dto.MenuSales;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
 import com.d205.KIWI_Backend.order.repository.OrderRepository;
 import java.time.YearMonth;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -31,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -40,13 +41,15 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final MenuRepository menuRepository;
     private final KioskRepository kioskRepository;
+    private final MemberService memberservice;
     private final Logger logger = LoggerFactory.getLogger(MenuService.class);
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, MenuRepository menuRepository, KioskRepository kioskRepository) {
+    public OrderService(OrderRepository orderRepository, MenuRepository menuRepository, KioskRepository kioskRepository, MemberService memberservice) {
         this.orderRepository = orderRepository;
         this.menuRepository = menuRepository;
         this.kioskRepository = kioskRepository;
+        this.memberservice = memberservice;
     }
 
     @Transactional
@@ -479,57 +482,116 @@ public class OrderService {
         return topSellingMenus;
     }
 
-//    public Map<String, Integer> getTopThreeSellingMenusByAgeGroup(Integer age) {
-//
-//        LocalDateTime endDate = LocalDateTime.now();
-//        LocalDateTime startDate = endDate.minusMonths(1);
-//        String ageGroup = getAgeGroup(age);
-//
-//        List<Object[]> result = orderRepository.findTopSellingMenusForAgeGroup(ageGroup, startDate, endDate);
-//
-//
-//        Map<String, Integer> menuSales = new HashMap<>();
-//
-//
-//        for (Object[] row : result) {
-//            String menuName = (String) row[0];
-//            Integer totalSales = ((Number) row[1]).intValue();
-//
-//
-//            menuSales.put(menuName, totalSales);
-//        }
-//
-//
-//        return menuSales.entrySet().stream()
-//            .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue())) // 판매량 내림차순 정렬
-//            .limit(3) // 상위 3개 선택
-//            .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), HashMap::putAll);
-//    }
-//
-//
-//    public Map<String, Integer> getTopThreeSellingMenusByAgeGroupAndKiosk(Integer kioskId, Integer age) {
-//        LocalDateTime endDate = LocalDateTime.now();
-//        LocalDateTime startDate = endDate.minusMonths(1);
-//
-//        String ageGroup = getAgeGroup(age);
-//
-//        List<Object[]> result = orderRepository.findTopSellingMenusForAgeGroupAndKiosk(kioskId, ageGroup, startDate, endDate);
-//
-//        Map<String, Integer> menuSales = new HashMap<>();
-//
-//        for (Object[] row : result) {
-//            String menuName = (String) row[0];
-//            Integer totalSales = ((Number) row[1]).intValue();
-//            menuSales.put(menuName, totalSales);
-//        }
-//
-//        return menuSales.entrySet().stream()
-//            .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
-//            .limit(3)
-//            .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), HashMap::putAll);
-//    }
+    @Transactional
+    public Map<String, List<MenuSales>> getTopSoldMenusByMemberId(Integer memberId) {
+
+        List<Order> orders = orderRepository.findOrdersByMemberId(memberId);
 
 
+        Map<String, Map<Integer, Integer>> ageGroupSales = new HashMap<>();
+
+        // 연령대 구분
+        String[] ageGroups = {"10대", "20대", "30대", "40대", "50대 이상"};
+
+        for (Order order : orders) {
+
+            int age = (order.getAge() != null) ? order.getAge() : 0;
+
+            String ageGroup = getAgeGroup(age); // 연령대 계산
+
+
+            for (OrderMenu orderMenu : order.getOrderMenus()) {
+                Integer menuId = orderMenu.getMenu().getId();
+                Integer quantity = orderMenu.getQuantity();
+
+
+                ageGroupSales
+                    .computeIfAbsent(ageGroup, k -> new HashMap<>())
+                    .merge(menuId, quantity, Integer::sum);
+            }
+        }
+
+        Map<String, List<MenuSales>> topSoldMenusByAgeGroup = new HashMap<>();
+
+        for (String ageGroup : ageGroups) {
+            Map<Integer, Integer> menuSales = ageGroupSales.getOrDefault(ageGroup, Collections.emptyMap());
+
+
+            List<MenuSales> sortedMenuSales = menuSales.entrySet().stream()
+                .map(entry -> {
+
+                    Optional<Menu> menuOptional = menuRepository.findById(entry.getKey());
+                    String menuName = menuOptional.map(Menu::getName).orElse("Unknown");
+                    return new MenuSales(entry.getKey(), menuName, entry.getValue());
+                })
+                .sorted(Comparator.comparingInt(MenuSales::getSales).reversed())
+                .collect(Collectors.toList());
+
+            List<MenuSales> topMenus = sortedMenuSales.stream()
+                .limit(1)
+                .collect(Collectors.toList());
+
+            topSoldMenusByAgeGroup.put(ageGroup, topMenus);
+        }
+
+        return topSoldMenusByAgeGroup;
+    }
+
+    @Transactional
+    public Map<String, List<MenuSales>> getTopSoldMenusByLoginMember() {
+        Integer memberId = memberservice.getCurrentMemberId();
+
+        List<Order> orders = orderRepository.findOrdersByMemberId(memberId);
+
+
+        Map<String, Map<Integer, Integer>> ageGroupSales = new HashMap<>();
+
+        // 연령대 구분
+        String[] ageGroups = {"10대", "20대", "30대", "40대", "50대 이상"};
+
+        for (Order order : orders) {
+
+            int age = (order.getAge() != null) ? order.getAge() : 0;
+
+            String ageGroup = getAgeGroup(age); // 연령대 계산
+
+
+            for (OrderMenu orderMenu : order.getOrderMenus()) {
+                Integer menuId = orderMenu.getMenu().getId();
+                Integer quantity = orderMenu.getQuantity();
+
+
+                ageGroupSales
+                    .computeIfAbsent(ageGroup, k -> new HashMap<>())
+                    .merge(menuId, quantity, Integer::sum);
+            }
+        }
+
+        Map<String, List<MenuSales>> topSoldMenusByAgeGroup = new HashMap<>();
+
+        for (String ageGroup : ageGroups) {
+            Map<Integer, Integer> menuSales = ageGroupSales.getOrDefault(ageGroup, Collections.emptyMap());
+
+
+            List<MenuSales> sortedMenuSales = menuSales.entrySet().stream()
+                .map(entry -> {
+
+                    Optional<Menu> menuOptional = menuRepository.findById(entry.getKey());
+                    String menuName = menuOptional.map(Menu::getName).orElse("Unknown");
+                    return new MenuSales(entry.getKey(), menuName, entry.getValue());
+                })
+                .sorted(Comparator.comparingInt(MenuSales::getSales).reversed())
+                .collect(Collectors.toList());
+
+            List<MenuSales> topMenus = sortedMenuSales.stream()
+                .limit(1)
+                .collect(Collectors.toList());
+
+            topSoldMenusByAgeGroup.put(ageGroup, topMenus);
+        }
+
+        return topSoldMenusByAgeGroup;
+    }
 
     private String getAgeGroup(Integer age) {
         if (age >= 10 && age < 20) {
@@ -544,7 +606,6 @@ public class OrderService {
             return "50대 이상";
         }
     }
-
 
 
 }
