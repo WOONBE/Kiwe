@@ -41,7 +41,7 @@ class OptionOrderCommand:
             raise HTTPException(status_code=400, detail="No items found in the order")
 
         order_items = []
-        need_temp = False
+        need_temp = 0
         check = []
 
         previous_orders = request.order_items
@@ -55,14 +55,14 @@ class OptionOrderCommand:
                             temp = comp.get("temp")
                             new_id = self.find_menu_id_with_temp(name,temp)
 
-                            if comp.option.get('shot') == True or pr.option.get('shot'):
-                                add_shot = True
+                            if comp.option.get('shot') == 1 or pr.option.get('shot') == 1:
+                                add_shot = 1
                             else:
-                                add_shot = False
-                            if comp.option.get('sugar') == True or pr.option.get('sugar'):
-                                add_sugar = True
+                                add_shot = 0
+                            if comp.option.get('sugar') == 1 or pr.option.get('sugar') == 1:
+                                add_sugar = 1
                             else:
-                                add_sugar = False
+                                add_sugar = 0
                             order_option = OrderOption(
                                 shot=add_shot,
                                 sugar=add_sugar

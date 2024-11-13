@@ -53,12 +53,12 @@ class NewOrderCommand:
             # Check for "spike" temperature and add to issues if found
             if temperature == "spike":
                 check.append(menu_name)
-                need_temp = True
+                need_temp = 1
 
             # Create OrderOption instance for options
             order_option = OrderOption(
-                shot=options.get("shot", False),
-                sugar=options.get("sugar", False)
+                shot=options.get("shot", 0),
+                sugar=options.get("sugar", 0)
             )
             print("current order order_option", order_option)
             # Append the processed order item

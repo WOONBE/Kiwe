@@ -14,8 +14,8 @@ class OrderRequest(BaseModel):
 
 # Response Model
 class OrderOption(BaseModel):
-    shot: bool  # Whether the "shot" option is selected
-    sugar: bool  # Whether the "sugar" option is selected
+    shot: int  # Whether the "shot" option is selected
+    sugar: int  # Whether the "sugar" option is selected
 
 class OrderResponseItem(BaseModel):
     menuId: int  # Name of the menu item, e.g., "카페라떼"

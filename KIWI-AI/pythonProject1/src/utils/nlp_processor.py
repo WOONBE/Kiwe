@@ -192,11 +192,11 @@ class NLPProcessor:
 
         # Check for sugar-related options
         if "설탕" in sentence or "설탕 추가" in sentence or "설탕 넣어줘" in sentence:
-            options["sugar"] = True
+            options["sugar"] = 1
 
         # Check for shot-related options
         if "샷 추가" in sentence or "샷 더 넣어줘" in sentence:
-            options["shot"] = True
+            options["shot"] = 1
 
         return options
 
@@ -271,8 +271,8 @@ class NLPProcessor:
                             temp = comp.get("temp")
                             new_id = self.find_menu_id_with_temp(name, temp)
 
-                            add_shot = comp.get('option', {}).get('shot', False) or pr.option.get('shot', False)
-                            add_sugar = comp.get('option', {}).get('sugar', False) or pr.option.get('sugar', False)
+                            add_shot = comp.get('option', {}).get('shot', 0) or pr.option.get('shot', 0)
+                            add_sugar = comp.get('option', {}).get('sugar', 0) or pr.option.get('sugar', 0)
 
                             order_option = OrderOption(shot=add_shot, sugar=add_sugar)
                             order_items.append(OrderResponseItem(
