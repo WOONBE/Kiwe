@@ -116,36 +116,4 @@ class KioskControllerTest {
 
         verify(kioskService, times(1)).getAllKiosks();
     }
-
-//    @Test
-//    void getMyKiosks() throws Exception {
-//        KioskResponse response1 = new KioskResponse(1, "Seoul", "ACTIVE");
-//        KioskResponse response2 = new KioskResponse(2, "Busan", "INACTIVE");
-//        List<KioskResponse> kiosks = List.of(response1, response2);
-//
-//        when(kioskService.getMyKiosks()).thenReturn(kiosks);
-//
-//        mockMvc.perform(get("/api/kiosks"))
-//            .andExpect(status().isOk())
-//            .andExpect(jsonPath("$[0].id").value(response1.getId()))
-//            .andExpect(jsonPath("$[1].id").value(response2.getId()));
-//
-//        verify(kioskService, times(1)).getMyKiosks();
-//    }
-//
-//    @Test
-//    void getKioskOrderNumber() throws Exception {
-//        KioskOrderNumberResponse response = new KioskOrderNumberResponse(1L, 5L);
-//
-//        when(kioskService.getKioskOrderNumber(1L, 1L)).thenReturn(response);
-//
-//        mockMvc.perform(get("/api/kiosks/kiosk-order")
-//                .param("ownerId", "1")
-//                .param("kioskId", "1"))
-//            .andExpect(status().isOk())
-//            .andExpect(jsonPath("$.kioskId").value(response.getKioskId()))
-//            .andExpect(jsonPath("$.kioskOrderNumber").value(response.getKioskOrderNumber()));
-//
-//        verify(kioskService, times(1)).getKioskOrderNumber(1L, 1L);
-//    }
 }

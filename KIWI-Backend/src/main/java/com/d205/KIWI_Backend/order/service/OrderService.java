@@ -335,6 +335,68 @@ public class OrderService {
     }
 
     @Transactional
+    public int calculateTotalPriceForLastMonthByMemberId() {
+        Integer memberId = memberservice.getCurrentMemberId();
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+        List<Order> orders = orderRepository.findByMemberIdAndOrderDateAfter(memberId, oneMonthAgo);
+
+        return orders.stream()
+            .flatMap(order -> order.getOrderMenus().stream())
+            .mapToInt(orderMenu -> orderMenu.getMenu().getPrice() * orderMenu.getQuantity())
+            .sum();
+    }
+
+    @Transactional
+    public int calculateOrderCountForLastMonthByMemberId() {
+        Integer memberId = memberservice.getCurrentMemberId();
+        YearMonth currentMonth = YearMonth.now();
+        LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
+
+        // memberId로 멤버가 운영하는 키오스크 목록 조회
+        List<Kiosk> kiosks = kioskRepository.findByMemberId(memberId);
+
+        int totalOrderCount = 0;
+
+        // 각 키오스크에 대해 한 달 동안의 주문 횟수 계산
+        for (Kiosk kiosk : kiosks) {
+            List<Order> orders = orderRepository.findByKioskIdAndOrderDateBetween(kiosk.getId(), startOfMonth, endOfMonth);
+            totalOrderCount += orders.size();
+        }
+
+        return totalOrderCount;
+    }
+
+    @Transactional
+    public Map<YearMonth, Integer> calculateMonthlyOrderCountForLastSixMonthsByMemberId() {
+        Integer memberId = memberservice.getCurrentMemberId();
+        Map<YearMonth, Integer> monthlyOrderCounts = new HashMap<>();
+        YearMonth currentMonth = YearMonth.now();
+
+        // memberId로 멤버가 운영하는 키오스크 목록 조회
+        List<Kiosk> kiosks = kioskRepository.findByMemberId(memberId);
+
+        // 각 키오스크에 대해 최근 6개월 간의 월별 주문 횟수 계산
+        for (Kiosk kiosk : kiosks) {
+            for (int i = 0; i < 6; i++) {
+                YearMonth targetMonth = currentMonth.minusMonths(i);
+                LocalDateTime startOfMonth = targetMonth.atDay(1).atStartOfDay();
+                LocalDateTime endOfMonth = targetMonth.atEndOfMonth().atTime(23, 59, 59);
+
+                // 해당 월의 주문 목록 조회 (키오스크 기준)
+                List<Order> orders = orderRepository.findByKioskIdAndOrderDateBetween(kiosk.getId(), startOfMonth, endOfMonth);
+
+                // 해당 월의 주문 횟수 계산
+                int orderCount = orders.size();
+
+                monthlyOrderCounts.put(targetMonth, orderCount);
+            }
+        }
+
+        return monthlyOrderCounts;
+    }
+
+    @Transactional
     public List<OrderResponse> getOrdersByKioskId(Integer kioskId) {
 
         List<Order> orders = orderRepository.findByKioskId(kioskId);
