@@ -69,6 +69,35 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         "ORDER BY totalSales DESC")
     List<Object[]> findTopSellingMenusByAgeGroup(@Param("startDate") LocalDateTime startDate,
         @Param("endDate") LocalDateTime endDate);
+//
+//    @Query("SELECT m.name, SUM(om.quantity) AS totalSales " +
+//        "FROM Order o " +
+//        "JOIN o.orderMenus om " +
+//        "JOIN om.menu m " +
+//        "WHERE o.age = :age AND o.orderDate BETWEEN :startDate AND :endDate " +
+//        "GROUP BY m.name " +
+//        "ORDER BY totalSales DESC")
+//    List<Object[]> findTopSellingMenusForAgeGroup(@Param("age") String age,
+//        @Param("startDate") LocalDateTime startDate,
+//        @Param("endDate") LocalDateTime endDate);
+//
+//
+//    @Query("SELECT om.menu.name, SUM(om.quantity) AS totalSales " +
+//        "FROM Order o " +
+//        "JOIN o.orderMenus om " +
+//        "JOIN o.kioskOrders ko " +
+//        "WHERE ko.kiosk.id = :kioskId " +
+//        "AND o.age = :age " +
+//        "AND o.orderDate BETWEEN :startDate AND :endDate " +
+//        "GROUP BY om.menu.name " +
+//        "ORDER BY totalSales DESC")
+//    List<Object[]> findTopSellingMenusForAgeGroupAndKiosk(
+//        @Param("kioskId") Integer kioskId,
+//        @Param("age") String age,
+//        @Param("startDate") LocalDateTime startDate,
+//        @Param("endDate") LocalDateTime endDate);
+
+
 
 
 
