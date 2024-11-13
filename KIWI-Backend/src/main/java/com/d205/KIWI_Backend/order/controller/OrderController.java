@@ -1,6 +1,7 @@
 package com.d205.KIWI_Backend.order.controller;
 
 import com.d205.KIWI_Backend.global.exception.BadRequestException;
+import com.d205.KIWI_Backend.order.dto.MenuSales;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
 import com.d205.KIWI_Backend.order.service.OrderService;
@@ -70,6 +71,7 @@ public class OrderController {
 
         return orderService.getTopSellingMenusByAgeGroup();
     }
+
 //
 //    @PutMapping("/{orderId}")
 //    @Operation(summary = "주문 업데이트", description = "주문을 업데이트하는 API")
@@ -137,27 +139,18 @@ public class OrderController {
         return ResponseEntity.ok(monthlySales);
     }
 
-//
-//    @GetMapping("/top-menus-by-age-group")
-//    @Operation(summary = "전체 주문에서 연령대별 많이 팔린 메뉴 조회", description = "전체 주문에서 연령대별 많이 팔린 메뉴 조회하는 API")
-//    public ResponseEntity<Map<String, Integer>> getTopThreeSellingMenusByAgeGroup(
-//        @RequestParam("age") Integer age) {
-//
-//        Map<String, Integer> topMenus = orderService.getTopThreeSellingMenusByAgeGroup(age);
-//
-//        return ResponseEntity.ok(topMenus);
-//    }
-//
-//    @GetMapping("/top-menus-by-age-group-and-kiosk")
-//    @Operation(summary = "특정 키오스크의 전체 주문에서 연령대별 많이 팔린 메뉴 조회", description = "특정 키오스크의 전체 주문에서 연령대별 많이 팔린 메뉴 조회하는 API")
-//    public ResponseEntity<Map<String, Integer>> getTopThreeSellingMenusByAgeGroupAndKiosk(
-//        @RequestParam("kioskId") Integer kioskId,
-//        @RequestParam("age") Integer age) {
-//
-//        Map<String, Integer> topMenus = orderService.getTopThreeSellingMenusByAgeGroupAndKiosk(kioskId, age);
-//
-//        return ResponseEntity.ok(topMenus);
-//    }
+    @GetMapping("/top-sold-menus/{memberId}")
+    @Operation(summary = "특정 멤버가 운영하는 키오스크의 연령대별 인기 메뉴 조회", description = "특정 멤버가 운영하는 키오스크의 연령대별 인기 메뉴 조회하는 API")
+    public Map<String, List<MenuSales>> getTopSoldMenusByMemberId(@PathVariable Integer memberId) {
+        return orderService.getTopSoldMenusByMemberId(memberId);
+    }
+
+    @GetMapping("/top-sold-menus")
+    @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 연령대별 인기 메뉴 조회", description = "로그인 된 멤버가 운영하는 키오스크의 연령대별 인기 메뉴 조회하는 API")
+    public Map<String, List<MenuSales>> getTopSoldMenusByLoginMember() {
+        return orderService.getTopSoldMenusByLoginMember();
+    }
+
 
 
 
