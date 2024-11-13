@@ -102,7 +102,7 @@ class MainViewModel
                         voiceResult =
                             VoiceOrderResponse(
                                 category = 0,
-                                need_temp = false,
+                                need_temp = 1,
                                 order = emptyList(),
                                 message = "",
                                 response = "",
@@ -116,25 +116,35 @@ class MainViewModel
                 if (menuRegex.containsMatchIn(result)) { // 메뉴판에 있는 메뉴를 말했다면
                     Timber.tag("MainViewModel").d("menuRegex: $result")
                     if (orderRegex.containsMatchIn(result)) { // 정해둔 폼으로 문장이 끝나는 지 검사
-                        Timber.tag("MainViewModel").d("orderRegex: $result")
+                        Timber.tag("Network").d("orderRegex: $result")
                         voiceOrderUseCase(
                             voiceOrder =
                                 VoiceOrderRequest(
                                     sentence = result,
-                                    need_temp = false,
+                                    need_temp = 1, // hot, ice 정보가 있으면 1로 들어가야함
                                     order_items = emptyList(),
                                 ),
                         ).onSuccess {
                             // AI에서 성공해서 응답이 돌아오면
-                            reduce {
-                                state.copy(
-                                    recognizedText = "",
-                                    voiceResult = it,
-                                    shouldShowRetryMessage = false,
-                                    isScreenShowing = false,
-                                )
+                            if (it.response == "잘못된 접근입니다.") {
+                                postSideEffect(MainSideEffect.Toast(it.response))
+                                reduce {
+                                    state.copy(
+                                        shouldShowRetryMessage = true,
+                                    )
+                                }
+                            } else {
+                                reduce {
+                                    state.copy(
+                                        recognizedText = "",
+                                        voiceResult = it,
+                                        shouldShowRetryMessage = false,
+                                        isScreenShowing = false,
+                                    )
+                                }
                             }
                         }.onFailure {
+                            postSideEffect(MainSideEffect.Toast("오류가 발생했습니다"))
                             reduce {
                                 state.copy(
                                     shouldShowRetryMessage = true,
@@ -262,7 +272,7 @@ data class MainState(
     val voiceResult: VoiceOrderResponse =
         VoiceOrderResponse(
             category = 0,
-            need_temp = false,
+            need_temp = 1,
             order = emptyList(),
             message = "",
             response = "",

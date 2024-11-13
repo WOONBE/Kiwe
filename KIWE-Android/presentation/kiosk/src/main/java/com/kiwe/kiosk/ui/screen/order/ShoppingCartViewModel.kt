@@ -34,13 +34,13 @@ class ShoppingCartViewModel
                     val menu = getMenuByIdUseCase(eachOrder.menuId).getOrThrow()
                     Timber.tag("VoiceOrder").d("menu: $menu")
                     val shot =
-                        if (eachOrder.option.shot) {
+                        if (eachOrder.option.shot == 1) {
                             "샷 추가" to Pair("1샷 추가", 500)
                         } else {
                             "샷 추가" to Pair("없음", 0)
                         }
                     val sugar =
-                        if (eachOrder.option.sugar) {
+                        if (eachOrder.option.sugar == 1) {
                             "설탕 추가" to Pair("1개 추가", 100)
                         } else {
                             "설탕 추가" to Pair("없음", 0)

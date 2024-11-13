@@ -14,16 +14,19 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +34,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,11 +47,15 @@ import com.kiwe.kiosk.ui.screen.main.component.ImageButton
 import com.kiwe.kiosk.ui.screen.order.OrderListDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
+import com.kiwe.kiosk.ui.screen.utils.TextToSpeechManager
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import com.kiwe.kiosk.utils.MainEnum
+import kotlinx.coroutines.delay
 import org.orbitmvi.orbit.compose.collectAsState
 import timber.log.Timber
+
+private const val TAG = "ContainerScreen"
 
 @Composable
 fun ContainerScreen(
@@ -61,6 +69,22 @@ fun ContainerScreen(
     val shoppingCartState = shoppingCartViewModel.collectAsState().value
     var isShoppingCartDialogOpen by remember { mutableStateOf(false) }
     var isOrderListDialogOpen by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val ttsManager = remember { TextToSpeechManager(context) }
+
+    LaunchedEffect(state.page) {
+        if (state.page == 1) {
+            Timber.tag(TAG).d("LaunchedEffect")
+        }
+        ttsManager.speak("음성 도움을 받으시려면, '도와줘'라고 말씀해주세요")
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            Timber.tag(TAG).d("onDispose")
+            ttsManager.stop()
+        }
+    }
 
     LaunchedEffect(shoppingCartState.isVoiceOrderConfirm) {
         isShoppingCartDialogOpen = shoppingCartState.isVoiceOrderConfirm
@@ -115,7 +139,10 @@ private fun ContainerScreen(
             if (page > 0) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     StepIndicator(page)
-                    AnimatedImageSwitcher(100.dp)
+                    Box(modifier = Modifier, contentAlignment = Alignment.Center) {
+                        AnimatedImageSwitcher(80.dp)
+                        VoiceIntro()
+                    }
                 }
             }
         },
@@ -188,6 +215,30 @@ fun GazeIndicator(gazePoint: Offset) {
                 ).size(20.dp)
                 .background(Color.Red.copy(alpha = 0.5f)),
     )
+}
+
+@Composable
+fun VoiceIntro() {
+    val message = "음성 도움을 받으시려면, '도와줘'라고 말씀해주세요"
+    val currentMessage = rememberUpdatedState(message)
+    var displayedText by remember { mutableStateOf("") }
+    LaunchedEffect(currentMessage.value) {
+        displayedText = ""
+        currentMessage.value.forEachIndexed { index, char ->
+            delay(100) // 글자가 나타나는 속도 조절 (100ms)
+            displayedText += char
+        }
+    }
+    Box(
+        modifier =
+            Modifier
+                .offset(y = 24.dp)
+                .padding(bottom = 8.dp)
+                .background(Color.White.copy(alpha = 0.8f), shape = RoundedCornerShape(8.dp))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+    ) {
+        Text(text = displayedText, style = MaterialTheme.typography.bodyMedium)
+    }
 }
 
 @Composable
@@ -286,7 +337,7 @@ fun StepItem(
 fun ContainerScreenPreview() {
     KIWEAndroidTheme {
         ContainerScreen(
-            page = 0,
+            page = 1,
             mode = MainEnum.KioskMode.MANUAL,
             onBackClick = {},
             onShoppingCartDialogClick = {},
