@@ -1,7 +1,11 @@
 package com.kiwe.kiosk.utils
 
 import android.graphics.BlurMaskFilter
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -41,3 +45,16 @@ fun Modifier.dropShadow(
         canvas.restore()
     }
 }
+
+inline fun Modifier.noRippleClickable(
+    modifier: Modifier = Modifier,
+    crossinline onClick: () -> Unit,
+): Modifier =
+    composed {
+        clickable(
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() },
+        ) {
+            onClick()
+        }
+    }
