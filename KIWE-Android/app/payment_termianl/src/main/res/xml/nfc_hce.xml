@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<host-card-emulation xmlns:android="http://schemas.android.com/apk/res/android">
+    <service
+        android:description="@string/nfc_service_description">
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="text/plain" />
+    </service>
+</host-card-emulation>

@@ -11,6 +11,20 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.KIWEAndroid">
+
+        <service
+            android:name=".NfcHceService"
+            android:exported="false"
+            android:permission="android.permission.BLUETOOTH_ADMIN">
+            <intent-filter>
+                <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.nfc.cardemulation.host_apdu_service"
+                android:resource="@xml/nfc_hce" />
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

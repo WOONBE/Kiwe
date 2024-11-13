@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">payment_termianl</string>
+    <string name="nfc_service_description">Payment Terminal Service</string>
 </resources>
