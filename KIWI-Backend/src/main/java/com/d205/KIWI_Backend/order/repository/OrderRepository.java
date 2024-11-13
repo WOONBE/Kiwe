@@ -4,7 +4,6 @@ import com.d205.KIWI_Backend.order.domain.Order;
 import io.lettuce.core.dynamic.annotation.Param;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -69,6 +68,24 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         "ORDER BY totalSales DESC")
     List<Object[]> findTopSellingMenusByAgeGroup(@Param("startDate") LocalDateTime startDate,
         @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT o FROM Order o " +
+        "JOIN KioskOrder ko ON o.id = ko.order.id " +
+        "JOIN Kiosk k ON ko.kiosk.id = k.id " +
+        "WHERE k.member.id = :memberId")
+    List<Order> findOrdersByMemberId(@Param("memberId") Integer memberId);
+
+    @Query("SELECT o FROM Order o JOIN o.kioskOrders ko WHERE ko.kiosk.member.id = :memberId AND o.orderDate > :oneMonthAgo")
+    List<Order> findByMemberIdAndOrderDateAfter(@Param("memberId") Integer memberId, @Param("oneMonthAgo") LocalDateTime oneMonthAgo);
+
+
+
+
+
+
+
+
+
 
 
 

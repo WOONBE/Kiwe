@@ -31,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -61,6 +63,7 @@ fun ContainerScreen(
     shoppingCartViewModel: ShoppingCartViewModel,
     onBackClick: () -> Unit,
     onClickPayment: () -> Unit,
+    setShoppingCartOffset: (Offset) -> Unit,
     content: @Composable () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
@@ -130,6 +133,7 @@ fun ContainerScreen(
         mode = state.mode,
         onBackClick = onBackClick,
         onShoppingCartDialogClick = { isShoppingCartDialogOpen = true },
+        setShoppingCartOffset = setShoppingCartOffset,
         onOrderListDialogClick = { isOrderListDialogOpen = true },
         gazePoint = state.gazePoint,
         content = content,
@@ -143,6 +147,7 @@ private fun ContainerScreen(
     mode: MainEnum.KioskMode,
     onBackClick: () -> Unit,
     onShoppingCartDialogClick: () -> Unit,
+    setShoppingCartOffset: (Offset) -> Unit,
     onOrderListDialogClick: () -> Unit,
     gazePoint: Offset?,
     content: @Composable () -> Unit,
@@ -189,7 +194,12 @@ private fun ContainerScreen(
                     }
                     Spacer(Modifier.width(5.dp))
                     ImageButton(
-                        modifier = Modifier.weight(1F),
+                        modifier =
+                            Modifier
+                                .weight(1F)
+                                .onGloballyPositioned {
+                                    setShoppingCartOffset(Offset(it.positionInRoot().x, it.positionInRoot().y - it.size.height * 4))
+                                },
                         "장바구니",
                         R.drawable.shopping_cart,
                         R.color.KIWE_orange1,
@@ -233,7 +243,10 @@ fun GazeIndicator(gazePoint: Offset) {
 @Composable
 fun PreviousButton(onBackClick: () -> Unit) {
     Button(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 120.dp, vertical = 20.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 120.dp, vertical = 20.dp),
         onClick = onBackClick,
         colors =
             ButtonDefaults.buttonColors(
@@ -334,6 +347,7 @@ fun ContainerScreenPreview() {
             gazePoint = Offset(0f, 0f),
             content = {},
             onLogoutRequested = {},
+            setShoppingCartOffset = {},
         )
     }
 }

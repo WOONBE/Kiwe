@@ -5,6 +5,7 @@ import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
 import com.kiwe.kiosk.model.ShoppingCartItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.LinkedList
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -43,14 +44,16 @@ class ShoppingCartViewModel
         fun onInsertItem(item: ShoppingCartItem) =
             intent {
                 val updatedItems =
-                    state.shoppingCartItem.map {
-                        if (it.menuTitle == item.menuTitle && it.menuRadioOption == item.menuRadioOption) {
-                            // 기존 아이템이 있을 경우 count만 업데이트
-                            it.copy(count = it.count + item.count)
-                        } else {
-                            it
-                        }
-                    }
+                    LinkedList(
+                        state.shoppingCartItem.map {
+                            if (it.menuTitle == item.menuTitle && it.menuRadioOption == item.menuRadioOption) {
+                                // 기존 아이템이 있을 경우 count만 업데이트
+                                it.copy(count = it.count + item.count)
+                            } else {
+                                it
+                            }
+                        },
+                    )
 
                 // 새로운 아이템인지 확인
                 val itemExists =
@@ -61,7 +64,8 @@ class ShoppingCartViewModel
                     if (itemExists) {
                         updatedItems
                     } else {
-                        updatedItems.plus(item)
+                        updatedItems.addFirst(item)
+                        updatedItems
                     }
                 reduce {
                     state.copy(shoppingCartItem = finalItems)
@@ -109,7 +113,7 @@ class ShoppingCartViewModel
 
 data class ShoppingCartState(
     val shoppingCartItem: List<ShoppingCartItem> =
-        listOf(),
+        LinkedList<ShoppingCartItem>(),
 ) : BaseState
 
 sealed interface ShoppingCartSideEffect : BaseSideEffect {
