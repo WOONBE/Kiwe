@@ -9,7 +9,7 @@ class OrderItem(BaseModel):
 
 class OrderRequest(BaseModel):
     sentence: str
-    need_temp: bool
+    need_temp: int
     order_items: List[OrderItem]  # List of order items
 
 # Response Model
@@ -24,7 +24,7 @@ class OrderResponseItem(BaseModel):
 
 class OrderResponse(BaseModel):
     category: int  # 1: order, 2: fix/delete, 3: suggestion, 4: explanation
-    need_temp: bool  # Whether temperature needs to be considered
+    need_temp: int  # Whether temperature needs to be considered
     message: str
     order: List[OrderResponseItem]  # The processed list of orders
     response: str  # The response, e.g., for TTS (Text-to-Speech)

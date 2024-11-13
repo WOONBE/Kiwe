@@ -4,14 +4,16 @@ from src.commands.new_order_command import NewOrderCommand
 from src.commands.fix_order_command import FixOrderCommand
 from src.commands.recommendation_command import RecommendationCommand
 from src.commands.explanation_command import ExplanationCommand
+from src.commands.option_order_command import OptionOrderCommand
+
 from src.utils.nlp_processor import NLPProcessor
 from src.api_layer.models.order_item import OrderRequest
+
 
 class ServiceRouter:
     def __init__(self, infrastructure, db):
         self.infrastructure = infrastructure
         self.nlp_processor = NLPProcessor(db)
-
 
     def route_request(self, request: OrderRequest):
         """
@@ -22,10 +24,15 @@ class ServiceRouter:
         request_type = processed_data["request_type"]
         data = processed_data["data"]
 
-        if request_type == "order":
+        if request.need_temp == 1:
+            command = OptionOrderCommand(self.infrastructure)
+            ans = command.execute(data, request)
+            print("option ans", ans)
+            return ans
+        elif request_type == "order":
             command = NewOrderCommand(self.infrastructure)
-            ans = command.execute(data,request)
-            print("ans",ans)
+            ans = command.execute(data, request)
+            print("ans", ans)
             return ans
         elif request_type == "modify_or_delete":
             command = FixOrderCommand(self.infrastructure)

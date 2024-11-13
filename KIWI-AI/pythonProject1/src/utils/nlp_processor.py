@@ -2,7 +2,7 @@ import re
 from fastapi import HTTPException
 from konlpy.tag import Okt
 from src.infrastructure.database import Database
-from src.api_layer.models.order_item import OrderItem, OrderRequest
+from src.api_layer.models.order_item import OrderItem, OrderRequest, OrderResponseItem, OrderOption
 
 
 class NLPProcessor:
@@ -54,7 +54,6 @@ class NLPProcessor:
     def extract_menu_item_and_options(self, sentence):
         """Extract the menu item, options, and temperature preference."""
 
-        # menu_info 여기 이상함
         for menu_id, menu_info in self.menu_data.items():
             # Use regular expression to find menu_name as a whole word in the sentence
             pattern = r'\b' + re.escape(menu_info['menu_name']) + r'\b'
@@ -91,11 +90,19 @@ class NLPProcessor:
 
     def process_request(self, request: OrderRequest):
         """Process a Korean input sentence to extract intent and structured data."""
+
+        if request.need_temp == 1:
+            data = self.extract_data(request.sentence, 'order', request.order_items)
+            result,need_temp = self.compare_temperature(request,data)
+            return {"request_type": 'order', "data": result}
+
         order_type = self.detect_order_type(request.sentence)
         if order_type == "unknown":
             return {"request_type": order_type, "data": "다시 말씀해 주세요"}
         else:
+
             data = self.extract_data(request.sentence, order_type, request.order_items)
+            print("data",data)
             if data is None:
                 return {"request_type": order_type, "data": "다시 말씀해 주세요"}
             return {"request_type": order_type, "data": data}
@@ -245,3 +252,38 @@ class NLPProcessor:
 
         # Default case if no temperature keywords are found
         return "default", sentence
+
+
+
+    def compare_temperature(self, request, data):
+        order_items = []
+        need_temp = 0
+        check = []
+
+        previous_orders = request.order_items
+
+        for pr in previous_orders:
+            for menu_id, menu_info in self.menu_data.items():
+                if pr.menuId == menu_id:
+                    name = menu_info['menu_name']
+                    for comp in data.get("items", []):  # Use get() to avoid potential NoneType issues
+                        if name == comp.get('menu_name'):
+                            temp = comp.get("temp")
+                            new_id = self.find_menu_id_with_temp(name, temp)
+
+                            add_shot = comp.get('option', {}).get('shot', False) or pr.option.get('shot', False)
+                            add_sugar = comp.get('option', {}).get('sugar', False) or pr.option.get('sugar', False)
+
+                            order_option = OrderOption(shot=add_shot, sugar=add_sugar)
+                            order_items.append(OrderResponseItem(
+                                menuId=new_id,
+                                count=pr.count,
+                                option=order_option
+                            ))
+                        else:
+                            order_items.append(name)
+
+                    return order_items, need_temp
+                else:
+                    pass
+        return order_items, need_temp
