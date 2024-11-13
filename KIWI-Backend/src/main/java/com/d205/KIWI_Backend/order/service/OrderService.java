@@ -479,6 +479,57 @@ public class OrderService {
         return topSellingMenus;
     }
 
+//    public Map<String, Integer> getTopThreeSellingMenusByAgeGroup(Integer age) {
+//
+//        LocalDateTime endDate = LocalDateTime.now();
+//        LocalDateTime startDate = endDate.minusMonths(1);
+//        String ageGroup = getAgeGroup(age);
+//
+//        List<Object[]> result = orderRepository.findTopSellingMenusForAgeGroup(ageGroup, startDate, endDate);
+//
+//
+//        Map<String, Integer> menuSales = new HashMap<>();
+//
+//
+//        for (Object[] row : result) {
+//            String menuName = (String) row[0];
+//            Integer totalSales = ((Number) row[1]).intValue();
+//
+//
+//            menuSales.put(menuName, totalSales);
+//        }
+//
+//
+//        return menuSales.entrySet().stream()
+//            .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue())) // 판매량 내림차순 정렬
+//            .limit(3) // 상위 3개 선택
+//            .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), HashMap::putAll);
+//    }
+//
+//
+//    public Map<String, Integer> getTopThreeSellingMenusByAgeGroupAndKiosk(Integer kioskId, Integer age) {
+//        LocalDateTime endDate = LocalDateTime.now();
+//        LocalDateTime startDate = endDate.minusMonths(1);
+//
+//        String ageGroup = getAgeGroup(age);
+//
+//        List<Object[]> result = orderRepository.findTopSellingMenusForAgeGroupAndKiosk(kioskId, ageGroup, startDate, endDate);
+//
+//        Map<String, Integer> menuSales = new HashMap<>();
+//
+//        for (Object[] row : result) {
+//            String menuName = (String) row[0];
+//            Integer totalSales = ((Number) row[1]).intValue();
+//            menuSales.put(menuName, totalSales);
+//        }
+//
+//        return menuSales.entrySet().stream()
+//            .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
+//            .limit(3)
+//            .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), HashMap::putAll);
+//    }
+
+
 
     private String getAgeGroup(Integer age) {
         if (age >= 10 && age < 20) {
@@ -493,5 +544,7 @@ public class OrderService {
             return "50대 이상";
         }
     }
+
+
 
 }
