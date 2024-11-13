@@ -15,7 +15,6 @@ import com.kiwe.domain.usecase.kiosk.datasource.SetOwnerIdUseCase
 import com.kiwe.domain.usecase.manager.kiosk.CreateKioskUseCase
 import com.kiwe.domain.usecase.manager.login.LoginUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMyInfoUseCase
-import com.kiwe.domain.usecase.manager.token.GetTokenUseCase
 import com.kiwe.domain.usecase.manager.token.SetTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -32,7 +31,6 @@ class LoginViewModel
     @Inject
     constructor(
         private val loginUseCase: LoginUseCase,
-        private val getTokenUseCase: GetTokenUseCase,
         private val setTokenUseCase: SetTokenUseCase,
         private val searchMyInfoUseCase: SearchMyInfoUseCase,
         private val createKioskUseCase: CreateKioskUseCase,
@@ -112,13 +110,13 @@ class LoginViewModel
                         response.refreshToken,
                     ),
                 )
-                onCreateKiosk(Token(response.accessToken, response.refreshToken))
+                onCreateKiosk()
             }
 
-        private fun onCreateKiosk(token: Token) =
+        private fun onCreateKiosk() =
             intent {
                 val userInfo =
-                    searchMyInfoUseCase(token).getOrThrow()
+                    searchMyInfoUseCase().getOrThrow()
                 Timber.tag(javaClass.simpleName).d("$userInfo")
                 val ownerId = userInfo.id
                 val requestCreateKiosk =
@@ -132,7 +130,7 @@ class LoginViewModel
                 setKioskIdUseCase(createKioskResponse.id.toString())
 
                 val getMyInfoResponse =
-                    searchMyInfoUseCase(token).getOrThrow()
+                    searchMyInfoUseCase().getOrThrow()
                 setOwnerIdUseCase(getMyInfoResponse.id.toString())
 
                 val getKioskNameResponse =

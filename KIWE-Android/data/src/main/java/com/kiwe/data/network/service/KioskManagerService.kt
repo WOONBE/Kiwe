@@ -10,7 +10,6 @@ import com.kiwe.domain.model.CreateKioskRequest
 import com.kiwe.domain.model.Kiosk
 import com.kiwe.domain.model.KioskOrder
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.setBody
 import javax.inject.Inject
@@ -53,7 +52,6 @@ class KioskManagerService
 
         /**
          * Kiosk에서 로그아웃합니다.
-         * @TODO: access token
          *
          */
         suspend fun signOutKiosk(request: SignOutKioskRequest): Result<Unit> =

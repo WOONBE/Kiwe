@@ -7,9 +7,7 @@ import com.kiwe.data.network.util.putResult
 import com.kiwe.domain.model.EditMemberParam
 import com.kiwe.domain.model.LogoutParam
 import com.kiwe.domain.model.MemberInfoResponse
-import com.kiwe.domain.model.Token
 import io.ktor.client.HttpClient
-import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.setBody
 import javax.inject.Inject
@@ -41,10 +39,7 @@ class MemberService
                 setBody(newMemberInfo)
             }
 
-        suspend fun searchMyInfo(token: Token): Result<MemberInfoResponse> =
-            client.getResult("api/members") {
-                header("Authorization", "Bearer ${token.accessToken}")
-            }
+        suspend fun searchMyInfo(): Result<MemberInfoResponse> = client.getResult("api/members")
 
         suspend fun editMyInfo(editMemberParam: EditMemberParam): Result<MemberInfoResponse> =
             client.putResult("api/members") {
