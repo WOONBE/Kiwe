@@ -24,7 +24,8 @@ class ServiceRouter:
         request_type = processed_data["request_type"]
         data = processed_data["data"]
 
-        if request.need_temp == 1:
+        if request.need_temp == 0:
+            print("request.need_temp", request.need_temp)
             command = OptionOrderCommand(self.infrastructure)
             ans = command.execute(data, request)
             print("option ans", ans)

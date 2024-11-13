@@ -31,7 +31,7 @@ class NLPProcessor:
         self.options = self.fetch_options()  # Placeholder for dynamic options fetching
         print()
         print()
-        print("hiiiiiiiiiiii",self.menu_data)
+        print("hiiiiiiiiiiii")
 
 
     def fetch_menu_items(self):
@@ -91,7 +91,8 @@ class NLPProcessor:
     def process_request(self, request: OrderRequest):
         """Process a Korean input sentence to extract intent and structured data."""
 
-        if request.need_temp == 1:
+        if request.need_temp == 0:
+            print("option line")
             data = self.extract_data(request.sentence, 'order', request.order_items)
             result,need_temp = self.compare_temperature(request,data)
             return {"request_type": 'order', "data": result}
@@ -102,7 +103,6 @@ class NLPProcessor:
         else:
 
             data = self.extract_data(request.sentence, order_type, request.order_items)
-            print("data",data)
             if data is None:
                 return {"request_type": order_type, "data": "다시 말씀해 주세요"}
             return {"request_type": order_type, "data": data}
@@ -124,7 +124,6 @@ class NLPProcessor:
 
     def find_menu_id_with_temp(self, menu_name, temperature):
         """Fetch menu_id based on menu_name and temperature (if needed)."""
-        print("self.menu_data.values()",self.menu_data.values())
         for menu_info in self.menu_data.values():
             # print("menu_info['menu_name']",menu_info['menu_name'],menu_info['hot_or_ice'])
             if menu_info['menu_name'] in menu_name:
@@ -188,7 +187,7 @@ class NLPProcessor:
 
     def extract_options_for_each_item(self, sentence):
         """Extract options (shot and sugar) for the current order."""
-        options = {"shot": False, "sugar": False}  # Default options
+        options = {"shot": 0, "sugar": 0}  # Default options
 
         # Check for sugar-related options
         if "설탕" in sentence or "설탕 추가" in sentence or "설탕 넣어줘" in sentence:
@@ -285,5 +284,5 @@ class NLPProcessor:
 
                     return order_items, need_temp
                 else:
-                    pass
+                    order_items.append()
         return order_items, need_temp

@@ -6,7 +6,7 @@ class OptionOrderCommand:
     def __init__(self, infrastructure):
         self.database = infrastructure['database']
         self.menu_data = self.fetch_menu_combinations()  # Fetch menu data with menu_id, name, etc.
-        print("hiiiiiiiiiiii", self.menu_data)
+        # print("hiiiiiiiiiiii", self.menu_data)
 
 
     def fetch_menu_combinations(self):
@@ -41,7 +41,7 @@ class OptionOrderCommand:
             raise HTTPException(status_code=400, detail="No items found in the order")
 
         order_items = []
-        need_temp = 0
+        need_temp = 1
         check = []
 
         previous_orders = request.order_items
@@ -76,7 +76,7 @@ class OptionOrderCommand:
                             ))
                         else:
                             check.append(name)
-                            need_temp = True
+                            need_temp = 0
         if need_temp:
             response_text = f"{check}의 온도를 알려주세요"
         else:

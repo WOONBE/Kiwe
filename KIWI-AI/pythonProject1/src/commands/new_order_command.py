@@ -15,7 +15,7 @@ class NewOrderCommand:
             raise HTTPException(status_code=400, detail="No items found in the order")
 
         order_items = []
-        need_temp = False
+        need_temp = 1
         check = []
 
         # Check if any item requires a temperature preference
@@ -29,7 +29,6 @@ class NewOrderCommand:
                     shot=prev_item.option.get('shot'),
                     sugar=prev_item.option.get('sugar')
                 )
-                print("hi")
                 print("order_option",order_option)
                 order_items.append(OrderResponseItem(
                     menuId=prev_item.menuId,
@@ -39,6 +38,7 @@ class NewOrderCommand:
 
 
         for item in order_data['items']:
+            print("item",item)
             # Validate required fields in each item
             if 'menuId' not in item or 'count' not in item or 'options' not in item:
                 raise HTTPException(status_code=400, detail="Missing fields in one or more order items")
@@ -48,30 +48,30 @@ class NewOrderCommand:
             menu_name = item.get('menu_name')  # Default if menu_name is missing
             count = item['count']
             options = item['options']
-            temperature = item.get("temp")  # Default to "default" if temperature is not specified
+            # temperature = item.get("temp")  # Default to "default" if temperature is not specified
 
             # Check for "spike" temperature and add to issues if found
-            if temperature == "spike":
+            if item.get("temp") == "spike":
+                print("spike")
                 check.append(menu_name)
-                need_temp = 1
+                need_temp = 0
 
             # Create OrderOption instance for options
             order_option = OrderOption(
                 shot=options.get("shot", 0),
                 sugar=options.get("sugar", 0)
             )
-            print("current order order_option", order_option)
             # Append the processed order item
             order_items.append(OrderResponseItem(
                 menuId=menu_id,
                 count=count,
                 option=order_option
             ))
-        print("order_items",order_items)
-
+        print("order_items",order_items,type(need_temp))
+        print("need_temp", need_temp, type(need_temp))
         # Build OrderResponse
 
-        if need_temp:
+        if need_temp == 0:
             response_text = f"{check}의 온도를 확인해주세요"
         else:
             response_text = "주문을 추가하였습니다"
