@@ -23,6 +23,15 @@ class KioskDataSource
         @ApplicationContext private val context: Context,
     ) {
         /**
+         * 모든 키 값을 초기화하는 함수
+         */
+        suspend fun clearAll() {
+            context.kioskDataStore.edit { pref ->
+                pref.clear() // 모든 데이터 삭제
+            }
+        }
+
+        /**
          * 소유자 ID 설정
          *
          * @param id 소유자의 ID

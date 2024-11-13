@@ -1,5 +1,6 @@
 package com.kiwe.data.di
 
+import com.kiwe.data.usecase.kiosk.datasource.ClearAllDataUseCaseImpl
 import com.kiwe.data.usecase.kiosk.datasource.ClearKioskNameUseCaseImpl
 import com.kiwe.data.usecase.kiosk.datasource.ClearOrderNumberUseCaseImpl
 import com.kiwe.data.usecase.kiosk.datasource.ClearOwnerIdUseCaseImpl
@@ -11,6 +12,7 @@ import com.kiwe.data.usecase.kiosk.datasource.GetOwnerIdUseCaseImpl
 import com.kiwe.data.usecase.kiosk.datasource.SetKioskIdUseCaseImpl
 import com.kiwe.data.usecase.kiosk.datasource.SetKioskNameUseCaseImpl
 import com.kiwe.data.usecase.kiosk.datasource.SetOwnerIdUseCaseImpl
+import com.kiwe.domain.usecase.kiosk.datasource.ClearAllDataUseCase
 import com.kiwe.domain.usecase.kiosk.datasource.ClearKioskNameUseCase
 import com.kiwe.domain.usecase.kiosk.datasource.ClearOrderNumberUseCase
 import com.kiwe.domain.usecase.kiosk.datasource.ClearOwnerIdUseCase
@@ -30,6 +32,9 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 interface KioskDataSourceModule {
+    @Binds
+    fun bindClearAllDataUseCase(uc: ClearAllDataUseCaseImpl): ClearAllDataUseCase
+
     @Binds
     fun bindClearKioskNameUseCase(uc: ClearKioskNameUseCaseImpl): ClearKioskNameUseCase
 
