@@ -2,6 +2,7 @@ package com.kiwe.kiosk.ui.screen.main
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import androidx.compose.ui.window.Dialog
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.AnimatedImageSwitcher
@@ -48,6 +50,9 @@ import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
+import com.kiwe.kiosk.ui.theme.KiweGray1
+import com.kiwe.kiosk.ui.theme.KiweGreen5
+import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.utils.MainEnum
 import kotlinx.coroutines.delay
 import org.orbitmvi.orbit.compose.collectAsState
@@ -67,6 +72,7 @@ fun ContainerScreen(
     val shoppingCartState = shoppingCartViewModel.collectAsState().value
     var isShoppingCartDialogOpen by remember { mutableStateOf(false) }
     var isOrderListDialogOpen by remember { mutableStateOf(false) }
+    var isQueryStateBoxOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.page) {
         if (state.page == 1) {
@@ -82,20 +88,29 @@ fun ContainerScreen(
         }
     }
 
-    LaunchedEffect(shoppingCartState.isVoiceOrderConfirm) {
+    LaunchedEffect(shoppingCartState.isVoiceOrderConfirm, shoppingCartState.shoppingCartItem) {
         isShoppingCartDialogOpen = shoppingCartState.isVoiceOrderConfirm
+        delay(1000L)
+        isQueryStateBoxOpen = isShoppingCartDialogOpen
+        Timber.tag("ContainerScreen").d("LaunchedEffect $isQueryStateBoxOpen")
     }
 
     if (isShoppingCartDialogOpen) {
         ShoppingCartDialog(
             viewModel = shoppingCartViewModel,
+            mainViewModel = viewModel,
             goOrderList = {
                 isShoppingCartDialogOpen = false
-                isOrderListDialogOpen = true
+                if (state.voiceShoppingCart.isNotEmpty()) {
+                    // 바로 다음 화면으로 보냄
+                    onClickPayment()
+                } else {
+                    isOrderListDialogOpen = true
+                }
             },
             onClose = {
                 isShoppingCartDialogOpen = false
-                shoppingCartViewModel.onConfirmVoiceOrder()
+                shoppingCartViewModel.onConfirmVoiceOrder() // 음성주문 상태 날리는 코드
             },
         )
     }
@@ -107,6 +122,29 @@ fun ContainerScreen(
             onClickPayment = onClickPayment,
         )
     }
+    if (state.isOrderEndTrue || state.isOrderEndFalse) {
+        Timber.tag("ContainerScreenOrder").d("ordered end")
+        isOrderListDialogOpen = false
+        isQueryStateBoxOpen = false
+    }
+
+    QueryStateBox(
+        isQueryStateBoxOpen = isQueryStateBoxOpen,
+        page = state.page,
+        onClose = {
+            isQueryStateBoxOpen = false
+        },
+        onNoClick = {
+            isQueryStateBoxOpen = false
+            isShoppingCartDialogOpen = false
+        },
+        onYesClick = {
+            isQueryStateBoxOpen = false
+            isShoppingCartDialogOpen = false
+            viewModel.showSpeechScreen()
+        },
+    )
+
     ContainerScreen(
         page = state.page,
         mode = state.mode,
@@ -194,6 +232,77 @@ private fun ContainerScreen(
             }
         },
     )
+}
+
+@Composable
+fun QueryStateBox(
+    isQueryStateBoxOpen: Boolean,
+    page: Int = 0,
+    onClose: () -> Unit,
+    onYesClick: () -> Unit = {},
+    onNoClick: () -> Unit = {},
+) {
+    // 장바구니 화면에서 팝업 띄우고, 포장, 매장 화면에서 팝업 또 띄우고
+    if (isQueryStateBoxOpen) {
+        Timber.tag("ContainerScreen").d("QueryStateBox $page")
+        Dialog(onDismissRequest = {
+            onClose()
+        }) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "더 주문하시겠습니까?",
+                        style = Typography.titleLarge.copy(color = Color.White),
+                    )
+                    Text(
+                        text = "음성으로 하셔도 됩니다",
+                        style = Typography.titleMedium.copy(color = Color.White),
+                    )
+                    Row(modifier = Modifier.padding(top = 12.dp)) {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .background(color = KiweGray1, shape = RoundedCornerShape(20.dp))
+                                    .padding(8.dp)
+                                    .clickable {
+                                        onYesClick()
+                                        onClose()
+                                    },
+                        ) {
+                            Text(
+                                text = "네",
+                                modifier = Modifier.padding(8.dp),
+                                style = Typography.titleLarge.copy(color = Color.White),
+                            )
+                        }
+
+                        Box(
+                            modifier =
+                                Modifier
+                                    .padding(start = 12.dp)
+                                    .background(color = KiweGreen5, shape = RoundedCornerShape(20.dp))
+                                    .padding(8.dp)
+                                    .clickable {
+                                        onNoClick()
+                                        onClose()
+                                    },
+                        ) {
+                            Text(
+                                text = "아니오",
+                                modifier = Modifier.padding(8.dp),
+                                style = Typography.titleLarge.copy(color = Color.White),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -341,5 +450,13 @@ fun ContainerScreenPreview() {
             gazePoint = Offset(0f, 0f),
             content = {},
         )
+    }
+}
+
+@Composable
+@Preview
+fun QueryStateBoxPreview() {
+    KIWEAndroidTheme {
+        QueryStateBox(isQueryStateBoxOpen = true, page = 0, {})
     }
 }

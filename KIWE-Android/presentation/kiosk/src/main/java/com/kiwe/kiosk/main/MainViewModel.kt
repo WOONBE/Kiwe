@@ -13,8 +13,10 @@ import com.kiwe.kiosk.ui.screen.utils.SpeechRecognizerManager
 import com.kiwe.kiosk.ui.screen.utils.SpeechResultListener
 import com.kiwe.kiosk.ui.screen.utils.helpPopupRegex
 import com.kiwe.kiosk.ui.screen.utils.menuRegex
+import com.kiwe.kiosk.ui.screen.utils.noRegex
 import com.kiwe.kiosk.ui.screen.utils.orderRegex
 import com.kiwe.kiosk.ui.screen.utils.temperatureRegex
+import com.kiwe.kiosk.ui.screen.utils.yesRegex
 import com.kiwe.kiosk.utils.MainEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -79,6 +81,8 @@ class MainViewModel
                     reduce {
                         state.copy(isScreenShowing = true)
                     }
+                } else {
+                    onProcessResult(resultText)
                 }
             }
         }
@@ -112,8 +116,47 @@ class MainViewModel
                                 message = "",
                                 response = "",
                             ),
+                        isOrderEndTrue = false,
+                        isOrderEndFalse = false,
 //                        voiceShoppingCart = emptyList() // 어디에 넣을지 생각하자
                     )
+                }
+            }
+
+        fun showSpeechScreen() =
+            intent {
+                reduce {
+                    state.copy(
+                        isScreenShowing = true,
+                    )
+                }
+            }
+
+        fun clearOrderEndState()  {
+            intent {
+                reduce {
+                    state.copy(
+                        isOrderEndTrue = false,
+                        isOrderEndFalse = false,
+                    )
+                }
+            }
+        }
+
+        private fun onProcessResult(result: String) =
+            intent {
+                // 음성 주문을 했고, 장바구니 카트에 담겨있다면
+                // 계속 주문할까요?
+                if (state.voiceShoppingCart.isNotEmpty()) {
+                    if (noRegex.containsMatchIn(result)) {
+                        // 부정
+                        Timber.tag("MainViewModel").d(result)
+                        reduce { state.copy(isOrderEndTrue = true) }
+                    }
+                    if (yesRegex.containsMatchIn(result)) {
+                        // 긍정
+                        reduce { state.copy(isOrderEndFalse = true) }
+                    }
                 }
             }
 
@@ -142,7 +185,6 @@ class MainViewModel
                                     isScreenShowing = false,
                                 )
                             }
-                        }.onFailure {
                         }
                     }
                 }
@@ -171,7 +213,8 @@ class MainViewModel
                             } else {
                                 if (it.response.contains("온도를 확인해주세요")) {
                                     Timber.tag("temp").d("${it.response}")
-                                    val listPart = it.response.substringAfter("[").substringBefore("]")
+                                    val listPart =
+                                        it.response.substringAfter("[").substringBefore("]")
                                     val itemList = listPart.replace("'", "").split(", ")
                                     // 지금은 단일로 할 것 같긴 함
                                     reduce {
@@ -190,7 +233,9 @@ class MainViewModel
                                             isScreenShowing = false,
                                         )
                                     }
-                                    Timber.tag("MainViewModel").d("voiceResult: ${state.voiceShoppingCart}")
+                                    Timber
+                                        .tag("MainViewModel")
+                                        .d("voiceResult: ${state.voiceShoppingCart}")
                                 }
                             }
                         }.onFailure {
@@ -221,7 +266,9 @@ class MainViewModel
                     // 다이얼로그가 보여지고 있는 상황이라면
                 } else if (helpPopupRegex.containsMatchIn(partialText)) {
                     // 다이얼로그가 안보이는 상황에서 음성이 들어온다면 이걸 탐
-                    Timber.tag("MainViewModel").d("${helpPopupRegex.containsMatchIn(partialText)}")
+                    Timber
+                        .tag("MainViewModel")
+                        .d("${helpPopupRegex.containsMatchIn(partialText)}")
                     reduce {
                         state.copy(isScreenShowing = true)
                     }
@@ -316,7 +363,8 @@ data class MainState(
     val isScreenShowing: Boolean = false,
     val isExistPerson: Boolean = false,
     val isTemperatureEmpty: Boolean = false, // 온도가 선택되지않았을 때
-    val isOrderEnd: Boolean = false, // 장바구니에서 더이상 메뉴를 담지 않을 때
+    val isOrderEndTrue: Boolean = false, // 장바구니에서 더이상 메뉴를 담지 않을 때
+    val isOrderEndFalse: Boolean = false, // 장바구니에서 계속 담기
     val isTogo: Boolean = false, // 포장인지 매장인지 고를 때
     val voiceShoppingCart: List<OrderList> = mutableListOf(),
     val category: List<Category> = emptyList(),

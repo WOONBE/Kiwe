@@ -20,6 +20,7 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -41,21 +42,39 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.kiwe.kiosk.BuildConfig.BASE_IMAGE_URL
 import com.kiwe.kiosk.R
+import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.model.ShoppingCartItem
 import com.kiwe.kiosk.ui.screen.order.component.OrderDialog
 import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.ui.theme.letterSpacing
 import com.kiwe.kiosk.utils.dropShadow
 import org.orbitmvi.orbit.compose.collectAsState
+import timber.log.Timber
 import java.util.Locale
 
 @Composable
 fun ShoppingCartDialog(
     viewModel: ShoppingCartViewModel,
+    mainViewModel: MainViewModel,
     goOrderList: () -> Unit,
     onClose: () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
+    val mainState = mainViewModel.collectAsState().value
+
+    LaunchedEffect(mainState.isOrderEndTrue, mainState.isOrderEndFalse) {
+        // 이게 true면
+        Timber.tag("CotainerScreenOrder").d("ordered")
+        if (mainState.isOrderEndTrue) {
+            goOrderList()
+            mainViewModel.clearOrderEndState()
+        }
+        if (mainState.isOrderEndFalse) {
+            onClose()
+            mainViewModel.clearOrderEndState()
+        }
+    }
+
     OrderDialog {
         Text(
             modifier = Modifier.padding(top = 10.dp),
