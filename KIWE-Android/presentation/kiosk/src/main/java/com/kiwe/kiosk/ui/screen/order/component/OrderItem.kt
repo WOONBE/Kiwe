@@ -11,11 +11,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -34,8 +41,9 @@ import java.util.Locale
 fun OrderItem(
     orderItem: MenuCategoryParam,
     modifier: Modifier = Modifier,
-    onClick: (Int, String, String, Int) -> Unit,
+    onClick: (Int, String, String, Int, Offset) -> Unit,
 ) {
+    var cartPosition by remember { mutableStateOf(Offset.Zero) }
     Box(
         modifier =
             modifier
@@ -54,7 +62,10 @@ fun OrderItem(
                         orderItem.imgPath,
                         orderItem.name,
                         orderItem.price,
+                        cartPosition,
                     )
+                }.onGloballyPositioned {
+                    cartPosition = Offset(it.positionInRoot().x, it.positionInRoot().y - it.size.height)
                 },
     ) {
         Column(
@@ -130,6 +141,6 @@ fun OrderItemPreview() {
             description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
             imgPath = "drinks/HOT_디카페인 아메리카노.jpg",
         ),
-        onClick = { _, _, _, _ -> },
+        onClick = { _, _, _, _, _ -> },
     )
 }
