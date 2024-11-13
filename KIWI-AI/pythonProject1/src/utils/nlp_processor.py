@@ -29,8 +29,7 @@ class NLPProcessor:
         self.menu_items = self.fetch_menu_items()  # Preload menu items
         self.menu_data = self.fetch_menu_combinations()  # Fetch menu data with menu_id, name, etc.
         self.options = self.fetch_options()  # Placeholder for dynamic options fetching
-        print()
-        print()
+
         print("hiiiiiiiiiiii")
 
 
