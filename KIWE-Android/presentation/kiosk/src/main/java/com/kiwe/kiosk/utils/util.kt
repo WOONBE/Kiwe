@@ -46,10 +46,7 @@ fun Modifier.dropShadow(
     }
 }
 
-inline fun Modifier.noRippleClickable(
-    modifier: Modifier = Modifier,
-    crossinline onClick: () -> Unit,
-): Modifier =
+inline fun Modifier.noRippleClickable(crossinline onClick: () -> Unit): Modifier =
     composed {
         clickable(
             indication = null,
