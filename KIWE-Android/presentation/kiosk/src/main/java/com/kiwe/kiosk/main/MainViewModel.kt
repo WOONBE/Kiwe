@@ -2,6 +2,7 @@ package com.kiwe.kiosk.main
 
 import androidx.compose.ui.geometry.Offset
 import com.kiwe.domain.model.Category
+import com.kiwe.domain.model.OrderList
 import com.kiwe.domain.model.VoiceOrderRequest
 import com.kiwe.domain.model.VoiceOrderResponse
 import com.kiwe.domain.usecase.VoiceOrderUseCase
@@ -111,6 +112,7 @@ class MainViewModel
                                 message = "",
                                 response = "",
                             ),
+//                        voiceShoppingCart = emptyList() // 어디에 넣을지 생각하자
                     )
                 }
             }
@@ -127,12 +129,13 @@ class MainViewModel
                                 VoiceOrderRequest(
                                     sentence = result + " " + state.tempOrder, // 기존 주문 문장에 넣고 진행
                                     need_temp = 1, // hot, ice 정보가 있으면 1로 들어가야함
-                                    order_items = emptyList(), // 빈 장바구니를 의미함(기존에 있는게 있으면 그걸 넣으면 됨)
+                                    order_items = state.voiceShoppingCart, // 빈 장바구니를 의미함(기존에 있는게 있으면 그걸 넣으면 됨)
                                 ),
                         ).onSuccess {
                             // 온도까지 잘 들어가 있다면
                             reduce {
                                 state.copy(
+                                    voiceShoppingCart = it.order,
                                     recognizedText = "",
                                     voiceResult = it,
                                     shouldShowRetryMessage = false,
@@ -154,7 +157,7 @@ class MainViewModel
                                 VoiceOrderRequest(
                                     sentence = removeHelpResult,
                                     need_temp = 1, // hot, ice 정보가 있으면 1로 들어가야함
-                                    order_items = emptyList(), // 빈 장바구니를 의미함(기존에 있는게 있으면 그걸 넣으면 됨)
+                                    order_items = state.voiceShoppingCart, // 빈 장바구니를 의미함(기존에 있는게 있으면 그걸 넣으면 됨)
                                 ),
                         ).onSuccess {
                             // AI에서 성공해서 응답이 돌아오면
@@ -178,15 +181,16 @@ class MainViewModel
                                         )
                                     }
                                 } else {
-                                    // 온도까지 잘 들어가 있다면
                                     reduce {
                                         state.copy(
+                                            voiceShoppingCart = it.order,
                                             recognizedText = "",
                                             voiceResult = it,
                                             shouldShowRetryMessage = false,
                                             isScreenShowing = false,
                                         )
                                     }
+                                    Timber.tag("MainViewModel").d("voiceResult: ${state.voiceShoppingCart}")
                                 }
                             }
                         }.onFailure {
@@ -311,7 +315,10 @@ data class MainState(
     val mode: MainEnum.KioskMode = MainEnum.KioskMode.ASSIST,
     val isScreenShowing: Boolean = false,
     val isExistPerson: Boolean = false,
-    val isTemperatureEmpty: Boolean = false,
+    val isTemperatureEmpty: Boolean = false, // 온도가 선택되지않았을 때
+    val isOrderEnd: Boolean = false, // 장바구니에서 더이상 메뉴를 담지 않을 때
+    val isTogo: Boolean = false, // 포장인지 매장인지 고를 때
+    val voiceShoppingCart: List<OrderList> = mutableListOf(),
     val category: List<Category> = emptyList(),
     val recognizedText: String = "",
     val tempOrder: String = "",

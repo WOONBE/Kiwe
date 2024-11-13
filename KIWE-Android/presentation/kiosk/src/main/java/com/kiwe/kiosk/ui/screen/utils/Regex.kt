@@ -94,6 +94,7 @@ val menuItems =
         "레몬차" to listOf("레몬차", "레차"),
         "자몽차" to listOf("자몽차", "자차"),
         "녹차" to listOf("녹차"),
+        "감자빵" to listOf("감자빵"),
         "페퍼민트" to listOf("페퍼민트", "페민트"),
         "캐모마일" to listOf("캐모마일", "캐마일"),
         "얼그레이" to listOf("얼그레이", "얼그"),
