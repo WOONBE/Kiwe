@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,14 +57,14 @@ fun SpeechScreen(
     DisposableEffect(Unit) {
         onDispose {
             Timber.tag(TAG).d("onDispose")
-            ttsManager.stop()
+//            ttsManager.stop()
         }
     }
 
     LaunchedEffect(state.voiceResult) {
         if (state.voiceResult.category > 0) { // 이러면 응답이 들어왔다는 의미
             shoppingCartViewModel.onVoiceResult(state.voiceResult)
-            ttsManager.speak(state.voiceResult.response) // tts로 읽어준다
+//            ttsManager.speak(state.voiceResult.response) // tts로 읽어준다
             mainViewModel.clearVoiceRecord()
         }
     }
@@ -74,6 +75,7 @@ fun SpeechScreen(
         recognizedText = state.recognizedText,
         commandText = "\"차가운 아메리카노 한잔 주세요\"",
         shouldShowRetryMessage = state.shouldShowRetryMessage,
+        isTemperatureEmpty = state.isTemperatureEmpty,
     )
 }
 
@@ -84,6 +86,7 @@ private fun SpeechScreen(
     recognizedText: String,
     commandText: String,
     shouldShowRetryMessage: Boolean,
+    isTemperatureEmpty: Boolean,
 ) {
     if (isOpen) {
         var elapsedTime by remember { mutableLongStateOf(0L) }
@@ -123,7 +126,7 @@ private fun SpeechScreen(
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     Spacer(modifier = Modifier.weight(2f))
-                    if (elapsedTime < MAX_SPEECH_WAIT_TIME) {
+                    if (elapsedTime in 0..<MAX_SPEECH_WAIT_TIME) {
                         Text(
                             text = if (shouldShowRetryMessage) "다시 말씀해주세요" else "듣는 중 입니다...",
                             color = Color.White,
@@ -170,6 +173,54 @@ private fun SpeechScreen(
                 if (elapsedTime >= MAX_SPEECH_WAIT_TIME) {
                     ExampleBox()
                 }
+                if (isTemperatureEmpty) {
+                    elapsedTime = -6
+                    TempBox()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TempBox(
+    onHotClick: () -> Unit = {},
+    onIceClick: () -> Unit = {},
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = "온도를 선택해주세요", style = Typography.titleLarge.copy(color = Color.White))
+        Row(modifier = Modifier.padding(top = 12.dp)) {
+            Box(
+                modifier =
+                    Modifier
+                        .background(color = Color.Red, shape = RoundedCornerShape(20.dp))
+                        .padding(8.dp)
+                        .clickable {
+                            onHotClick()
+                        },
+            ) {
+                Text(
+                    text = "뜨거운 거",
+                    modifier = Modifier.padding(8.dp),
+                    style = Typography.titleLarge.copy(color = Color.White),
+                )
+            }
+
+            Box(
+                modifier =
+                    Modifier
+                        .padding(start = 12.dp)
+                        .background(color = Color.Blue, shape = RoundedCornerShape(20.dp))
+                        .padding(8.dp)
+                        .clickable {
+                            onIceClick()
+                        },
+            ) {
+                Text(
+                    text = "차가운 거",
+                    modifier = Modifier.padding(8.dp),
+                    style = Typography.titleLarge.copy(color = Color.White),
+                )
             }
         }
     }
@@ -231,6 +282,7 @@ fun SpeechScreenPreview() {
             recognizedText = "",
             shouldShowRetryMessage = false,
             commandText = "dicat",
+            isTemperatureEmpty = true,
         )
     }
 }

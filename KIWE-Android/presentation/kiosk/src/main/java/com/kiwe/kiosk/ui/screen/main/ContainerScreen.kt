@@ -34,7 +34,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,7 +46,6 @@ import com.kiwe.kiosk.ui.screen.main.component.ImageButton
 import com.kiwe.kiosk.ui.screen.order.OrderListDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
-import com.kiwe.kiosk.ui.screen.utils.TextToSpeechManager
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import com.kiwe.kiosk.utils.MainEnum
@@ -69,20 +67,18 @@ fun ContainerScreen(
     val shoppingCartState = shoppingCartViewModel.collectAsState().value
     var isShoppingCartDialogOpen by remember { mutableStateOf(false) }
     var isOrderListDialogOpen by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    val ttsManager = remember { TextToSpeechManager(context) }
 
     LaunchedEffect(state.page) {
         if (state.page == 1) {
             Timber.tag(TAG).d("LaunchedEffect")
+//            viewModel.speakWithTTS("음성 도움을 받으시려면, '도와줘'라고 말씀해주세요", tts)
         }
-        ttsManager.speak("음성 도움을 받으시려면, '도와줘'라고 말씀해주세요")
     }
 
     DisposableEffect(Unit) {
         onDispose {
             Timber.tag(TAG).d("onDispose")
-            ttsManager.stop()
+//            tts.stop()
         }
     }
 

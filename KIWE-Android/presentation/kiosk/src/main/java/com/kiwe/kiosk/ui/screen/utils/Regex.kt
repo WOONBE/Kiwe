@@ -115,5 +115,28 @@ val orderCommands =
         "주문",
         "줘",
     )
-val orderPattern = orderCommands.joinToString("|") { "(?:$it)" } // 비포획 그룹으로 각 항목 감싸기
+val orderPattern = orderCommands.joinToString("|") { "(?:$it)" }
 val orderRegex = Regex(orderPattern)
+
+val temperatureCommands =
+    listOf(
+        "따뜻한",
+        "따뜻",
+        "뜨거운",
+        "차가운",
+    )
+val temperaturePattern = temperatureCommands.joinToString("|") { "(?:$it)" }
+val temperatureRegex = Regex(temperaturePattern)
+
+val noyesCommands =
+    listOf(
+        "네",
+        "내",
+        "넵",
+        "예",
+        "아니오",
+        "아니요",
+        "아뇨",
+    )
+val noyesPattern = noyesCommands.joinToString("|") { "(?:$it)" }
+val noyesRegex = Regex(noyesPattern)

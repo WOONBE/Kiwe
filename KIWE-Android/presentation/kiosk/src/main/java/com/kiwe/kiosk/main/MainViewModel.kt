@@ -13,6 +13,7 @@ import com.kiwe.kiosk.ui.screen.utils.SpeechResultListener
 import com.kiwe.kiosk.ui.screen.utils.helpPopupRegex
 import com.kiwe.kiosk.ui.screen.utils.menuRegex
 import com.kiwe.kiosk.ui.screen.utils.orderRegex
+import com.kiwe.kiosk.ui.screen.utils.temperatureRegex
 import com.kiwe.kiosk.utils.MainEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -56,6 +57,7 @@ class MainViewModel
         // 음성 인식 시작
         fun startSpeechRecognition() {
             speechRecognizerManager.startListening()
+            Timber.tag("MainViewModel").d("startSpeechRecognition")
         }
 
         // 음성 인식 중단
@@ -99,6 +101,8 @@ class MainViewModel
             intent {
                 reduce {
                     state.copy(
+                        tempOrder = "",
+                        isTemperatureEmpty = false,
                         voiceResult =
                             VoiceOrderResponse(
                                 category = 0,
@@ -113,16 +117,44 @@ class MainViewModel
 
         fun onSpeechResult(result: String) =
             intent {
+                if (state.tempOrder.isNotEmpty() && state.isTemperatureEmpty) { // 온도 선택을 안한 경우
+                    // 저장된 문장이 있다는 것은 진행중인 음성 주문이 있다는 것
+                    // 온도 관련 정규식 때려서 검사하고 주문 넣기
+                    if (temperatureRegex.containsMatchIn(result)) {
+                        Timber.tag("MainViewModel").d("tempOrder: $result")
+                        voiceOrderUseCase(
+                            voiceOrder =
+                                VoiceOrderRequest(
+                                    sentence = result + " " + state.tempOrder, // 기존 주문 문장에 넣고 진행
+                                    need_temp = 1, // hot, ice 정보가 있으면 1로 들어가야함
+                                    order_items = emptyList(), // 빈 장바구니를 의미함(기존에 있는게 있으면 그걸 넣으면 됨)
+                                ),
+                        ).onSuccess {
+                            // 온도까지 잘 들어가 있다면
+                            reduce {
+                                state.copy(
+                                    recognizedText = "",
+                                    voiceResult = it,
+                                    shouldShowRetryMessage = false,
+                                    isScreenShowing = false,
+                                )
+                            }
+                        }.onFailure {
+                        }
+                    }
+                }
                 if (menuRegex.containsMatchIn(result)) { // 메뉴판에 있는 메뉴를 말했다면
                     Timber.tag("MainViewModel").d("menuRegex: $result")
                     if (orderRegex.containsMatchIn(result)) { // 정해둔 폼으로 문장이 끝나는 지 검사
                         Timber.tag("Network").d("orderRegex: $result")
+                        val modifiedResult = orderRegex.replace(result, " 주세요")
+                        val removeHelpResult = helpPopupRegex.replace(modifiedResult, "")
                         voiceOrderUseCase(
                             voiceOrder =
                                 VoiceOrderRequest(
-                                    sentence = result,
+                                    sentence = removeHelpResult,
                                     need_temp = 1, // hot, ice 정보가 있으면 1로 들어가야함
-                                    order_items = emptyList(),
+                                    order_items = emptyList(), // 빈 장바구니를 의미함(기존에 있는게 있으면 그걸 넣으면 됨)
                                 ),
                         ).onSuccess {
                             // AI에서 성공해서 응답이 돌아오면
@@ -134,13 +166,27 @@ class MainViewModel
                                     )
                                 }
                             } else {
-                                reduce {
-                                    state.copy(
-                                        recognizedText = "",
-                                        voiceResult = it,
-                                        shouldShowRetryMessage = false,
-                                        isScreenShowing = false,
-                                    )
+                                if (it.response.contains("온도를 확인해주세요")) {
+                                    Timber.tag("temp").d("${it.response}")
+                                    val listPart = it.response.substringAfter("[").substringBefore("]")
+                                    val itemList = listPart.replace("'", "").split(", ")
+                                    // 지금은 단일로 할 것 같긴 함
+                                    reduce {
+                                        state.copy(
+                                            tempOrder = removeHelpResult,
+                                            isTemperatureEmpty = true,
+                                        )
+                                    }
+                                } else {
+                                    // 온도까지 잘 들어가 있다면
+                                    reduce {
+                                        state.copy(
+                                            recognizedText = "",
+                                            voiceResult = it,
+                                            shouldShowRetryMessage = false,
+                                            isScreenShowing = false,
+                                        )
+                                    }
                                 }
                             }
                         }.onFailure {
@@ -264,10 +310,12 @@ data class MainState(
     val page: Int = 0,
     val mode: MainEnum.KioskMode = MainEnum.KioskMode.ASSIST,
     val isScreenShowing: Boolean = false,
+    val isExistPerson: Boolean = false,
+    val isTemperatureEmpty: Boolean = false,
     val category: List<Category> = emptyList(),
     val recognizedText: String = "",
+    val tempOrder: String = "",
     val shouldShowRetryMessage: Boolean = false,
-    val isExistPerson: Boolean = false,
     val gazePoint: Offset? = null,
     val voiceResult: VoiceOrderResponse =
         VoiceOrderResponse(
