@@ -16,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.ad.AdScreen
 import com.kiwe.kiosk.ui.screen.intro.IntroScreen
@@ -27,6 +28,7 @@ import com.kiwe.kiosk.ui.screen.payment.PaymentScreen
 import com.kiwe.kiosk.ui.screen.receipt.ReceiptScreen
 import com.kiwe.kiosk.ui.screen.speech.SpeechScreen
 import org.orbitmvi.orbit.compose.collectAsState
+import timber.log.Timber
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -91,15 +93,27 @@ fun MainNavHost() {
                         composable(route = MainRoute.PAYMENT.route) {
                             PaymentScreen(
                                 shoppingCartViewModel = shoppingCartViewModel,
-                                onCompletePayment = {
-                                    navController.navigate(MainRoute.RECEIPT.route)
+                                onCompletePayment = { orderNumber ->
+                                    navController.navigate("${MainRoute.RECEIPT.route}/$orderNumber")
                                 },
                             ) { page ->
                                 mainViewModel.setPage(page)
                             }
                         }
-                        composable(route = MainRoute.RECEIPT.route) {
+                        composable(
+                            route = "${MainRoute.RECEIPT.route}/{orderNumber}",
+                            arguments =
+                                listOf(
+                                    navArgument("orderNumber") {
+                                        defaultValue = "1001"
+                                    },
+                                ),
+                        ) { backStackEntry ->
+                            val orderNumber =
+                                backStackEntry.arguments?.getString("orderNumber") ?: "1001"
+                            Timber.tag("그바르디올").d("${javaClass.simpleName} : $orderNumber")
                             ReceiptScreen(
+                                orderNumber = orderNumber,
                                 onEnterScreen = { page ->
                                     mainViewModel.setPage(page)
                                 },
