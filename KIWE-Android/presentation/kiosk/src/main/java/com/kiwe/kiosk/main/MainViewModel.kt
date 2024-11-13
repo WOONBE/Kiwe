@@ -196,8 +196,9 @@ class MainViewModel
         fun detectPerson(box: Boolean) {
             if (box) {
                 if (!personDetectedRecently) {
-                    onPersonCome()
-                    startPersonDetectionCooldown()
+                    onStartTouchScreen()
+//                    onPersonCome()
+//                    startPersonDetectionCooldown()
                 }
             } else {
                 if (!personDetectedRecently) {
@@ -209,6 +210,7 @@ class MainViewModel
         fun onStartTouchScreen() {
             onPersonCome()
             startTimer()
+            personDetectedRecently = true
         }
 
         private fun startTimer() {
@@ -216,18 +218,20 @@ class MainViewModel
             timerJob?.cancel()
             timerJob =
                 viewModelScope.launch {
-                    var timeLeft = 5 * 60L // 5분을 초로 변환 // TODO : 5분
+                    var timeLeft = 10L // 5분을 초로 변환 // TODO : 5분
                     while (timeLeft > 0) {
                         intent {
                             reduce { state.copy(remainingTime = timeLeft) }
                         }
                         delay(1000L)
                         timeLeft -= 1
+                        Timber.tag("코바치치").d("$timeLeft")
                     }
                     // 타이머가 종료되면 isExistPerson 상태를 false로 변경
-                    intent {
-                        reduce { state.copy(isExistPerson = false, remainingTime = 0) }
-                    }
+//                    intent {
+//                        postSideEffect(MainSideEffect.NavigateToAdvertisement)
+//                    }
+                    personDetectedRecently = false
                 }
         }
 
@@ -282,4 +286,6 @@ sealed interface MainSideEffect : BaseSideEffect {
     ) : MainSideEffect
 
     data object NavigateToNextScreen : MainSideEffect
+
+    data object NavigateToAdvertisement : MainSideEffect
 }

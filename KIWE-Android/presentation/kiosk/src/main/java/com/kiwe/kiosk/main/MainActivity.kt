@@ -73,6 +73,7 @@ class MainActivity : ComponentActivity() {
         Timber.tag("MainActivity").d("사용자 상호작용 감지")
         // 사용자 상호작용이 감지되었을 때 실행할 로직
         // 예: ViewModel을 통해 타이머 초기화
+        mainViewModel.onStartTouchScreen()
     }
 
     private fun allPermissionsGranted() =

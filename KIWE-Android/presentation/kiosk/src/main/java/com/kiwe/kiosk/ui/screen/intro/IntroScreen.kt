@@ -49,6 +49,7 @@ fun IntroScreen(
         when (it) {
             MainSideEffect.NavigateToNextScreen -> TODO()
             is MainSideEffect.Toast -> TODO()
+            MainSideEffect.NavigateToAdvertisement -> TODO()
         }
     }
 
