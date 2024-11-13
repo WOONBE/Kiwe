@@ -20,29 +20,24 @@ class NewOrderCommand:
 
         # Check if any item requires a temperature preference
         print("rq.items",request.order_items)
-        if request.order_items[0].menuId == 0:
+        if request.order_items == [] or request.order_items[0].menuId == 0:
             pass
         else:
             for prev_item in request.order_items:
-                print("prev_item",prev_item)
                 order_option = OrderOption(
                     shot=prev_item.option.get('shot'),
                     sugar=prev_item.option.get('sugar')
                 )
-                print("order_option",order_option)
                 order_items.append(OrderResponseItem(
                     menuId=prev_item.menuId,
                     count=prev_item.count,
                     option=order_option
                 ))
 
-
         for item in order_data['items']:
-            print("item",item)
             # Validate required fields in each item
             if 'menuId' not in item or 'count' not in item or 'options' not in item:
                 raise HTTPException(status_code=400, detail="Missing fields in one or more order items")
-            print("temp",item.get("temp"))
             # Extract and process item details
             menu_id = item['menuId']
             menu_name = item.get('menu_name')  # Default if menu_name is missing
