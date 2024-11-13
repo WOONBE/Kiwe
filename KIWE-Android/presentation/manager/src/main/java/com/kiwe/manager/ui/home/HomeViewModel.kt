@@ -153,6 +153,13 @@ class HomeViewModel
                 val response = getOrderAllUseCase().getOrThrow()
                 postSideEffect(HomeSideEffect.Toast(response.toString()))
             }
+
+        fun onTabChanged(tabIdx: Int) =
+            intent {
+                reduce {
+                    state.copy(tabIdx = tabIdx)
+                }
+            }
     }
 
 @Immutable
@@ -164,6 +171,7 @@ data class HomeState(
     val orderId: Int = 170,
     val kioskId: Int = 8,
     val kioskIds: List<Int> = listOf(),
+    val tabIdx: Int = 0
 )
 
 sealed interface HomeSideEffect {
