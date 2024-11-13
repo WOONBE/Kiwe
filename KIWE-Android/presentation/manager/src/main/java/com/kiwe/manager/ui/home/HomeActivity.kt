@@ -1,43 +1,61 @@
 package com.kiwe.manager.ui.home
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.kiwe.manager.ui.login.LoginActivity
+import com.kiwe.manager.ui.component.HomeSideBar
+import com.kiwe.manager.ui.theme.KIWEAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
+import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
+    private val homeViewModel: HomeViewModel by viewModels<HomeViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContent {
-            Surface {
-                HomeScreen(
-                    onNavigateToLoginScreen = {
-                        startActivity(
-                            Intent(
-                                this,
-                                LoginActivity::class.java,
-                            ).apply {
-                                flags =
-                                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                            },
+            KIWEAndroidTheme {
+                Surface(modifier = Modifier.systemBarsPadding()) {
+                    val state = homeViewModel.collectAsState().value
+                    Row {
+                        HomeSideBar(
+                            tabIdx = state.tabIdx,
+                            onTabChanged = { idx -> homeViewModel.onTabChanged(idx) },
                         )
-                    },
-                )
+                        HomeNavHost()
+                    }
+//                HomeScreen(
+//                    onNavigateToLoginScreen = {
+//                        startActivity(
+//                            Intent(
+//                                this,
+//                                LoginActivity::class.java,
+//                            ).apply {
+//                                flags =
+//                                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+//                            },
+//                        )
+//                    },
+//                )
+                }
             }
         }
     }
