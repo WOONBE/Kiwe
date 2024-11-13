@@ -4,7 +4,6 @@ import com.d205.KIWI_Backend.order.domain.Order;
 import io.lettuce.core.dynamic.annotation.Param;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -69,6 +68,46 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         "ORDER BY totalSales DESC")
     List<Object[]> findTopSellingMenusByAgeGroup(@Param("startDate") LocalDateTime startDate,
         @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT o FROM Order o " +
+        "JOIN KioskOrder ko ON o.id = ko.order.id " +
+        "JOIN Kiosk k ON ko.kiosk.id = k.id " +
+        "WHERE k.member.id = :memberId")
+    List<Order> findOrdersByMemberId(@Param("memberId") Integer memberId);
+
+
+//    @Query("""
+//        SELECT new com.d205.KIWI_Backend.order.dto.AgeGroupTopMenuResponse(
+//            o.age AS ageGroup,
+//            om.menu.id AS mostSoldMenuId,
+//            SUM(om.quantity) AS totalQuantity
+//        FROM KioskOrder ko
+//        JOIN ko.order o
+//        JOIN o.orderMenus om
+//        WHERE ko.kiosk.id IN (
+//            SELECT k.id FROM Kiosk k WHERE k.owner.id = :memberId
+//        )
+//        GROUP BY o.age, om.menu.id
+//        HAVING SUM(om.quantity) = (
+//            SELECT MAX(sub.totalQuantity)
+//            FROM (
+//                SELECT SUM(om2.quantity) AS totalQuantity
+//                FROM KioskOrder ko2
+//                JOIN ko2.order o2
+//                JOIN o2.orderMenus om2
+//                WHERE ko2.kiosk.id IN (
+//                    SELECT k.id FROM Kiosk k WHERE k.owner.id = :memberId
+//                )
+//                AND o2.age = o.age
+//                GROUP BY om2.menu.id
+//            ) AS sub
+//        )
+//        ORDER BY o.age
+//    """)
+//    List<AgeGroupTopMenuResponse> findTopMenuByAgeGroupForMember(@Param("memberId") Long memberId);
+
+
+
 //
 //    @Query("SELECT m.name, SUM(om.quantity) AS totalSales " +
 //        "FROM Order o " +
