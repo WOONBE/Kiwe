@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -141,7 +142,7 @@ private fun ContainerScreen(
                         R.drawable.arrow_square_left,
                         R.color.KIWE_gray1,
                     ) {
-                        onBackClick()
+                        // TODO : 직원 호출
                     }
                     Spacer(Modifier.width(5.dp))
                     ImageButton(
@@ -149,7 +150,12 @@ private fun ContainerScreen(
                             Modifier
                                 .weight(1F)
                                 .onGloballyPositioned {
-                                    setShoppingCartOffset(Offset(it.positionInRoot().x, it.positionInRoot().y - it.size.height * 4))
+                                    setShoppingCartOffset(
+                                        Offset(
+                                            it.positionInRoot().x,
+                                            it.positionInRoot().y - it.size.height * 4,
+                                        ),
+                                    )
                                 },
                         "장바구니",
                         R.drawable.shopping_cart,
@@ -167,8 +173,15 @@ private fun ContainerScreen(
                         onOrderListDialogClick()
                     }
                 }
-            } else if (page > 0) {
-                PreviousButton(onBackClick = onBackClick)
+            } else if (page == 2) {
+                PreviousButton(
+                    onBackClick = onBackClick,
+                )
+            } else if (page == 3) {
+                PreviousButton(
+                    modifier = Modifier.alpha(0.0F),
+                    onBackClick = { },
+                )
             }
         },
     )
@@ -192,10 +205,13 @@ fun GazeIndicator(gazePoint: Offset) {
 }
 
 @Composable
-fun PreviousButton(onBackClick: () -> Unit) {
+fun PreviousButton(
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
+) {
     Button(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .padding(horizontal = 120.dp, vertical = 20.dp),
         onClick = onBackClick,
