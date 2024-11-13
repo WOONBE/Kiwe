@@ -1,6 +1,7 @@
 package com.kiwe.kiosk.main
 
 import androidx.compose.ui.geometry.Offset
+import androidx.lifecycle.viewModelScope
 import com.kiwe.domain.model.Category
 import com.kiwe.domain.model.VoiceOrderRequest
 import com.kiwe.domain.usecase.VoiceOrderUseCase
@@ -16,6 +17,7 @@ import com.kiwe.kiosk.utils.MainEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -32,7 +34,8 @@ class MainViewModel
     ) : BaseViewModel<MainState, MainSideEffect>(MainState()),
         SpeechResultListener {
         private var personDetectedRecently = false
-        private val delayTime = TimeUnit.MINUTES.toMillis(2)
+        private val delayTime = TimeUnit.MINUTES.toMillis(5)
+        private var timerJob: Job? = null
 
         override fun handleExceptionIntent(
             coroutineContext: CoroutineContext,
@@ -203,6 +206,31 @@ class MainViewModel
             }
         }
 
+        fun onStartTouchScreen() {
+            onPersonCome()
+            startTimer()
+        }
+
+        private fun startTimer() {
+            // 기존 타이머가 있다면 취소하고 새로운 타이머 시작
+            timerJob?.cancel()
+            timerJob =
+                viewModelScope.launch {
+                    var timeLeft = 5 * 60L // 5분을 초로 변환 // TODO : 5분
+                    while (timeLeft > 0) {
+                        intent {
+                            reduce { state.copy(remainingTime = timeLeft) }
+                        }
+                        delay(1000L)
+                        timeLeft -= 1
+                    }
+                    // 타이머가 종료되면 isExistPerson 상태를 false로 변경
+                    intent {
+                        reduce { state.copy(isExistPerson = false, remainingTime = 0) }
+                    }
+                }
+        }
+
         fun onPersonCome() =
             intent {
                 reduce {
@@ -245,6 +273,7 @@ data class MainState(
     val shouldShowRetryMessage: Boolean = false,
     val isExistPerson: Boolean = false,
     val gazePoint: Offset? = null,
+    val remainingTime: Long = 0,
 ) : BaseState
 
 sealed interface MainSideEffect : BaseSideEffect {
