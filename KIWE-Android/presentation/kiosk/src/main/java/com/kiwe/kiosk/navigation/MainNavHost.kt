@@ -93,6 +93,7 @@ fun MainNavHost() {
                         composable(route = MainRoute.PAYMENT.route) {
                             PaymentScreen(
                                 shoppingCartViewModel = shoppingCartViewModel,
+                                mainViewModel = mainViewModel,
                                 onCompletePayment = { orderNumber ->
                                     navController.navigate("${MainRoute.RECEIPT.route}/$orderNumber")
                                 },
@@ -116,6 +117,7 @@ fun MainNavHost() {
                                 orderNumber = orderNumber,
                                 onEnterScreen = { page ->
                                     mainViewModel.setPage(page)
+                                    mainViewModel.stopSpeechRecognition()
                                 },
                                 onBackHome = {
                                     navController.navigate(MainRoute.AD.route) {
@@ -147,7 +149,8 @@ fun MainNavHost() {
 
         if (state.page > 0) {
             SpeechScreen(
-                viewModel = mainViewModel,
+                mainViewModel = mainViewModel,
+                shoppingCartViewModel = shoppingCartViewModel,
             )
         }
     }
