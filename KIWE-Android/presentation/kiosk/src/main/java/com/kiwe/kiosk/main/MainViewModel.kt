@@ -1,6 +1,7 @@
 package com.kiwe.kiosk.main
 
 import androidx.compose.ui.geometry.Offset
+import androidx.lifecycle.viewModelScope
 import com.kiwe.domain.model.Category
 import com.kiwe.domain.model.OrderList
 import com.kiwe.domain.model.VoiceBody
@@ -24,6 +25,7 @@ import com.kiwe.kiosk.utils.MainEnum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -42,7 +44,8 @@ class MainViewModel
     ) : BaseViewModel<MainState, MainSideEffect>(MainState()),
         SpeechResultListener {
         private var personDetectedRecently = false
-        private val delayTime = TimeUnit.MINUTES.toMillis(2)
+        private val delayTime = TimeUnit.MINUTES.toMillis(5)
+        private var timerJob: Job? = null
 
         override fun handleExceptionIntent(
             coroutineContext: CoroutineContext,
@@ -234,7 +237,7 @@ class MainViewModel
                                     val listPart =
                                         it.response.substringAfter("[").substringBefore("]")
                                     val itemList = listPart.replace("'", "").split(", ")
-                                    itemList// 지금은 단일로 할 것 같긴 함
+                                    itemList // 지금은 단일로 할 것 같긴 함
                                     reduce {
                                         state.copy(
                                             tempOrder = removeHelpResult,
@@ -332,14 +335,46 @@ class MainViewModel
         fun detectPerson(box: Boolean) {
             if (box) {
                 if (!personDetectedRecently) {
-                    onPersonCome()
-                    startPersonDetectionCooldown()
+                    onStartKiosk()
+//                    onPersonCome()
+//                    startPersonDetectionCooldown()
                 }
             } else {
                 if (!personDetectedRecently) {
                     onPersonLeave()
                 }
             }
+        }
+
+        /**
+         * kiosk 모드 시작
+         */
+        fun onStartKiosk() {
+            onPersonCome()
+            startTimer()
+            personDetectedRecently = true
+        }
+
+        private fun startTimer() {
+            // 기존 타이머가 있다면 취소하고 새로운 타이머 시작
+            timerJob?.cancel()
+            timerJob =
+                viewModelScope.launch {
+                    var timeLeft = 15L // 5분을 초로 변환 // TODO : 5분
+                    while (timeLeft > 0) {
+                        intent {
+                            reduce { state.copy(remainingTime = timeLeft) }
+                        }
+                        delay(1000L)
+                        timeLeft -= 1
+                        Timber.tag("코바치치").d("$timeLeft")
+                    }
+                    // 타이머가 종료되면 isExistPerson 상태를 false로 변경
+                    intent {
+                        postSideEffect(MainSideEffect.ClearCart)
+                    }
+                    personDetectedRecently = false
+                }
         }
 
         private fun onPersonCome() =
@@ -402,6 +437,7 @@ data class MainState(
     val tempOrder: String = "",
     val shouldShowRetryMessage: Boolean = false,
     val gazePoint: Offset? = null,
+    val remainingTime: Long = 0,
     val voiceResult: VoiceBody =
         VoiceBody(
             category = 0,
@@ -419,5 +455,9 @@ sealed interface MainSideEffect : BaseSideEffect {
 
     data object NavigateToNextScreen : MainSideEffect
 
+    data object NavigateToAdvertisement : MainSideEffect
+
     data object NavigateToLoginScreen : MainSideEffect
+
+    data object ClearCart : MainSideEffect
 }
