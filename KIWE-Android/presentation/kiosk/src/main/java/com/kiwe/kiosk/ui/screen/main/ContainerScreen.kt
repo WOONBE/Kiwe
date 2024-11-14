@@ -1,5 +1,6 @@
 package com.kiwe.kiosk.ui.screen.main
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -40,13 +41,17 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainViewModel
+import com.kiwe.kiosk.ui.component.BoldTextWithKeywords
 import com.kiwe.kiosk.ui.screen.main.component.AnimatedImageSwitcher
 import com.kiwe.kiosk.ui.screen.main.component.ImageButton
+import com.kiwe.kiosk.ui.screen.main.component.RoundStepItem
 import com.kiwe.kiosk.ui.screen.order.OrderListDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
+import com.kiwe.kiosk.ui.theme.KiweOrange1
+import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.utils.MainEnum
 import org.orbitmvi.orbit.compose.collectAsState
 import timber.log.Timber
@@ -90,6 +95,7 @@ fun ContainerScreen(
         setShoppingCartOffset = setShoppingCartOffset,
         onOrderListDialogClick = { isOrderListDialogOpen = true },
         gazePoint = state.gazePoint,
+        remainingTime = state.remainingTime,
         content = content,
     )
 }
@@ -103,6 +109,7 @@ private fun ContainerScreen(
     setShoppingCartOffset: (Offset) -> Unit,
     onOrderListDialogClick: () -> Unit,
     gazePoint: Offset?,
+    remainingTime: Long,
     content: @Composable () -> Unit,
 ) {
     gazePoint // TODO
@@ -111,7 +118,29 @@ private fun ContainerScreen(
             mode // TODO
             if (page > 0) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    StepIndicator(page)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Spacer(Modifier.weight(1f))
+                        StepIndicator(modifier = Modifier.weight(6f), page)
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            BoldTextWithKeywords(
+                                modifier = Modifier,
+                                fullText = "남은 시간\n${remainingTime}초",
+                                keywords = listOf("$remainingTime"),
+                                brushFlag = listOf(true),
+                                boldStyle = Typography.bodyMedium,
+                                normalStyle = Typography.labelMedium.copy(fontSize = 10.sp),
+                                alignStyle = TextAlign.Center,
+                                textColor = KiweOrange1,
+                            )
+                        }
+                    }
+
                     AnimatedImageSwitcher(100.dp)
                 }
             }
@@ -231,25 +260,31 @@ fun PreviousButton(
 }
 
 @Composable
-fun StepIndicator(currentStep: Int) {
+fun StepIndicator(
+    modifier: Modifier = Modifier,
+    currentStep: Int,
+) {
     val steps = listOf("주문", "결제", "확인")
     if (currentStep > 0) {
         Row(
             modifier =
-                Modifier
+                modifier
                     .fillMaxWidth()
-                    .padding(4.dp)
-                    .padding(top = 4.dp),
+                    .padding(4.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             steps.forEachIndexed { index, step ->
-                StepItem(
+                val widthWeight by animateFloatAsState(
+                    targetValue = if (index == currentStep - 1) 4f else 3f,
+                    label = "",
+                )
+                RoundStepItem(
                     title = step,
                     isActive = index == currentStep - 1,
                     isFirst = index == 0,
                     isLast = index == steps.size - 1,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(widthWeight),
                 )
             }
         }
@@ -313,6 +348,7 @@ fun ContainerScreenPreview() {
             onOrderListDialogClick = {},
             gazePoint = Offset(0f, 0f),
             content = {},
+            remainingTime = 0L,
             setShoppingCartOffset = {},
         )
     }
