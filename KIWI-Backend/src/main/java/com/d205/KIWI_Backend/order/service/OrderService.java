@@ -8,6 +8,7 @@ import com.d205.KIWI_Backend.kiosk.domain.Kiosk;
 import com.d205.KIWI_Backend.kiosk.repository.KioskRepository;
 import com.d205.KIWI_Backend.member.service.MemberService;
 import com.d205.KIWI_Backend.menu.domain.Menu;
+import com.d205.KIWI_Backend.menu.dto.MenuResponse;
 import com.d205.KIWI_Backend.menu.repository.MenuRepository;
 import com.d205.KIWI_Backend.menu.service.MenuService;
 import com.d205.KIWI_Backend.order.domain.KioskOrder;
@@ -425,6 +426,49 @@ public class OrderService {
         }
         return orderResponses;
     }
+
+    @Transactional
+    public List<MenuResponse> getTop20MenuSalesForLastMonthByMemberId() {
+        Integer memberId = memberservice.getCurrentMemberId();
+        YearMonth currentMonth = YearMonth.now();
+        LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
+
+        // memberId로 멤버가 운영하는 키오스크 목록 조회
+        List<Kiosk> kiosks = kioskRepository.findByMemberId(memberId);
+
+        // 메뉴별 판매 수량을 집계
+        Map<Integer, Integer> menuSalesCount = new HashMap<>();
+
+        for (Kiosk kiosk : kiosks) {
+            // 해당 키오스크의 주문 목록 조회
+            List<Order> orders = orderRepository.findByKioskIdAndOrderDateBetween(kiosk.getId(), startOfMonth, endOfMonth);
+
+            // 각 주문의 메뉴 항목을 순회하며 판매 수량 집계
+            for (Order order : orders) {
+                for (OrderMenu orderMenu : order.getOrderMenus()) {
+                    menuSalesCount.put(orderMenu.getMenu().getId(), menuSalesCount.getOrDefault(orderMenu.getMenu().getId(), 0) + orderMenu.getQuantity());
+                }
+            }
+        }
+
+        // 판매 수량을 기준으로 내림차순 정렬 후 상위 20개 메뉴를 리턴
+        List<MenuResponse> menuResponses = menuSalesCount.entrySet().stream()
+            .sorted((entry1, entry2) -> entry2.getValue() - entry1.getValue()) // 내림차순 정렬
+            .limit(20) // 상위 20개만
+            .map(entry -> {
+                // 메뉴 정보 가져오기 (예시로 메뉴 ID를 사용하여 메뉴 정보를 조회)
+                Menu menu = menuRepository.findById(entry.getKey()).orElse(null);
+
+                // MenuResponse 객체 생성
+                return menu != null ? MenuResponse.fromMenu(menu) : null;
+            })
+            .filter(Objects::nonNull) // null이 아닌 메뉴만 포함
+            .collect(Collectors.toList());
+
+        return menuResponses;
+    }
+
 
     public Map<String, Map<String, Integer>> getTopSellingMenusByAgeGroup() {
 

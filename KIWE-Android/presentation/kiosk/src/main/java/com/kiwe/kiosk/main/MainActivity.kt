@@ -25,7 +25,6 @@ import com.kiwe.kiosk.utils.ImageProcessUtils
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 
-@ExperimentalGetImage
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
@@ -34,7 +33,7 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
             val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
-
+            @ExperimentalGetImage
             if (cameraGranted && audioGranted) {
                 startCamera()
             } else {

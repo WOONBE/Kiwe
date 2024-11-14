@@ -2,7 +2,10 @@ package com.kiwe.kiosk.ui.screen.utils
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
+import timber.log.Timber
 import java.util.Locale
+
+private const val TAG = "TextToSpeechManager"
 
 class TextToSpeechManager(
     private val context: Context,
@@ -19,6 +22,7 @@ class TextToSpeechManager(
 
     fun speak(text: String) {
         if (isInitialized && text.isNotEmpty()) {
+            Timber.tag(TAG).d("speak: $text")
             tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
         }
     }

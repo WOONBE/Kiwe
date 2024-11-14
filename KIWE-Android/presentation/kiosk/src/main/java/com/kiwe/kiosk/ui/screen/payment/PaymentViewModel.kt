@@ -5,6 +5,9 @@ import com.kiwe.domain.model.Order
 import com.kiwe.domain.usecase.kiosk.CancelPaymentUseCase
 import com.kiwe.domain.usecase.kiosk.ConfirmPaymentUseCase
 import com.kiwe.domain.usecase.kiosk.PostOrderUseCase
+import com.kiwe.domain.usecase.kiosk.datasource.GetKioskIdUseCase
+import com.kiwe.domain.usecase.kiosk.datasource.GetKioskNameUseCase
+import com.kiwe.domain.usecase.kiosk.datasource.GetOrderNumberUseCase
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
@@ -15,6 +18,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.Locale
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -25,8 +29,21 @@ class PaymentViewModel
         private val postOrderUseCase: PostOrderUseCase,
         private val confirmPaymentUseCase: ConfirmPaymentUseCase,
         private val cancelPaymentUseCase: CancelPaymentUseCase,
+        private val getKioskIdUseCase: GetKioskIdUseCase,
+        private val getKioskNameUseCase: GetKioskNameUseCase,
+        private val getOrderNumberUseCase: GetOrderNumberUseCase,
     ) : BaseViewModel<PaymentState, PaymentSideEffect>(PaymentState()) {
         private var confirmJob: Job? = null
+
+        init {
+            intent {
+                val getKioskId = getKioskIdUseCase()?.toIntOrNull() ?: 1
+                Timber.tag("그바르디올").d("${javaClass.simpleName} :키오ID $getKioskId")
+                reduce {
+                    state.copy(kioskId = getKioskId)
+                }
+            }
+        }
 
         override fun handleExceptionIntent(
             coroutineContext: CoroutineContext,
@@ -65,6 +82,20 @@ class PaymentViewModel
         fun completePayment() {
             intent {
                 reduce { state.copy(completePayment = true) }
+            }
+        }
+
+        fun createOrderNumber() {
+            intent {
+                val kioskName = getKioskNameUseCase()
+                val orderNumber =
+                    String.format(Locale.KOREAN, "%03d", getOrderNumberUseCase()) // 3자리로 포맷팅
+                reduce {
+                    state.copy(
+                        orderNumber = "$kioskName$orderNumber",
+                    )
+                }
+                Timber.tag("그바르디올").d("${javaClass.simpleName} : 메서드 $kioskName$orderNumber")
             }
         }
 
@@ -120,6 +151,7 @@ class PaymentViewModel
                                 Timber.tag(javaClass.simpleName).d("결제 성공")
                                 viewModelScope.launch {
                                     successPayment(generateUserCardNumber())
+                                    navigateToReceiptScreen()
                                     delay(1000L)
                                     completePayment()
                                     hideDialog() // 결제가 성공하면 다이얼로그 숨김
@@ -140,6 +172,23 @@ class PaymentViewModel
                         cancelPayment()
                     }
                 }
+        }
+
+        fun navigateToReceiptScreen() {
+            // createOrderNumber 함수를 호출하여 orderNumber를 생성한 뒤, 이를 ReceiptScreen으로 전달
+            intent {
+                createOrderNumber()
+                repeat(5) {
+                    if (state.orderNumber.isBlank()) {
+                        delay(500L)
+                        Timber.tag("그바르디올").d("${javaClass.simpleName} : 아직 비어 있음 ${state.orderNumber}")
+                    } else {
+                        postSideEffect(PaymentSideEffect.NavigateToReceiptScreen(orderNumber = state.orderNumber))
+                        return@repeat // 반복 종료
+                    }
+                }
+                Timber.tag("그바르디올").d("${javaClass.simpleName} : ${state.orderNumber}")
+            }
         }
 
         fun cancelPayment() {
@@ -174,10 +223,15 @@ data class PaymentState(
     val remainingTime: Long = 0,
     val userCardNumber: String = "",
     val completePayment: Boolean = false,
+    val orderNumber: String = "",
 ) : BaseState
 
 sealed interface PaymentSideEffect : BaseSideEffect {
     data class Toast(
         val message: String,
+    ) : PaymentSideEffect
+
+    data class NavigateToReceiptScreen(
+        val orderNumber: String,
     ) : PaymentSideEffect
 }

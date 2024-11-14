@@ -51,6 +51,7 @@ fun IntroScreen(
 //        }
 //    }
 
+
     LaunchedEffect(Unit) {
         onEnterScreen(0)
     }
