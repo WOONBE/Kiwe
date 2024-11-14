@@ -1,5 +1,6 @@
 package com.kiwe.data.di
 
+import com.kiwe.data.usecase.kiosk.GetKioskOrderNumberImpl
 import com.kiwe.data.usecase.manager.kiosk.CreateKioskUseCaseImpl
 import com.kiwe.data.usecase.manager.kiosk.DeleteKioskUseCaseImpl
 import com.kiwe.data.usecase.manager.kiosk.EditKioskUseCaseImpl
@@ -9,6 +10,7 @@ import com.kiwe.data.usecase.manager.kiosk.GetAllMyKioskUseCaseImpl
 import com.kiwe.data.usecase.manager.kiosk.GetKioskByIdUseCaseImpl
 import com.kiwe.data.usecase.manager.kiosk.SignOutKioskUseCaseImpl
 import com.kiwe.domain.usecase.kiosk.GetKioskByIdUseCase
+import com.kiwe.domain.usecase.kiosk.GetKioskOrderNumber
 import com.kiwe.domain.usecase.manager.kiosk.CreateKioskUseCase
 import com.kiwe.domain.usecase.manager.kiosk.DeleteKioskUseCase
 import com.kiwe.domain.usecase.manager.kiosk.EditKioskUseCase
@@ -47,4 +49,7 @@ interface KioskManagerModule {
 
     @Binds
     fun bindGetKioskByIdUseCase(uc: GetKioskByIdUseCaseImpl): GetKioskByIdUseCase
+
+    @Binds
+    fun bindGetKioskOrder(uc: GetKioskOrderNumberImpl): GetKioskOrderNumber
 }
