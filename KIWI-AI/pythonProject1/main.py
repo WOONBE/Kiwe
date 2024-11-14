@@ -107,7 +107,7 @@ async def process_order(order_request: OrderRequest):
                 response=response_text
             )
         else:
-            response = service_router.route_request(order_request)
+            response = await service_router.route_request(order_request)
             return response
 
         return response

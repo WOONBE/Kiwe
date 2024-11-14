@@ -6,7 +6,7 @@ class NewOrderCommand:
     def __init__(self, infrastructure):
         self.database = infrastructure['database']
 
-    def execute(self, order_data, request: OrderRequest):
+    async def execute(self, order_data, request: OrderRequest):
         """Process a new order and verify required options."""
         print("Received order_data:", order_data)  # Debug print to check the structure
 
@@ -80,4 +80,6 @@ class NewOrderCommand:
             response=response_text
         )
         print("response",response)
-        return response
+        return {
+            "status":"success","data":response
+            }

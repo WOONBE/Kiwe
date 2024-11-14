@@ -27,19 +27,19 @@ class ServiceRouter:
 
         if request_type == "order":
             command = NewOrderCommand(self.infrastructure)
-            ans = command.execute(data, request)
+            ans = await command.execute(data, request)
             print("ans", ans)
             return ans
         elif request_type == "modify_or_delete":
             command = FixOrderCommand(self.infrastructure)
             print("data", data)
-            return command.execute(data)
+            return await command.execute(data)
         elif request_type == "recommendation":
             command = RecommendationCommand(self.infrastructure)
             return await command.execute(data)
         elif request_type == "explanation":
             command = ExplanationCommand(self.infrastructure)
-            return command.execute(data)
+            return await command.execute(data)
         elif request_type == "check_order":
             return {"status": "success", "message": "Order status is confirmed"}
         elif request_type == "next_step":
