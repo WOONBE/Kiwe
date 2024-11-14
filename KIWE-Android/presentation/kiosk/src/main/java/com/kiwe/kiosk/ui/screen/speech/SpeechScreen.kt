@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,14 +26,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.WavyAnimation
-import com.kiwe.kiosk.ui.screen.utils.TextToSpeechManager
+import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.Typography
 import kotlinx.coroutines.delay
@@ -44,40 +44,50 @@ const val MAX_SPEECH_WAIT_TIME = 5
 private const val TAG = "SpeechScreen"
 
 @Composable
-fun SpeechScreen(viewModel: MainViewModel) {
-    val state = viewModel.collectAsState().value
-    val context = LocalContext.current
-    val ttsManager = remember { TextToSpeechManager(context) }
+fun SpeechScreen(
+    mainViewModel: MainViewModel,
+    shoppingCartViewModel: ShoppingCartViewModel,
+) {
+    val state = mainViewModel.collectAsState().value
+//    val context = LocalContext.current
+//    val ttsManager = remember { TextToSpeechManager(context) }
 
     DisposableEffect(Unit) {
         onDispose {
             Timber.tag(TAG).d("onDispose")
-            ttsManager.stop()
+//            ttsManager.stop()
+        }
+    }
+
+    LaunchedEffect(state.voiceResult) {
+        if (state.voiceResult.category > 0) { // 이러면 응답이 들어왔다는 의미
+            shoppingCartViewModel.onVoiceResult(state.voiceResult)
+//            ttsManager.speak(state.voiceResult.response) // tts로 읽어준다
+            mainViewModel.clearVoiceRecord()
         }
     }
 
     SpeechScreen(
-        isDialogOpen = state.isDialogShowing, // 녹음중인 상태일 때 SpeechScreen을 보여준다
-        onResult = viewModel::onSpeechResult,
-        onDismissRequest = viewModel::onDismissRequest,
+        isOpen = state.isScreenShowing, // 녹음중인 상태일 때 SpeechScreen을 보여준다
+        onDismissRequest = mainViewModel::onDismissRequest,
         recognizedText = state.recognizedText,
         commandText = "\"차가운 아메리카노 한잔 주세요\"",
         shouldShowRetryMessage = state.shouldShowRetryMessage,
+        isTemperatureEmpty = state.isTemperatureEmpty,
     )
 }
 
 @Composable
 private fun SpeechScreen(
-    isDialogOpen: Boolean,
-    onResult: (String) -> Unit,
+    isOpen: Boolean,
     onDismissRequest: () -> Unit,
     recognizedText: String,
     commandText: String,
     shouldShowRetryMessage: Boolean,
+    isTemperatureEmpty: Boolean,
 ) {
-    if (isDialogOpen) {
+    if (isOpen) {
         var elapsedTime by remember { mutableLongStateOf(0L) }
-        onResult // TODO
         LaunchedEffect(Unit) {
             delay(1000)
             elapsedTime = 0L // 타이머 초기화
@@ -105,12 +115,6 @@ private fun SpeechScreen(
                     ).clickable { onDismissRequest() },
             color = Color.Transparent,
         ) {
-//            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.anim_kiwe_dynamic_recording))
-//            val progress by animateLottieCompositionAsState(
-//                composition = composition,
-//                iterations = LottieConstants.IterateForever,
-//            )
-
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
@@ -120,7 +124,7 @@ private fun SpeechScreen(
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     Spacer(modifier = Modifier.weight(2f))
-                    if (elapsedTime < MAX_SPEECH_WAIT_TIME) {
+                    if (elapsedTime in 0..<MAX_SPEECH_WAIT_TIME) {
                         Text(
                             text = if (shouldShowRetryMessage) "다시 말씀해주세요" else "듣는 중 입니다...",
                             color = Color.White,
@@ -167,6 +171,54 @@ private fun SpeechScreen(
                 if (elapsedTime >= MAX_SPEECH_WAIT_TIME) {
                     ExampleBox()
                 }
+                if (isTemperatureEmpty) {
+                    elapsedTime = -6
+                    TempBox()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TempBox(
+    onHotClick: () -> Unit = {},
+    onIceClick: () -> Unit = {},
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = "온도를 선택해주세요", style = Typography.titleLarge.copy(color = Color.White))
+        Row(modifier = Modifier.padding(top = 12.dp)) {
+            Box(
+                modifier =
+                    Modifier
+                        .background(color = Color.Red, shape = RoundedCornerShape(20.dp))
+                        .padding(8.dp)
+                        .clickable {
+                            onHotClick()
+                        },
+            ) {
+                Text(
+                    text = "뜨거운 거",
+                    modifier = Modifier.padding(8.dp),
+                    style = Typography.titleLarge.copy(color = Color.White),
+                )
+            }
+
+            Box(
+                modifier =
+                    Modifier
+                        .padding(start = 12.dp)
+                        .background(color = Color.Blue, shape = RoundedCornerShape(20.dp))
+                        .padding(8.dp)
+                        .clickable {
+                            onIceClick()
+                        },
+            ) {
+                Text(
+                    text = "차가운 거",
+                    modifier = Modifier.padding(8.dp),
+                    style = Typography.titleLarge.copy(color = Color.White),
+                )
             }
         }
     }
@@ -223,12 +275,12 @@ fun ExampleItem(
 fun SpeechScreenPreview() {
     KIWEAndroidTheme {
         SpeechScreen(
-            isDialogOpen = true,
-            onResult = {},
+            isOpen = true,
             onDismissRequest = {},
             recognizedText = "",
             shouldShowRetryMessage = false,
             commandText = "dicat",
+            isTemperatureEmpty = true,
         )
     }
 }
