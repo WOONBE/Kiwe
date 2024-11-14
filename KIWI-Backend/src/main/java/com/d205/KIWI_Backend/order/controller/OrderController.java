@@ -1,6 +1,8 @@
 package com.d205.KIWI_Backend.order.controller;
 
 import com.d205.KIWI_Backend.global.exception.BadRequestException;
+import com.d205.KIWI_Backend.menu.dto.MenuResponse;
+import com.d205.KIWI_Backend.order.dto.MenuSales;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
 import com.d205.KIWI_Backend.order.service.OrderService;
@@ -46,6 +48,31 @@ public class OrderController {
         List<OrderResponse> orderResponses = orderService.getAllOrders();
         return ResponseEntity.ok(orderResponses);
     }
+
+    @GetMapping("/kiosk/{kioskId}")
+    @Operation(summary = "특정 키오스크의 주문 전체 조회", description = "특정 키오스크의 주문을 전체 조회하는 API")
+    public ResponseEntity<List<OrderResponse>> getOrdersByKioskId(@PathVariable Integer kioskId) {
+        List<OrderResponse> orderResponses = orderService.getOrdersByKioskId(kioskId);
+        if (orderResponses.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(orderResponses);
+    }
+
+    @GetMapping("/kiosk/top-selling-menus")
+    @Operation(summary = "키오스크별 연령대별 인기 메뉴 조회", description = "특정 키오스크에서 연령대별 인기 메뉴를 조회하는 API")
+    public Map<String, Map<String, Integer>> getTopSellingMenusByAgeGroupByKioskId(
+        @RequestParam Integer kioskId) {
+        return orderService.getTopSellingMenusByAgeGroupByKioskId(kioskId);
+    }
+
+    @GetMapping("/all/top-selling-menus")
+    @Operation(summary = "전체 주문 기반 연령대별 인기 메뉴 조회", description = "전체 주문을 기반으로 연령대별 인기 메뉴를 조회하는 API")
+    public Map<String, Map<String, Integer>> getTopSellingMenusByAgeGroup() {
+
+        return orderService.getTopSellingMenusByAgeGroup();
+    }
+
 //
 //    @PutMapping("/{orderId}")
 //    @Operation(summary = "주문 업데이트", description = "주문을 업데이트하는 API")
@@ -112,5 +139,67 @@ public class OrderController {
         Map<YearMonth, Integer> monthlySales = orderService.calculateMonthlyTotalForLastSixMonthsByKioskId(kioskId);
         return ResponseEntity.ok(monthlySales);
     }
+
+    @GetMapping("/top-sold-menus/{memberId}")
+    @Operation(summary = "특정 멤버가 운영하는 키오스크의 연령대별 인기 메뉴 조회", description = "특정 멤버가 운영하는 키오스크의 연령대별 인기 메뉴 조회하는 API")
+    public Map<String, List<MenuSales>> getTopSoldMenusByMemberId(@PathVariable Integer memberId) {
+        return orderService.getTopSoldMenusByMemberId(memberId);
+    }
+
+    @GetMapping("/top-sold-menus")
+    @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 연령대별 인기 메뉴 조회", description = "로그인 된 멤버가 운영하는 키오스크의 연령대별 인기 메뉴 조회하는 API")
+    public Map<String, List<MenuSales>> getTopSoldMenusByLoginMember() {
+        return orderService.getTopSoldMenusByLoginMember();
+    }
+
+    @GetMapping("/total-price/last-month/member")
+    @Operation(summary = "로그인 된 멤버의 모든 키오스크의 한달 간 총 수익", description = "특정 멤버가 운영하는 모든 키오스크의 한달 간 총 수익을 리턴하는 API")
+    public ResponseEntity<Integer> getTotalPriceForLastMonthByMemberId() {
+        int totalPrice = orderService.calculateTotalPriceForLastMonthByMemberId();
+        return ResponseEntity.ok(totalPrice);
+    }
+
+    @GetMapping("/monthly-order-counts")
+    @Operation(summary = "로그인 된 멤버의 모든 키오스크의 한달 간 총 수익", description = "특정 멤버가 운영하는 모든 키오스크의 한달 간 총 수익을 리턴하는 API")
+    public ResponseEntity<Map<YearMonth, Integer>> getSixMonthlyOrderCounts() {
+        Map<YearMonth, Integer> monthlyOrderCounts = orderService.calculateMonthlyOrderCountForLastSixMonthsByMemberId();
+
+        if (monthlyOrderCounts.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(monthlyOrderCounts);
+    }
+
+    @GetMapping("/order-count-last-month")
+    @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 총 주문 횟수", description = "로그인 된 멤버가 운영하는 키오스크의 총 주문 횟수을 리턴하는 API")
+    public ResponseEntity<Integer> getOrderCountForLastMonth() {
+        int orderCount = orderService.calculateOrderCountForLastMonthByMemberId();
+
+        return ResponseEntity.ok(orderCount);
+    }
+
+    @GetMapping("/top-20-menu-sales")
+    @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 판매량 별 메뉴 조회", description = "로그인 된 멤버가 운영하는 키오스크의 판매량 별 메뉴 조회하는 API")
+    public ResponseEntity<List<MenuResponse>> getTop20MenuSales() {
+        // 서비스 메서드를 호출하여 판매 수량이 많은 상위 20개의 메뉴 가져오기
+        List<MenuResponse> top20MenuSales = orderService.getTop20MenuSalesForLastMonthByMemberId();
+
+        // 결과 반환
+        if (top20MenuSales.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(top20MenuSales);
+    }
+
+
+
+
+
+
+
+
+
 
 }

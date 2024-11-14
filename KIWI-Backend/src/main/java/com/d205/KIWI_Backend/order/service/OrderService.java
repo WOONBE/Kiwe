@@ -4,20 +4,23 @@ import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_KIO
 import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_ORDER;
 
 import com.d205.KIWI_Backend.global.exception.BadRequestException;
-import com.d205.KIWI_Backend.global.exception.BusinessException;
-import com.d205.KIWI_Backend.global.exception.ExceptionCode;
 import com.d205.KIWI_Backend.kiosk.domain.Kiosk;
 import com.d205.KIWI_Backend.kiosk.repository.KioskRepository;
+import com.d205.KIWI_Backend.member.service.MemberService;
 import com.d205.KIWI_Backend.menu.domain.Menu;
+import com.d205.KIWI_Backend.menu.dto.MenuResponse;
 import com.d205.KIWI_Backend.menu.repository.MenuRepository;
 import com.d205.KIWI_Backend.menu.service.MenuService;
 import com.d205.KIWI_Backend.order.domain.KioskOrder;
 import com.d205.KIWI_Backend.order.domain.Order;
 import com.d205.KIWI_Backend.order.domain.OrderMenu;
+import com.d205.KIWI_Backend.order.dto.MenuSales;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
 import com.d205.KIWI_Backend.order.repository.OrderRepository;
 import java.time.YearMonth;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -31,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -40,13 +42,15 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final MenuRepository menuRepository;
     private final KioskRepository kioskRepository;
+    private final MemberService memberservice;
     private final Logger logger = LoggerFactory.getLogger(MenuService.class);
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, MenuRepository menuRepository, KioskRepository kioskRepository) {
+    public OrderService(OrderRepository orderRepository, MenuRepository menuRepository, KioskRepository kioskRepository, MemberService memberservice) {
         this.orderRepository = orderRepository;
         this.menuRepository = menuRepository;
         this.kioskRepository = kioskRepository;
+        this.memberservice = memberservice;
     }
 
     @Transactional
@@ -56,6 +60,8 @@ public class OrderService {
         // 주문 객체 생성 (빌더 패턴 사용)
         Order order = Order.builder()
             .orderDate(LocalDateTime.now())
+            .age(orderRequest.getAge())
+            .gender(orderRequest.getGender())
             .status("PENDING")  // 기본 상태: PENDING
             .build();
 
@@ -293,12 +299,11 @@ public class OrderService {
     }
     @Transactional
     public int calculateTotalPriceForLastMonthByKioskId(Integer kioskId) {
-        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1); // 한 달 전 날짜 계산
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
 
-        // 특정 키오스크 ID와 한 달 내의 주문 목록 가져오기
+
         List<Order> orders = orderRepository.findByKioskIdAndOrderDateAfter(kioskId, oneMonthAgo);
 
-        // 주문 총 금액 계산
         return orders.stream()
             .flatMap(order -> order.getOrderMenus().stream())
             .mapToInt(orderMenu -> orderMenu.getMenu().getPrice() * orderMenu.getQuantity())
@@ -329,5 +334,384 @@ public class OrderService {
 
         return monthlySales;
     }
+
+    @Transactional
+    public int calculateTotalPriceForLastMonthByMemberId() {
+        Integer memberId = memberservice.getCurrentMemberId();
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+        List<Order> orders = orderRepository.findByMemberIdAndOrderDateAfter(memberId, oneMonthAgo);
+
+        return orders.stream()
+            .flatMap(order -> order.getOrderMenus().stream())
+            .mapToInt(orderMenu -> orderMenu.getMenu().getPrice() * orderMenu.getQuantity())
+            .sum();
+    }
+
+    @Transactional
+    public int calculateOrderCountForLastMonthByMemberId() {
+        Integer memberId = memberservice.getCurrentMemberId();
+        YearMonth currentMonth = YearMonth.now();
+        LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
+
+        // memberId로 멤버가 운영하는 키오스크 목록 조회
+        List<Kiosk> kiosks = kioskRepository.findByMemberId(memberId);
+
+        int totalOrderCount = 0;
+
+        // 각 키오스크에 대해 한 달 동안의 주문 횟수 계산
+        for (Kiosk kiosk : kiosks) {
+            List<Order> orders = orderRepository.findByKioskIdAndOrderDateBetween(kiosk.getId(), startOfMonth, endOfMonth);
+            totalOrderCount += orders.size();
+        }
+
+        return totalOrderCount;
+    }
+
+    @Transactional
+    public Map<YearMonth, Integer> calculateMonthlyOrderCountForLastSixMonthsByMemberId() {
+        Integer memberId = memberservice.getCurrentMemberId();
+        Map<YearMonth, Integer> monthlyOrderCounts = new HashMap<>();
+        YearMonth currentMonth = YearMonth.now();
+
+        // memberId로 멤버가 운영하는 키오스크 목록 조회
+        List<Kiosk> kiosks = kioskRepository.findByMemberId(memberId);
+
+        // 각 키오스크에 대해 최근 6개월 간의 월별 주문 횟수 계산
+        for (Kiosk kiosk : kiosks) {
+            for (int i = 0; i < 6; i++) {
+                YearMonth targetMonth = currentMonth.minusMonths(i);
+                LocalDateTime startOfMonth = targetMonth.atDay(1).atStartOfDay();
+                LocalDateTime endOfMonth = targetMonth.atEndOfMonth().atTime(23, 59, 59);
+
+                // 해당 월의 주문 목록 조회 (키오스크 기준)
+                List<Order> orders = orderRepository.findByKioskIdAndOrderDateBetween(kiosk.getId(), startOfMonth, endOfMonth);
+
+                // 해당 월의 주문 횟수 계산
+                int orderCount = orders.size();
+
+                monthlyOrderCounts.put(targetMonth, orderCount);
+            }
+        }
+
+        return monthlyOrderCounts;
+    }
+
+    @Transactional
+    public List<OrderResponse> getOrdersByKioskId(Integer kioskId) {
+
+        List<Order> orders = orderRepository.findByKioskId(kioskId);
+
+
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        for (Order order : orders) {
+            List<OrderMenu> orderMenus = order.getOrderMenus();
+
+
+            int totalPrice = orderMenus.stream()
+                .mapToInt(orderMenu -> orderMenu.getMenu().getPrice() * orderMenu.getQuantity())
+                .sum();
+
+            // OrderResponse 객체 생성
+            OrderResponse orderResponse = OrderResponse.builder()
+                .orderId(order.getId())
+                .orderDate(order.getOrderDate())
+                .status(order.getStatus())
+                .menuOrders(createMenuOrderResponses(orderMenus))
+                .kioskId(order.getKioskOrders().get(0).getKiosk().getId())
+                .totalPrice(totalPrice)
+                .build();
+
+            orderResponses.add(orderResponse);
+        }
+        return orderResponses;
+    }
+
+    @Transactional
+    public List<MenuResponse> getTop20MenuSalesForLastMonthByMemberId() {
+        Integer memberId = memberservice.getCurrentMemberId();
+        YearMonth currentMonth = YearMonth.now();
+        LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
+
+        // memberId로 멤버가 운영하는 키오스크 목록 조회
+        List<Kiosk> kiosks = kioskRepository.findByMemberId(memberId);
+
+        // 메뉴별 판매 수량을 집계
+        Map<Integer, Integer> menuSalesCount = new HashMap<>();
+
+        for (Kiosk kiosk : kiosks) {
+            // 해당 키오스크의 주문 목록 조회
+            List<Order> orders = orderRepository.findByKioskIdAndOrderDateBetween(kiosk.getId(), startOfMonth, endOfMonth);
+
+            // 각 주문의 메뉴 항목을 순회하며 판매 수량 집계
+            for (Order order : orders) {
+                for (OrderMenu orderMenu : order.getOrderMenus()) {
+                    menuSalesCount.put(orderMenu.getMenu().getId(), menuSalesCount.getOrDefault(orderMenu.getMenu().getId(), 0) + orderMenu.getQuantity());
+                }
+            }
+        }
+
+        // 판매 수량을 기준으로 내림차순 정렬 후 상위 20개 메뉴를 리턴
+        List<MenuResponse> menuResponses = menuSalesCount.entrySet().stream()
+            .sorted((entry1, entry2) -> entry2.getValue() - entry1.getValue()) // 내림차순 정렬
+            .limit(20) // 상위 20개만
+            .map(entry -> {
+                // 메뉴 정보 가져오기 (예시로 메뉴 ID를 사용하여 메뉴 정보를 조회)
+                Menu menu = menuRepository.findById(entry.getKey()).orElse(null);
+
+                // MenuResponse 객체 생성
+                return menu != null ? MenuResponse.fromMenu(menu) : null;
+            })
+            .filter(Objects::nonNull) // null이 아닌 메뉴만 포함
+            .collect(Collectors.toList());
+
+        return menuResponses;
+    }
+
+
+    public Map<String, Map<String, Integer>> getTopSellingMenusByAgeGroup() {
+
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = endDate.minusMonths(1);
+
+        // 쿼리 호출 - 전체 주문 조회
+        List<Object[]> result = orderRepository.findTopSellingMenusByAgeGroup(startDate, endDate);
+
+        Map<String, Map<String, Integer>> ageGroupSales = new HashMap<>();
+
+        for (Object[] row : result) {
+            String menuName = (String) row[0];
+            Integer totalSales = ((Number) row[1]).intValue();
+            Integer age = (Integer) row[2];
+
+            if (age == null) {
+                age = 0; // 기본값 0으로 설정, 혹은 원하는 값으로 변경
+            }
+
+
+            String ageGroup = getAgeGroup(age);
+
+            // 해당 연령대에 대한 메뉴 판매량이 이미 기록되어 있으면, 더 높은 판매량만 저장
+            ageGroupSales.putIfAbsent(ageGroup, new HashMap<>());
+            Map<String, Integer> menuSales = ageGroupSales.get(ageGroup);
+
+            // 이미 해당 메뉴가 존재하는 경우, 판매량 비교 후 더 높은 판매량을 저장
+            if (menuSales.containsKey(menuName)) {
+                Integer currentSales = menuSales.get(menuName);
+                if (totalSales > currentSales) {
+                    menuSales.put(menuName, totalSales); // 더 많이 팔린 경우 교체
+                }
+            } else {
+                menuSales.put(menuName, totalSales); // 메뉴가 없으면 추가
+            }
+        }
+
+        // 각 연령대별로 가장 많이 팔린 메뉴만 남기기
+        Map<String, Map<String, Integer>> topSellingMenus = new HashMap<>();
+        for (String ageGroup : ageGroupSales.keySet()) {
+            Map<String, Integer> menuSales = ageGroupSales.get(ageGroup);
+
+            // 연령대별 가장 많이 팔린 메뉴만 추출
+            String topMenu = null;
+            Integer topSales = 0;
+            for (Map.Entry<String, Integer> entry : menuSales.entrySet()) {
+                if (entry.getValue() > topSales) {
+                    topSales = entry.getValue();
+                    topMenu = entry.getKey();
+                }
+            }
+
+            // 가장 많이 팔린 메뉴만 저장
+            if (topMenu != null) {
+                topSellingMenus.put(ageGroup, Map.of(topMenu, topSales));
+            }
+        }
+
+        return topSellingMenus;
+    }
+
+    public Map<String, Map<String, Integer>> getTopSellingMenusByAgeGroupByKioskId(Integer kioskId) {
+
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = endDate.minusMonths(1);
+
+        List<Object[]> result = orderRepository.findTopSellingMenusByAgeGroupByKioskId(kioskId, startDate, endDate);
+
+        Map<String, Map<String, Integer>> ageGroupSales = new HashMap<>();
+
+        for (Object[] row : result) {
+            String menuName = (String) row[0];
+            Integer totalSales = ((Number) row[1]).intValue();
+            Integer age = (Integer) row[2];
+
+            if (age == null) {
+                age = 0; // 기본값 0으로 설정, 혹은 원하는 값으로 변경
+            }
+
+            String ageGroup = getAgeGroup(age);
+
+            // 해당 연령대에 대한 메뉴 판매량이 이미 기록되어 있으면, 더 높은 판매량만 저장
+            ageGroupSales.putIfAbsent(ageGroup, new HashMap<>());
+            Map<String, Integer> menuSales = ageGroupSales.get(ageGroup);
+
+
+            if (menuSales.containsKey(menuName)) {
+                Integer currentSales = menuSales.get(menuName);
+                if (totalSales > currentSales) {
+                    menuSales.put(menuName, totalSales); // 더 많이 팔린 경우 교체
+                }
+            } else {
+                menuSales.put(menuName, totalSales); // 메뉴가 없으면 추가
+            }
+        }
+
+
+        Map<String, Map<String, Integer>> topSellingMenus = new HashMap<>();
+        for (String ageGroup : ageGroupSales.keySet()) {
+            Map<String, Integer> menuSales = ageGroupSales.get(ageGroup);
+
+            String topMenu = null;
+            Integer topSales = 0;
+            for (Map.Entry<String, Integer> entry : menuSales.entrySet()) {
+                if (entry.getValue() > topSales) {
+                    topSales = entry.getValue();
+                    topMenu = entry.getKey();
+                }
+            }
+            // 가장 많이 팔린 메뉴만 저장
+            if (topMenu != null) {
+                topSellingMenus.put(ageGroup, Map.of(topMenu, topSales));
+            }
+        }
+
+        return topSellingMenus;
+    }
+
+    @Transactional
+    public Map<String, List<MenuSales>> getTopSoldMenusByMemberId(Integer memberId) {
+
+        List<Order> orders = orderRepository.findOrdersByMemberId(memberId);
+
+
+        Map<String, Map<Integer, Integer>> ageGroupSales = new HashMap<>();
+
+        // 연령대 구분
+        String[] ageGroups = {"10대", "20대", "30대", "40대", "50대 이상"};
+
+        for (Order order : orders) {
+
+            int age = (order.getAge() != null) ? order.getAge() : 0;
+
+            String ageGroup = getAgeGroup(age); // 연령대 계산
+
+
+            for (OrderMenu orderMenu : order.getOrderMenus()) {
+                Integer menuId = orderMenu.getMenu().getId();
+                Integer quantity = orderMenu.getQuantity();
+
+
+                ageGroupSales
+                    .computeIfAbsent(ageGroup, k -> new HashMap<>())
+                    .merge(menuId, quantity, Integer::sum);
+            }
+        }
+
+        Map<String, List<MenuSales>> topSoldMenusByAgeGroup = new HashMap<>();
+
+        for (String ageGroup : ageGroups) {
+            Map<Integer, Integer> menuSales = ageGroupSales.getOrDefault(ageGroup, Collections.emptyMap());
+
+
+            List<MenuSales> sortedMenuSales = menuSales.entrySet().stream()
+                .map(entry -> {
+
+                    Optional<Menu> menuOptional = menuRepository.findById(entry.getKey());
+                    String menuName = menuOptional.map(Menu::getName).orElse("Unknown");
+                    return new MenuSales(entry.getKey(), menuName, entry.getValue());
+                })
+                .sorted(Comparator.comparingInt(MenuSales::getSales).reversed())
+                .collect(Collectors.toList());
+
+            List<MenuSales> topMenus = sortedMenuSales.stream()
+                .limit(1)
+                .collect(Collectors.toList());
+
+            topSoldMenusByAgeGroup.put(ageGroup, topMenus);
+        }
+
+        return topSoldMenusByAgeGroup;
+    }
+
+    @Transactional
+    public Map<String, List<MenuSales>> getTopSoldMenusByLoginMember() {
+        Integer memberId = memberservice.getCurrentMemberId();
+
+        List<Order> orders = orderRepository.findOrdersByMemberId(memberId);
+
+
+        Map<String, Map<Integer, Integer>> ageGroupSales = new HashMap<>();
+
+        // 연령대 구분
+        String[] ageGroups = {"10대", "20대", "30대", "40대", "50대 이상"};
+
+        for (Order order : orders) {
+
+            int age = (order.getAge() != null) ? order.getAge() : 0;
+
+            String ageGroup = getAgeGroup(age); // 연령대 계산
+
+
+            for (OrderMenu orderMenu : order.getOrderMenus()) {
+                Integer menuId = orderMenu.getMenu().getId();
+                Integer quantity = orderMenu.getQuantity();
+
+
+                ageGroupSales
+                    .computeIfAbsent(ageGroup, k -> new HashMap<>())
+                    .merge(menuId, quantity, Integer::sum);
+            }
+        }
+
+        Map<String, List<MenuSales>> topSoldMenusByAgeGroup = new HashMap<>();
+
+        for (String ageGroup : ageGroups) {
+            Map<Integer, Integer> menuSales = ageGroupSales.getOrDefault(ageGroup, Collections.emptyMap());
+
+
+            List<MenuSales> sortedMenuSales = menuSales.entrySet().stream()
+                .map(entry -> {
+
+                    Optional<Menu> menuOptional = menuRepository.findById(entry.getKey());
+                    String menuName = menuOptional.map(Menu::getName).orElse("Unknown");
+                    return new MenuSales(entry.getKey(), menuName, entry.getValue());
+                })
+                .sorted(Comparator.comparingInt(MenuSales::getSales).reversed())
+                .collect(Collectors.toList());
+
+            List<MenuSales> topMenus = sortedMenuSales.stream()
+                .limit(1)
+                .collect(Collectors.toList());
+
+            topSoldMenusByAgeGroup.put(ageGroup, topMenus);
+        }
+
+        return topSoldMenusByAgeGroup;
+    }
+
+    private String getAgeGroup(Integer age) {
+        if (age >= 10 && age < 20) {
+            return "10대";
+        } else if (age >= 20 && age < 30) {
+            return "20대";
+        } else if (age >= 30 && age < 40) {
+            return "30대";
+        } else if (age >= 40 && age < 50) {
+            return "40대";
+        } else {
+            return "50대 이상";
+        }
+    }
+
 
 }

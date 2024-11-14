@@ -15,6 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderRequest {
     private Integer kioskId;
+    private Integer age;  // 주문자의 나이
+    private Integer gender;  // 주문자의 성별
+
     private List<MenuOrderRequest> menuOrders;  // 여러 메뉴에 대한 주문 정보
 
     @Getter

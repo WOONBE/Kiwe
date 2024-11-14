@@ -1,15 +1,18 @@
 package com.kiwe.kiosk.ui.screen.payment
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun PaymentScreen(
@@ -17,24 +20,30 @@ fun PaymentScreen(
     mainViewModel: MainViewModel,
     viewModel: PaymentViewModel = hiltViewModel(),
     shoppingCartViewModel: ShoppingCartViewModel = hiltViewModel(),
-    onCompletePayment: () -> Unit = {},
+    onCompletePayment: (String) -> Unit = {},
     onEnterScreen: (Int) -> Unit = {},
 ) {
     val paymentState = viewModel.collectAsState().value
+    val context = LocalContext.current
     val shoppingCartState = shoppingCartViewModel.collectAsState().value
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is PaymentSideEffect.Toast -> {
+                Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+            }
 
+            is PaymentSideEffect.NavigateToReceiptScreen -> {
+                onCompletePayment(sideEffect.orderNumber)
+                shoppingCartViewModel.onClearAllItem()
+            }
+        }
+    }
     val pagerState =
         rememberPagerState(pageCount = {
             PaymentStatus.entries.size
         })
     LaunchedEffect(Unit) {
         onEnterScreen(2)
-    }
-    LaunchedEffect(paymentState.completePayment) {
-        if (paymentState.completePayment) {
-            onCompletePayment()
-            shoppingCartViewModel.onClearAllItem()
-        }
     }
     HorizontalPager(
         modifier = modifier,

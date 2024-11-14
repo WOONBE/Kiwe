@@ -1,5 +1,7 @@
 package com.kiwe.kiosk.ui.screen.main
 
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,7 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,8 +47,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Dialog
 import com.kiwe.kiosk.R
+import com.kiwe.kiosk.login.LoginActivity
+import com.kiwe.kiosk.main.MainSideEffect
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.AnimatedImageSwitcher
+import com.kiwe.kiosk.ui.screen.main.component.CustomPasswordInputDialog
 import com.kiwe.kiosk.ui.screen.main.component.ImageButton
 import com.kiwe.kiosk.ui.screen.order.OrderListDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
@@ -56,6 +64,7 @@ import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.utils.MainEnum
 import kotlinx.coroutines.delay
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 import timber.log.Timber
 
 private const val TAG = "ContainerScreen"
@@ -66,6 +75,7 @@ fun ContainerScreen(
     shoppingCartViewModel: ShoppingCartViewModel,
     onBackClick: () -> Unit,
     onClickPayment: () -> Unit,
+    setShoppingCartOffset: (Offset) -> Unit,
     content: @Composable () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
@@ -73,6 +83,8 @@ fun ContainerScreen(
     var isShoppingCartDialogOpen by remember { mutableStateOf(false) }
     var isOrderListDialogOpen by remember { mutableStateOf(false) }
     var isQueryStateBoxOpen by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var isLogoutDialogOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.page) {
         if (state.page == 1) {
@@ -93,6 +105,31 @@ fun ContainerScreen(
         delay(1000L)
         isQueryStateBoxOpen = isShoppingCartDialogOpen
         Timber.tag("ContainerScreen").d("LaunchedEffect $isQueryStateBoxOpen")
+    }
+
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is MainSideEffect.Toast ->
+                Toast
+                    .makeText(
+                        context,
+                        sideEffect.message,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+
+            MainSideEffect.NavigateToLoginScreen -> {
+                context.startActivity(
+                    Intent(
+                        context,
+                        LoginActivity::class.java,
+                    ).apply {
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    },
+                )
+            }
+
+            MainSideEffect.NavigateToNextScreen -> TODO()
+        }
     }
 
     if (isShoppingCartDialogOpen) {
@@ -122,6 +159,7 @@ fun ContainerScreen(
             onClickPayment = onClickPayment,
         )
     }
+
     if (state.isOrderEndTrue || state.isOrderEndFalse) {
         Timber.tag("ContainerScreenOrder").d("ordered end")
         isOrderListDialogOpen = false
@@ -148,14 +186,30 @@ fun ContainerScreen(
         },
     )
 
+    if (isLogoutDialogOpen) {
+        CustomPasswordInputDialog(
+            modifier = Modifier,
+            onDismissRequest = { isLogoutDialogOpen = false },
+            onConfirm = { password ->
+                viewModel.requestSignOut(password)
+                // 로그아웃 로직을 여기에 추가합니다.
+                // password를 사용하여 로그아웃 확인 처리
+                Timber.tag("Logout").d("비밀번호: $password")
+                isLogoutDialogOpen = false
+            },
+        )
+    }
+
     ContainerScreen(
         page = state.page,
         mode = state.mode,
         onBackClick = onBackClick,
         onShoppingCartDialogClick = { isShoppingCartDialogOpen = true },
+        setShoppingCartOffset = setShoppingCartOffset,
         onOrderListDialogClick = { isOrderListDialogOpen = true },
         gazePoint = state.gazePoint,
         content = content,
+        onLogoutRequested = { isLogoutDialogOpen = true },
     )
 }
 
@@ -165,9 +219,11 @@ private fun ContainerScreen(
     mode: MainEnum.KioskMode,
     onBackClick: () -> Unit,
     onShoppingCartDialogClick: () -> Unit,
+    setShoppingCartOffset: (Offset) -> Unit,
     onOrderListDialogClick: () -> Unit,
     gazePoint: Offset?,
     content: @Composable () -> Unit,
+    onLogoutRequested: () -> Unit,
 ) {
     gazePoint // TODO
     Scaffold(
@@ -177,7 +233,7 @@ private fun ContainerScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     StepIndicator(page)
                     Box(modifier = Modifier, contentAlignment = Alignment.Center) {
-                        AnimatedImageSwitcher(80.dp)
+                        AnimatedImageSwitcher(80.dp, onLogoutRequested = onLogoutRequested)
                         VoiceIntro()
                     }
                 }
@@ -213,7 +269,12 @@ private fun ContainerScreen(
                     }
                     Spacer(Modifier.width(5.dp))
                     ImageButton(
-                        modifier = Modifier.weight(1F),
+                        modifier =
+                            Modifier
+                                .weight(1F)
+                                .onGloballyPositioned {
+                                    setShoppingCartOffset(Offset(it.positionInRoot().x, it.positionInRoot().y - it.size.height * 4))
+                                },
                         "장바구니",
                         R.drawable.shopping_cart,
                         R.color.KIWE_orange1,
@@ -352,7 +413,10 @@ fun VoiceIntro() {
 @Composable
 fun PreviousButton(onBackClick: () -> Unit) {
     Button(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 120.dp, vertical = 20.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 120.dp, vertical = 20.dp),
         onClick = onBackClick,
         colors =
             ButtonDefaults.buttonColors(
@@ -452,6 +516,8 @@ fun ContainerScreenPreview() {
             onOrderListDialogClick = {},
             gazePoint = Offset(0f, 0f),
             content = {},
+            onLogoutRequested = {},
+            setShoppingCartOffset = {},
         )
     }
 }

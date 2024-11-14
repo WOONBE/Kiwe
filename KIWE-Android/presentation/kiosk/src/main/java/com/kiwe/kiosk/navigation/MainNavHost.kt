@@ -7,10 +7,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.ad.AdScreen
 import com.kiwe.kiosk.ui.screen.intro.IntroScreen
@@ -22,6 +28,7 @@ import com.kiwe.kiosk.ui.screen.payment.PaymentScreen
 import com.kiwe.kiosk.ui.screen.receipt.ReceiptScreen
 import com.kiwe.kiosk.ui.screen.speech.SpeechScreen
 import org.orbitmvi.orbit.compose.collectAsState
+import timber.log.Timber
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -30,6 +37,8 @@ fun MainNavHost() {
     val mainViewModel: MainViewModel = hiltViewModel()
     val shoppingCartViewModel: ShoppingCartViewModel = hiltViewModel()
     val state = mainViewModel.collectAsState().value
+    var shoppingCartOffset by remember { mutableStateOf(Offset.Zero) }
+
     Surface {
         Scaffold(
             content = {
@@ -40,6 +49,7 @@ fun MainNavHost() {
                     onClickPayment = {
                         navController.navigate(MainRoute.PAYMENT.route)
                     },
+                    setShoppingCartOffset = { offset -> shoppingCartOffset = offset },
                 ) {
                     NavHost(
                         navController = navController,
@@ -66,6 +76,7 @@ fun MainNavHost() {
                         composable(route = MainRoute.ORDER.route) {
                             OrderScreen(
                                 shoppingCartViewModel = shoppingCartViewModel,
+                                getShoppingCartPosition = { shoppingCartOffset },
                             ) { page ->
                                 mainViewModel.setPage(page)
                             }
@@ -83,15 +94,27 @@ fun MainNavHost() {
                             PaymentScreen(
                                 shoppingCartViewModel = shoppingCartViewModel,
                                 mainViewModel = mainViewModel,
-                                onCompletePayment = {
-                                    navController.navigate(MainRoute.RECEIPT.route)
+                                onCompletePayment = { orderNumber ->
+                                    navController.navigate("${MainRoute.RECEIPT.route}/$orderNumber")
                                 },
                             ) { page ->
                                 mainViewModel.setPage(page)
                             }
                         }
-                        composable(route = MainRoute.RECEIPT.route) {
+                        composable(
+                            route = "${MainRoute.RECEIPT.route}/{orderNumber}",
+                            arguments =
+                                listOf(
+                                    navArgument("orderNumber") {
+                                        defaultValue = "1001"
+                                    },
+                                ),
+                        ) { backStackEntry ->
+                            val orderNumber =
+                                backStackEntry.arguments?.getString("orderNumber") ?: "1001"
+                            Timber.tag("그바르디올").d("${javaClass.simpleName} : $orderNumber")
                             ReceiptScreen(
+                                orderNumber = orderNumber,
                                 onEnterScreen = { page ->
                                     mainViewModel.setPage(page)
                                     mainViewModel.stopSpeechRecognition()

@@ -44,6 +44,7 @@ private const val TAG = "OptionDialog 싸피"
 @Composable
 fun OptionDialog(
     onClose: () -> Unit,
+    onInsert: () -> Unit,
     shoppingCartViewModel: ShoppingCartViewModel,
     optionViewModel: OptionViewModel,
 ) {
@@ -66,6 +67,7 @@ fun OptionDialog(
             onPlus = optionViewModel::onPlus,
             onMinus = optionViewModel::onMinus,
             onClose = onClose,
+            onInsert = onInsert,
             onRadioOptionClick = optionViewModel::onRadioOptionClick,
             onPurchase = {
                 shoppingCartViewModel.onInsertItem(it)
@@ -82,6 +84,7 @@ private fun OptionDialog(
     onChange: () -> Unit,
     onPlus: () -> Unit,
     onMinus: () -> Unit,
+    onInsert: () -> Unit,
     onClose: () -> Unit,
     onRadioOptionClick: (String, String, Int) -> Unit,
     onPurchase: (ShoppingCartItem) -> Unit,
@@ -192,6 +195,7 @@ private fun OptionDialog(
                             count = state.menuCount,
                         ),
                     )
+                    onInsert()
                 },
                 colors =
                     ButtonColors(
@@ -292,6 +296,7 @@ private fun OptionDialogPreview() {
         onPlus = {},
         onMinus = {},
         onClose = {},
+        onInsert = {},
         onRadioOptionClick = { _, _, _ -> },
         onPurchase = {},
     )
