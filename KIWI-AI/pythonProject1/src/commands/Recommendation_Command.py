@@ -1,4 +1,4 @@
-# src/commands/recommendation_command.py
+# src/commands/Recommendation_Command.py
 from src.commands.base_command import BaseCommand
 
 class RecommendationCommand(BaseCommand):
@@ -15,8 +15,8 @@ class RecommendationCommand(BaseCommand):
         :param data: Dictionary containing user preferences or context for recommendations.
         :return: Dictionary with the recommendation response.
         """
-        print()
-        print("data length",len(data))
+        print("data",data)
+        print("data length",len(data),data)
         # print("data", data)
 
         menu_infos = []

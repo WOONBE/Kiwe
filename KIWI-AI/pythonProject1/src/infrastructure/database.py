@@ -173,3 +173,19 @@ class Database:
             return None
         finally:
             cursor.close()
+
+    def get_unique_menu_names_descs(self):
+        """Fetch unique menu names from the database."""
+        if not self.connection:
+            self.connect()
+
+        cursor = self.connection.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT DISTINCT menu_name, menu_desc FROM menu")
+            menu_names = cursor.fetchall()
+            return menu_names
+        except Error as e:
+            print(f"Error fetching menu names: {e}")
+            return None
+        finally:
+            cursor.close()

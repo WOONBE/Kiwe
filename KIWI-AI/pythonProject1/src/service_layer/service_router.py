@@ -2,8 +2,8 @@
 
 from src.commands.new_order_command import NewOrderCommand
 from src.commands.fix_order_command import FixOrderCommand
-from src.commands.recommendation_command import RecommendationCommand
-from src.commands.explanation_command import ExplanationCommand
+from src.commands.Recommendation_Command import RecommendationCommand
+from src.commands.Explanation_command import ExplanationCommand
 # from src.commands.option_order_command import OptionOrderCommand
 
 from src.utils.nlp_processor import NLPProcessor
@@ -23,22 +23,19 @@ class ServiceRouter:
 
         request_type = processed_data["request_type"]
         data = processed_data["data"]
-        print("request_type, data", request_type, data)
 
         if request_type == "order":
             command = NewOrderCommand(self.infrastructure)
             ans = await command.execute(data, request)
-            print("ans", ans)
             return ans
-        elif request_type == "modify_or_delete":
-            command = FixOrderCommand(self.infrastructure)
-            print("data", data)
-            return await command.execute(data)
         elif request_type == "recommendation":
             command = RecommendationCommand(self.infrastructure)
             return await command.execute(data)
         elif request_type == "explanation":
             command = ExplanationCommand(self.infrastructure)
+            return await command.execute(data)
+        elif request_type == "modify_or_delete":
+            command = FixOrderCommand(self.infrastructure)
             return await command.execute(data)
         else:
             return {"status": "unknown", "message": "Unknown request type"}

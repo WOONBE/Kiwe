@@ -115,76 +115,6 @@ async def process_order(order_request: OrderRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"error response  {str(e)}")
 
-# @app.post("/option")
-# async def option_order(order_request: OrderRequest):
-#     """
-#     Process an order request and return a structured response.
-#
-#     return은 id, count, option 가지고 있고, response에서 음료 이름들 가지고 있다.
-#     비교시 각 id의 이름들과 비교하며 새로들어온 입력을 우선으로 넣는다.
-#     """
-#     if order_request.need_temp == 0:
-#         response = service_router.route_request(order_request)
-#         return response
-#     else:
-#         order_option = OrderOption(
-#             shot=0,
-#             sugar=0
-#         )
-#         # Append the processed order
-#         item = OrderResponseItem(
-#             menuId=0,
-#             count=0,
-#             option=order_option
-#         )
-#         response_text = "잘못된 접근입니다."
-#         # Create the final OrderResponse
-#         response = OrderResponse(
-#             category=1,
-#             need_temp=0,
-#             message=order_request.sentence,
-#             order=[item],
-#             response=response_text
-#         )
-#
-#     return response
-
-
-@app.post("/suggest")
-async def process_suggest(order_request: OrderRequest):
-    """
-    Process an order request and return a structured response.
-    """
-    try:
-
-        if order_request.need_temp == 0:
-            order_option = OrderOption(
-                shot=False,
-                sugar=False
-            )
-            # Append the processed order
-            item = OrderResponseItem(
-                menuId=0,
-                count=0,
-                option=order_option
-            )
-            response_text = "잘못된 접근입니다."
-            # Create the final OrderResponse
-            response = OrderResponse(
-                category=1,
-                need_temp=1,
-                message=order_request.sentence,
-                order=[item],
-                response=response_text
-            )
-        else:
-            response = service_router.route_request(order_request)
-            return response
-
-        return response
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"error response  {str(e)}")
-
 @app.post("/recommend")
 async def get_recommendation(request: SuggestRequest):
     try:
@@ -193,10 +123,10 @@ async def get_recommendation(request: SuggestRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# @app.post("/explanation")
-# async def get_explanation(request: SuggestRequest):
-#     try:
-#         response = await service_router.route_request(request)
-#         return response
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
+@app.post("/explanation")
+async def get_explanation(request: SuggestRequest):
+    try:
+        response = await service_router.route_request(request)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
