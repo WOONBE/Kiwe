@@ -26,9 +26,12 @@ import com.kiwe.manager.R
 @Composable
 fun DashBoardAnalytics(
     modifier: Modifier,
+    buttonModifier: Modifier,
     dropDownMenuFirst: List<String>,
     dropDownMenuSecond: List<String> = emptyList(),
     title: String,
+    onFirstDropdownMenuChanged: (String) -> Unit = {},
+    onSecondDropdownMenuChanged: (String) -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     var firstDropDownExpanded by remember { mutableStateOf(false) }
@@ -62,22 +65,32 @@ fun DashBoardAnalytics(
             Text(title)
             Row {
                 DropDown(
+                    modifier = buttonModifier,
                     expanded = firstDropDownExpanded,
                     selectedItem = firstDropDownSelectedItem,
                     menu = dropDownMenuFirst,
                     onButtonClick = { firstDropDownExpanded = !firstDropDownExpanded },
-                    onItemClick = { item -> firstDropDownSelectedItem = item },
+                    onItemClick = { item ->
+                        onFirstDropdownMenuChanged(item)
+                        firstDropDownSelectedItem = item
+                        firstDropDownExpanded = false
+                    },
                     onDismissRequest = { firstDropDownExpanded = false },
                 )
 
                 if (secondDropDownSelectedItem.isNotEmpty()) {
                     Spacer(modifier = Modifier.width(10.dp))
                     DropDown(
+                        modifier = buttonModifier,
                         expanded = secondDropDownExpanded,
                         selectedItem = secondDropDownSelectedItem,
                         menu = dropDownMenuSecond,
                         onButtonClick = { secondDropDownExpanded = !secondDropDownExpanded },
-                        onItemClick = { item -> secondDropDownSelectedItem = item },
+                        onItemClick = { item ->
+                            onSecondDropdownMenuChanged(item)
+                            secondDropDownSelectedItem = item
+                            secondDropDownExpanded = false
+                        },
                         onDismissRequest = { secondDropDownExpanded = false },
                     )
                 }
@@ -92,6 +105,9 @@ fun DashBoardAnalytics(
 private fun DashBoardAnalyticsPreview() {
     DashBoardAnalytics(
         modifier = Modifier.padding(1.dp),
+        buttonModifier = Modifier.width(100.dp),
+        onFirstDropdownMenuChanged = {},
+        onSecondDropdownMenuChanged = {},
         dropDownMenuFirst = listOf(),
         title = "faucibus",
         content = { Text("") },

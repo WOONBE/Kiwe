@@ -3,20 +3,21 @@ package com.kiwe.manager.ui.home
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.kiwe.manager.ui.dashboard.DashBoardScreen
+import com.kiwe.manager.ui.menumanagement.MenuManagementScreen
 
 @Composable
-fun HomeNavHost() {
-    val navController = rememberNavController()
+fun HomeNavHost(navController: NavHostController) {
+    // val navController = rememberNavController()
     NavHost(
         modifier = Modifier.fillMaxWidth(),
         navController = navController,
-        startDestination = HomeRoute.DashBoardScreen.name,
+        startDestination = HomeRoute.DashBoardScreen.route,
     ) {
-        composable(route = HomeRoute.DashBoardScreen.name) {
+        composable(route = HomeRoute.DashBoardScreen.route) {
             DashBoardScreen(
 //                onNavigateToSignUpScreen = {
 //                    navController.navigate(
@@ -31,7 +32,8 @@ fun HomeNavHost() {
             )
         }
 
-        composable(route = HomeRoute.MenuManagementScreen.name) {
+        composable(route = HomeRoute.MenuManagementScreen.route) {
+            MenuManagementScreen()
 //            MenuManagementScreen(
 //                onNavigateToLoginScreen = {
 //                    navController.navigate(
@@ -45,7 +47,7 @@ fun HomeNavHost() {
 //            )
         }
 
-        composable(route = HomeRoute.SalesOverviewScreen.name) {
+        composable(route = HomeRoute.SalesOverviewScreen.route) {
 //            SalesOverviewScreen(
 //                onNavigateToLoginScreen = {
 //                    navController.navigate(
@@ -59,7 +61,7 @@ fun HomeNavHost() {
 //            )
         }
 
-        composable(route = HomeRoute.KioskManagementScreen.name) {
+        composable(route = HomeRoute.KioskManagementScreen.route) {
 //            KioskManagementScreen(
 //                onNavigateToLoginScreen = {
 //                    navController.navigate(
@@ -73,7 +75,7 @@ fun HomeNavHost() {
 //            )
         }
 
-        composable(route = HomeRoute.SettingScreen.name) {
+        composable(route = HomeRoute.SettingScreen.route) {
 //            SettingScreen(
 //                onNavigateToLoginScreen = {
 //                    navController.navigate(
