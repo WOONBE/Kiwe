@@ -38,13 +38,16 @@ import com.kiwe.kiosk.ui.theme.KiweOrange1
 import com.kiwe.kiosk.ui.theme.KiweSilver1
 import com.kiwe.kiosk.ui.theme.Typography
 import kotlinx.coroutines.delay
+import timber.log.Timber
 
 @Composable
 fun ReceiptScreen(
     modifier: Modifier = Modifier,
+    orderNumber: String = "2005",
     onEnterScreen: (Int) -> Unit = {},
     onBackHome: () -> Unit = {},
 ) {
+    Timber.tag("그바르디올").d("힝힝 : $orderNumber")
     var showReceipt by remember { mutableStateOf(false) }
     val translationY by animateFloatAsState(
         targetValue = if (showReceipt) 0f else -300f,
@@ -132,8 +135,8 @@ fun ReceiptScreen(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = "2005",
-                fontSize = 92.sp,
+                text = orderNumber,
+                fontSize = 80.sp,
                 style = Typography.bodyLarge.copy(fontSize = 48.sp),
                 color = Color.Black,
             )

@@ -4,6 +4,8 @@ import androidx.compose.ui.geometry.Offset
 import com.kiwe.domain.model.Category
 import com.kiwe.domain.model.VoiceOrderRequest
 import com.kiwe.domain.usecase.VoiceOrderUseCase
+import com.kiwe.domain.usecase.kiosk.datasource.ClearAllDataUseCase
+import com.kiwe.domain.usecase.manager.kiosk.SignOutKioskUseCase
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
@@ -29,6 +31,8 @@ class MainViewModel
     constructor(
         private val speechRecognizerManager: SpeechRecognizerManager,
         private val voiceOrderUseCase: VoiceOrderUseCase,
+        private val signOutKioskUseCase: SignOutKioskUseCase,
+        private val clearAllDataUseCase: ClearAllDataUseCase,
     ) : BaseViewModel<MainState, MainSideEffect>(MainState()),
         SpeechResultListener {
         private var personDetectedRecently = false
@@ -234,6 +238,18 @@ class MainViewModel
             intent {
                 reduce { state.copy(gazePoint = gazePoint) }
             }
+
+        fun requestSignOut(password: String) =
+            intent {
+                runCatching {
+                    signOutKioskUseCase(password)
+                }.onSuccess {
+                    clearAllDataUseCase()
+                    postSideEffect(MainSideEffect.NavigateToLoginScreen)
+                }.onFailure {
+                    postSideEffect(MainSideEffect.Toast(it.message ?: "알수 없는 에러"))
+                }
+            }
     }
 
 data class MainState(
@@ -253,4 +269,6 @@ sealed interface MainSideEffect : BaseSideEffect {
     ) : MainSideEffect
 
     data object NavigateToNextScreen : MainSideEffect
+
+    data object NavigateToLoginScreen : MainSideEffect
 }

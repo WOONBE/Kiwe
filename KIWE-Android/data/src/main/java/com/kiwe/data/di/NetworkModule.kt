@@ -43,7 +43,7 @@ object NetworkModule {
     @Provides
     @Spring
     @Singleton
-    fun provideHttpsClient() =
+    fun provideHttpsClient(getTokenUseCase: GetTokenUseCase) =
         HttpClient(Android) {
             install(ContentNegotiation) {
                 json(
@@ -91,6 +91,13 @@ object NetworkModule {
                 url {
                     protocol = URLProtocol.HTTPS
                     host = BASE_URL
+                }
+                runBlocking {
+                    val token = getTokenUseCase()
+                    if (token != null) {
+                        header("Authorization", "Bearer ${token.accessToken}")
+                        header("Refresh-Token", token.refreshToken)
+                    }
                 }
             }
         }

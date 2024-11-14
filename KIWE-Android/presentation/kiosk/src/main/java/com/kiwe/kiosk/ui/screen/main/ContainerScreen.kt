@@ -1,5 +1,7 @@
 package com.kiwe.kiosk.ui.screen.main
 
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,14 +34,18 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import com.kiwe.kiosk.R
+import com.kiwe.kiosk.login.LoginActivity
+import com.kiwe.kiosk.main.MainSideEffect
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.AnimatedImageSwitcher
+import com.kiwe.kiosk.ui.screen.main.component.CustomPasswordInputDialog
 import com.kiwe.kiosk.ui.screen.main.component.ImageButton
 import com.kiwe.kiosk.ui.screen.order.OrderListDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
@@ -48,6 +54,7 @@ import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import com.kiwe.kiosk.utils.MainEnum
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 import timber.log.Timber
 
 @Composable
@@ -60,8 +67,35 @@ fun ContainerScreen(
     content: @Composable () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
+    val context = LocalContext.current
     var isShoppingCartDialogOpen by remember { mutableStateOf(false) }
     var isOrderListDialogOpen by remember { mutableStateOf(false) }
+    var isLogoutDialogOpen by remember { mutableStateOf(false) }
+
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is MainSideEffect.Toast ->
+                Toast
+                    .makeText(
+                        context,
+                        sideEffect.message,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+
+            MainSideEffect.NavigateToLoginScreen -> {
+                context.startActivity(
+                    Intent(
+                        context,
+                        LoginActivity::class.java,
+                    ).apply {
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    },
+                )
+            }
+
+            MainSideEffect.NavigateToNextScreen -> TODO()
+        }
+    }
 
     if (isShoppingCartDialogOpen) {
         ShoppingCartDialog(
@@ -81,6 +115,19 @@ fun ContainerScreen(
             onClickPayment = onClickPayment,
         )
     }
+    if (isLogoutDialogOpen) {
+        CustomPasswordInputDialog(
+            modifier = Modifier,
+            onDismissRequest = { isLogoutDialogOpen = false },
+            onConfirm = { password ->
+                viewModel.requestSignOut(password)
+                // 로그아웃 로직을 여기에 추가합니다.
+                // password를 사용하여 로그아웃 확인 처리
+                Timber.tag("Logout").d("비밀번호: $password")
+                isLogoutDialogOpen = false
+            },
+        )
+    }
     ContainerScreen(
         page = state.page,
         mode = state.mode,
@@ -90,6 +137,7 @@ fun ContainerScreen(
         onOrderListDialogClick = { isOrderListDialogOpen = true },
         gazePoint = state.gazePoint,
         content = content,
+        onLogoutRequested = { isLogoutDialogOpen = true },
     )
 }
 
@@ -103,6 +151,7 @@ private fun ContainerScreen(
     onOrderListDialogClick: () -> Unit,
     gazePoint: Offset?,
     content: @Composable () -> Unit,
+    onLogoutRequested: () -> Unit,
 ) {
     gazePoint // TODO
     Scaffold(
@@ -111,7 +160,7 @@ private fun ContainerScreen(
             if (page > 0) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     StepIndicator(page)
-                    AnimatedImageSwitcher(100.dp)
+                    AnimatedImageSwitcher(100.dp, onLogoutRequested = onLogoutRequested)
                 }
             }
         },
@@ -297,6 +346,7 @@ fun ContainerScreenPreview() {
             onOrderListDialogClick = {},
             gazePoint = Offset(0f, 0f),
             content = {},
+            onLogoutRequested = {},
             setShoppingCartOffset = {},
         )
     }
