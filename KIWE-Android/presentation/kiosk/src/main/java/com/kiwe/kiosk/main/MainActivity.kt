@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +17,7 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import com.kiwe.kiosk.navigation.MainNavHost
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
@@ -43,6 +45,20 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        // 터치 이벤트가 발생했을 때 실행할 로직
+        if (ev != null) {
+            // 터치 이벤트의 종류를 확인 (예: DOWN, UP 등)
+            when (ev.action) {
+                MotionEvent.ACTION_DOWN -> { // 손에서 딱 누를 때,
+                    // 터치 시작 시 필요한 처리
+                    mainViewModel.onStartKiosk()
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
     private fun allPermissionsGranted() =
         ContextCompat.checkSelfPermission(
             this,
@@ -56,6 +72,8 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalGetImage::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         imageProcessUtil = ImageProcessUtils(this, mainViewModel::onDetectAgeGender)
         enableEdgeToEdge()
 

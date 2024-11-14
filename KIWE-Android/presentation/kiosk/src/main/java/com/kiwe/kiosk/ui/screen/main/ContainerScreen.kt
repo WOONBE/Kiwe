@@ -1,5 +1,6 @@
 package com.kiwe.kiosk.ui.screen.main
 
+import androidx.compose.animation.core.animateFloatAsState
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.Canvas
@@ -33,6 +34,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -50,14 +52,17 @@ import com.kiwe.kiosk.R
 import com.kiwe.kiosk.login.LoginActivity
 import com.kiwe.kiosk.main.MainSideEffect
 import com.kiwe.kiosk.main.MainViewModel
+import com.kiwe.kiosk.ui.component.BoldTextWithKeywords
 import com.kiwe.kiosk.ui.screen.main.component.AnimatedImageSwitcher
 import com.kiwe.kiosk.ui.screen.main.component.CustomPasswordInputDialog
 import com.kiwe.kiosk.ui.screen.main.component.ImageButton
+import com.kiwe.kiosk.ui.screen.main.component.RoundStepItem
 import com.kiwe.kiosk.ui.screen.order.OrderListDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
+import com.kiwe.kiosk.ui.theme.KiweOrange1
 import com.kiwe.kiosk.ui.theme.KiweGray1
 import com.kiwe.kiosk.ui.theme.KiweGreen5
 import com.kiwe.kiosk.ui.theme.Typography
@@ -208,6 +213,7 @@ fun ContainerScreen(
         setShoppingCartOffset = setShoppingCartOffset,
         onOrderListDialogClick = { isOrderListDialogOpen = true },
         gazePoint = state.gazePoint,
+        remainingTime = state.remainingTime,
         content = content,
         onLogoutRequested = { isLogoutDialogOpen = true },
     )
@@ -222,6 +228,7 @@ private fun ContainerScreen(
     setShoppingCartOffset: (Offset) -> Unit,
     onOrderListDialogClick: () -> Unit,
     gazePoint: Offset?,
+    remainingTime: Long,
     content: @Composable () -> Unit,
     onLogoutRequested: () -> Unit,
 ) {
@@ -231,6 +238,28 @@ private fun ContainerScreen(
             mode // TODO
             if (page > 0) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Spacer(Modifier.weight(1f))
+                        StepIndicator(modifier = Modifier.weight(6f), page)
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            BoldTextWithKeywords(
+                                modifier = Modifier,
+                                fullText = "남은 시간\n${remainingTime}초",
+                                keywords = listOf("$remainingTime"),
+                                brushFlag = listOf(true),
+                                boldStyle = Typography.bodyMedium,
+                                normalStyle = Typography.labelMedium.copy(fontSize = 10.sp),
+                                alignStyle = TextAlign.Center,
+                                textColor = KiweOrange1,
+                            )
+                        }
+                    }
                     StepIndicator(page)
                     Box(modifier = Modifier, contentAlignment = Alignment.Center) {
                         AnimatedImageSwitcher(80.dp, onLogoutRequested = onLogoutRequested)
@@ -265,7 +294,7 @@ private fun ContainerScreen(
                         R.drawable.arrow_square_left,
                         R.color.KIWE_gray1,
                     ) {
-                        onBackClick()
+                        // TODO : 직원 호출
                     }
                     Spacer(Modifier.width(5.dp))
                     ImageButton(
@@ -273,7 +302,12 @@ private fun ContainerScreen(
                             Modifier
                                 .weight(1F)
                                 .onGloballyPositioned {
-                                    setShoppingCartOffset(Offset(it.positionInRoot().x, it.positionInRoot().y - it.size.height * 4))
+                                    setShoppingCartOffset(
+                                        Offset(
+                                            it.positionInRoot().x,
+                                            it.positionInRoot().y - it.size.height * 4,
+                                        ),
+                                    )
                                 },
                         "장바구니",
                         R.drawable.shopping_cart,
@@ -291,8 +325,15 @@ private fun ContainerScreen(
                         onOrderListDialogClick()
                     }
                 }
-            } else if (page > 0) {
-                PreviousButton(onBackClick = onBackClick)
+            } else if (page == 2) {
+                PreviousButton(
+                    onBackClick = onBackClick,
+                )
+            } else if (page == 3) {
+                PreviousButton(
+                    modifier = Modifier.alpha(0.0F),
+                    onBackClick = { },
+                )
             }
         },
     )
@@ -411,10 +452,13 @@ fun VoiceIntro() {
 }
 
 @Composable
-fun PreviousButton(onBackClick: () -> Unit) {
+fun PreviousButton(
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
+) {
     Button(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .padding(horizontal = 120.dp, vertical = 20.dp),
         onClick = onBackClick,
@@ -434,25 +478,31 @@ fun PreviousButton(onBackClick: () -> Unit) {
 }
 
 @Composable
-fun StepIndicator(currentStep: Int) {
+fun StepIndicator(
+    modifier: Modifier = Modifier,
+    currentStep: Int,
+) {
     val steps = listOf("주문", "결제", "확인")
     if (currentStep > 0) {
         Row(
             modifier =
-                Modifier
+                modifier
                     .fillMaxWidth()
-                    .padding(4.dp)
-                    .padding(top = 4.dp),
+                    .padding(4.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             steps.forEachIndexed { index, step ->
-                StepItem(
+                val widthWeight by animateFloatAsState(
+                    targetValue = if (index == currentStep - 1) 4f else 3f,
+                    label = "",
+                )
+                RoundStepItem(
                     title = step,
                     isActive = index == currentStep - 1,
                     isFirst = index == 0,
                     isLast = index == steps.size - 1,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(widthWeight),
                 )
             }
         }
@@ -516,6 +566,7 @@ fun ContainerScreenPreview() {
             onOrderListDialogClick = {},
             gazePoint = Offset(0f, 0f),
             content = {},
+            remainingTime = 0L,
             onLogoutRequested = {},
             setShoppingCartOffset = {},
         )
