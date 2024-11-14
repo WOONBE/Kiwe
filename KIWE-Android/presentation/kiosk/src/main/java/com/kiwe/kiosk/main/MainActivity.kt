@@ -17,6 +17,7 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import com.kiwe.kiosk.navigation.MainNavHost
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
@@ -89,6 +90,8 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalGetImage::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         imageProcessUtil = ImageProcessUtils(this, mainViewModel::onDetectAgeGender)
         enableEdgeToEdge()
 
