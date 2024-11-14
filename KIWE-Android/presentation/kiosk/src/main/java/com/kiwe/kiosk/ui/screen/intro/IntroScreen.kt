@@ -29,12 +29,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.kiwe.kiosk.R
-import com.kiwe.kiosk.main.MainSideEffect
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.Typography
 import org.orbitmvi.orbit.compose.collectAsState
-import org.orbitmvi.orbit.compose.collectSideEffect
 import timber.log.Timber
 
 @Composable
@@ -45,13 +43,13 @@ fun IntroScreen(
     onHelpClick: () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
-    viewModel.collectSideEffect {
-        when (it) {
-            MainSideEffect.NavigateToNextScreen -> TODO()
-            is MainSideEffect.Toast -> TODO()
-            MainSideEffect.NavigateToAdvertisement -> TODO()
-        }
-    }
+//    viewModel.collectSideEffect {
+//        when (it) {
+//            MainSideEffect.NavigateToNextScreen -> TODO()
+//            is MainSideEffect.Toast -> TODO()
+//            MainSideEffect.NavigateToAdvertisement -> TODO()
+//        }
+//    }
 
     LaunchedEffect(Unit) {
         onEnterScreen(0)

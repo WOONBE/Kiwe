@@ -218,7 +218,7 @@ class MainViewModel
             timerJob?.cancel()
             timerJob =
                 viewModelScope.launch {
-                    var timeLeft = 10L // 5분을 초로 변환 // TODO : 5분
+                    var timeLeft = 15L // 5분을 초로 변환 // TODO : 5분
                     while (timeLeft > 0) {
                         intent {
                             reduce { state.copy(remainingTime = timeLeft) }
@@ -228,9 +228,9 @@ class MainViewModel
                         Timber.tag("코바치치").d("$timeLeft")
                     }
                     // 타이머가 종료되면 isExistPerson 상태를 false로 변경
-//                    intent {
-//                        postSideEffect(MainSideEffect.NavigateToAdvertisement)
-//                    }
+                    intent {
+                        postSideEffect(MainSideEffect.ClearCart)
+                    }
                     personDetectedRecently = false
                 }
         }
@@ -288,4 +288,6 @@ sealed interface MainSideEffect : BaseSideEffect {
     data object NavigateToNextScreen : MainSideEffect
 
     data object NavigateToAdvertisement : MainSideEffect
+
+    data object ClearCart : MainSideEffect
 }
