@@ -13,6 +13,7 @@ from src.service_layer.service_router import ServiceRouter
 from src.utils.nlp_processor import NLPProcessor
 from src.utils.response_formatter import format_success_response, format_error_response
 from src.api_layer.models.order_item import OrderRequest, OrderResponse, OrderOption, OrderResponseItem
+from src.api_layer.models.suggest_item import SuggestRequest, SuggestResponse
 from src.api_layer.api import api_router  # Import the APIRouter from api.py
 from src.infrastructure.llama_client import LLaMAClient
 from src.infrastructure.elk_client import ELKClient
@@ -185,52 +186,17 @@ async def process_suggest(order_request: OrderRequest):
         raise HTTPException(status_code=500, detail=f"error response  {str(e)}")
 
 @app.post("/recommend")
-async def get_recommendation(request: OrderRequest):
+async def get_recommendation(request: SuggestRequest):
     try:
         response = await service_router.route_request(request)
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-class PromptRequest(BaseModel):
-    prompt: str
-
-# Define the function to send prompt to LLM
-def send_prompt_to_llm(prompt: str):
-    """Send a prompt to the LLM server and get a response."""
-    try:
-        response = requests.post("http://70.12.130.121:9988/infer", json={"prompt": prompt})
-        response.raise_for_status()  # Ensure a 200 status
-        return response.json().get("response")
-    except requests.exceptions.RequestException as e:
-        print(f"Error: {e}")
-        return None
-
-# Define an endpoint for handling prompts
-@app.post("/get_llm_response")
-async def get_llm_response(prompt_request: PromptRequest):
-    """
-    Send a prompt to the LLM server and return its response.
-    """
-    response = send_prompt_to_llm(prompt_request.prompt)
-    if response:
-        return {"response": response}
-    else:
-        raise HTTPException(status_code=500, detail="Failed to get a response from the LLM server.")
-
-# @app.post("/process")
-# async def process_request(sentence: str):
+# @app.post("/explanation")
+# async def get_explanation(request: SuggestRequest):
 #     try:
-#         nlp_result = nlp_processor.process_sentence(sentence)
-#         response = service_router.route_request(sentence) #nlp_result["request_type"], nlp_result["data"])
-#         return format_success_response(response)
+#         response = await service_router.route_request(request)
+#         return response
 #     except Exception as e:
-#         logger = get_logger(__name__)
-#         logger.error(f"Error processing request: {e}")
-#         raise HTTPException(status_code=500, detail=format_error_response(str(e)))
-
-# Close database connection on shutdown
-# @app.on_event("shutdown")
-# def shutdown_event():
-#     database.close()
-#     print("Database connection closed.")
+#         raise HTTPException(status_code=500, detail=str(e))

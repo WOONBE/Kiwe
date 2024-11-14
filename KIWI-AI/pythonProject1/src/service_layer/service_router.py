@@ -19,7 +19,7 @@ class ServiceRouter:
         """
         Route the request based on NLP-detected intent.
         """
-        processed_data = self.nlp_processor.process_request(request.sentence)
+        processed_data = self.nlp_processor.process_request(request)
 
         request_type = processed_data["request_type"]
         data = processed_data["data"]
@@ -40,9 +40,5 @@ class ServiceRouter:
         elif request_type == "explanation":
             command = ExplanationCommand(self.infrastructure)
             return await command.execute(data)
-        elif request_type == "check_order":
-            return {"status": "success", "message": "Order status is confirmed"}
-        elif request_type == "next_step":
-            return {"status": "success", "message": "Proceeding to the next step"}
         else:
             return {"status": "unknown", "message": "Unknown request type"}

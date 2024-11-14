@@ -88,7 +88,7 @@ class NLPProcessor:
 
         raise HTTPException(status_code=400, detail="No matching menu item found in the sentence.")
 
-    def process_request(self, sentence):
+    def process_request(self, request):
         """Process a Korean input sentence to extract intent and structured data."""
 
         # if request.need_temp == 0:
@@ -97,12 +97,12 @@ class NLPProcessor:
         #     result,need_temp = self.compare_temperature(request,data)
         #     return {"request_type": 'order', "data": result}
 
-        order_type = self.detect_order_type(sentence)
+        order_type = self.detect_order_type(request.sentence)
         if order_type == "unknown":
             return {"request_type": order_type, "data": "다시 말씀해 주세요"}
 
         else:
-            data = self.extract_data(sentence, order_type)
+            data = self.extract_data(request, order_type)
             print("data",data)
             if data is None:
                 return {"request_type": order_type, "data": "다시 말씀해 주세요"}
@@ -137,19 +137,19 @@ class NLPProcessor:
                     continue
         return None
 
-    def extract_data(self, sentence, order_type):
+    def extract_data(self, request, order_type):
         """Extract information based on order type."""
         if order_type == "order":
-            items = self.extract_multiple_orders(sentence)  # Handle multiple items
+            items = self.extract_multiple_orders(request.sentence)  # Handle multiple items
             return {"items": items}
         elif order_type == "recommendation":
             print("suggest_tmp")
-            suggest_items = self.extract_suggestions(sentence)
+            suggest_items = self.extract_suggestions(request)
             return suggest_items
         elif order_type == "modify_or_delete":
-            action_type = self.extract_modification_type(sentence)
-            cart_item = self.extract_cart_item(sentence)
-            updates = self.extract_updates(sentence) if action_type == "modify" else {}
+            action_type = self.extract_modification_type(request.sentence)
+            cart_item = self.extract_cart_item(request.sentence)
+            updates = self.extract_updates(request.sentence) if action_type == "modify" else {}
             return {"action_type": action_type, "cart_item": cart_item, "updates": updates}
 
         elif order_type == "check_order":
@@ -257,20 +257,20 @@ class NLPProcessor:
         # Default case if no temperature keywords are found
         return "default", sentence
 
-    def extract_suggestions(self, sentence):
+    def extract_suggestions(self, request):
         """Extract suggestions based on temperature preference and age."""
-        temperature = self.extract_suggest_keyworrds(sentence)
+        temperature = self.extract_suggest_keyworrds(request.sentence)
 
         # Assuming we have access to age through some means
         # For now, let's use a default age or you can modify to pass it as parameter
-        age = 30  # Default age or you could pass this as a parameter
+        # age = 30  # Default age or you could pass this as a parameter
 
         if temperature == "default":
             # If no temperature preference, use general suggestion
-            suggests = self.db.get_suggest_age_order_menu(age)
+            suggests = self.db.get_suggest_age_order_menu(request.age)
         else:
             # If temperature preference exists, use temperature-specific suggestion
-            suggests = self.db.get_suggest_age_temp_order_menu(age, temperature)
+            suggests = self.db.get_suggest_age_temp_order_menu(request.age, temperature)
 
         if suggests is None:
             raise HTTPException(status_code=500, detail="Error fetching suggestions from database")
