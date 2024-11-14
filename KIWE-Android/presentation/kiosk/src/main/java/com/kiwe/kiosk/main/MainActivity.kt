@@ -23,7 +23,6 @@ import com.kiwe.kiosk.navigation.MainNavHost
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.utils.ImageProcessUtils
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -51,29 +50,13 @@ class MainActivity : ComponentActivity() {
         if (ev != null) {
             // 터치 이벤트의 종류를 확인 (예: DOWN, UP 등)
             when (ev.action) {
-                MotionEvent.ACTION_DOWN -> {
+                MotionEvent.ACTION_DOWN -> { // 손에서 딱 누를 때,
                     // 터치 시작 시 필요한 처리
-                    onUserInteractionDetected()
-                    Timber.tag("ACTION_DOWN").d("ACTION_DOWN")
-                }
-                MotionEvent.ACTION_UP -> {
-                    // 터치 종료 시 필요한 처리
-                    Timber.tag("ACTION_UP").d("ACTION_UP")
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    // 터치 이동 시 필요한 처리
-                    Timber.tag("ACTION_MOVE").d("ACTION_MOVE")
+                    mainViewModel.onStartKiosk()
                 }
             }
         }
         return super.dispatchTouchEvent(ev)
-    }
-
-    private fun onUserInteractionDetected() {
-        Timber.tag("MainActivity").d("사용자 상호작용 감지")
-        // 사용자 상호작용이 감지되었을 때 실행할 로직
-        // 예: ViewModel을 통해 타이머 초기화
-        mainViewModel.onStartTouchScreen()
     }
 
     private fun allPermissionsGranted() =

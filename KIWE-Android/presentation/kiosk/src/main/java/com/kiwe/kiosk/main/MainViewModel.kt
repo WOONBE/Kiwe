@@ -237,7 +237,7 @@ class MainViewModel
                                     val listPart =
                                         it.response.substringAfter("[").substringBefore("]")
                                     val itemList = listPart.replace("'", "").split(", ")
-                                    itemList// 지금은 단일로 할 것 같긴 함
+                                    itemList // 지금은 단일로 할 것 같긴 함
                                     reduce {
                                         state.copy(
                                             tempOrder = removeHelpResult,
@@ -335,7 +335,7 @@ class MainViewModel
         fun detectPerson(box: Boolean) {
             if (box) {
                 if (!personDetectedRecently) {
-                    onStartTouchScreen()
+                    onStartKiosk()
 //                    onPersonCome()
 //                    startPersonDetectionCooldown()
                 }
@@ -346,7 +346,10 @@ class MainViewModel
             }
         }
 
-        fun onStartTouchScreen() {
+        /**
+         * kiosk 모드 시작
+         */
+        fun onStartKiosk() {
             onPersonCome()
             startTimer()
             personDetectedRecently = true
@@ -373,6 +376,7 @@ class MainViewModel
                     personDetectedRecently = false
                 }
         }
+
         private fun onPersonCome() =
             intent {
                 reduce {
@@ -456,5 +460,4 @@ sealed interface MainSideEffect : BaseSideEffect {
     data object NavigateToLoginScreen : MainSideEffect
 
     data object ClearCart : MainSideEffect
-
 }
