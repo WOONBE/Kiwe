@@ -1,36 +1,37 @@
 # src/commands/recommendation_command.py
-
 from src.commands.base_command import BaseCommand
-
 
 class RecommendationCommand(BaseCommand):
     def __init__(self, infrastructure):
-        """
-        Initialize with infrastructure components like retriever and generator for recommendations.
-        """
         super().__init__(infrastructure)
-        self.retriever = infrastructure.get("retriever")  # Used for retrieving relevant recommendations
-        self.generator = infrastructure.get("generator")  # Used for generating recommendation text
+        self.retriever = infrastructure.get("retriever")
+        self.llama_client = infrastructure.get("llama_client")
 
-    def execute(self, data):
+    # Properly implement the abstract method
+    async def execute(self, data):
         """
         Execute the recommendation command by retrieving and generating recommendations.
 
         :param data: Dictionary containing user preferences or context for recommendations.
         :return: Dictionary with the recommendation response.
         """
-        user_preferences = data.get("user_preferences", [])
+        print()
+        print("data length",len(data))
+        # print("data", data)
 
-        # Step 1: Retrieve recommendations based on user preferences or history
-        if self.retriever:
-            recommendations = self.retriever.retrieve_recommendations(user_preferences)
-        else:
-            return {"status": "error", "message": "Unable to retrieve recommendations"}
+        menu_infos = []
+        menu_id = []
 
-        # Step 2: Generate a recommendation response based on retrieved data
-        if self.generator and recommendations:
-            recommendation_text = self.generator.generate(recommendations)
-            return {"status": "success", "recommendation": recommendation_text}
-
-        # If no recommendations are found
-        return {"status": "error", "message": "No recommendations available"}
+        for i in data:
+            print("menu data",i["menu_name"],i["menu_desc"],i["hot_or_ice"],type(i["hot_or_ice"]))
+            menu_infos.append(i["menu_name"] + i["menu_desc"])
+            menu_id.append(i["menu_id"])
+        try:
+            if self.llama_client:
+                context = f"Menu items: {data}\nUser preferences: {[]}"
+                recommendation = await self.llama_client.get_recommendation(context)
+                return {"status": "success", "message": recommendation}
+            return {"status": "success", "message": f"{menu_id} {menu_infos}" }
+        except Exception as e:
+            print(f"Error in recommendation command: {str(e)}")
+            return {"status": "No server", "message": f"{menu_id} {menu_infos}"}

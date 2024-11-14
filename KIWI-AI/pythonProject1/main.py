@@ -9,16 +9,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from src.service_layer.service_router import ServiceRouter
-from src.infrastructure.database import Database
-from src.infrastructure.elk_client import ELKClient
 # from src.utils.logger import setup_logger, get_logger
 from src.utils.nlp_processor import NLPProcessor
 from src.utils.response_formatter import format_success_response, format_error_response
-
 from src.api_layer.models.order_item import OrderRequest, OrderResponse, OrderOption, OrderResponseItem
-
 from src.api_layer.api import api_router  # Import the APIRouter from api.py
-
+from src.infrastructure.llama_client import LLaMAClient
+from src.infrastructure.elk_client import ELKClient
+from src.infrastructure.database import Database
 from typing import Dict, Optional
 from pydantic import BaseModel
 
@@ -44,6 +42,7 @@ def load_config():
 
 config = load_config()
 # setup_logger(config['logging'])
+llama_client = LLaMAClient(config['llama'])
 
 # Initialize Database and ELK client
 database = Database()
@@ -52,7 +51,8 @@ database.connect()  # Ensure connection to the database
 elk_client = ELKClient(config['elk'])
 infrastructure = {
     "database": database,
-    "retriever": elk_client
+    "retriever": elk_client,
+    "llama_client": llama_client
 }
 
 # Initialize NLP Processor and Service Layer
@@ -114,41 +114,83 @@ async def process_order(order_request: OrderRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"error response  {str(e)}")
 
-@app.post("/option")
-async def process_order(order_request: OrderRequest):
+# @app.post("/option")
+# async def option_order(order_request: OrderRequest):
+#     """
+#     Process an order request and return a structured response.
+#
+#     return은 id, count, option 가지고 있고, response에서 음료 이름들 가지고 있다.
+#     비교시 각 id의 이름들과 비교하며 새로들어온 입력을 우선으로 넣는다.
+#     """
+#     if order_request.need_temp == 0:
+#         response = service_router.route_request(order_request)
+#         return response
+#     else:
+#         order_option = OrderOption(
+#             shot=0,
+#             sugar=0
+#         )
+#         # Append the processed order
+#         item = OrderResponseItem(
+#             menuId=0,
+#             count=0,
+#             option=order_option
+#         )
+#         response_text = "잘못된 접근입니다."
+#         # Create the final OrderResponse
+#         response = OrderResponse(
+#             category=1,
+#             need_temp=0,
+#             message=order_request.sentence,
+#             order=[item],
+#             response=response_text
+#         )
+#
+#     return response
+
+
+@app.post("/suggest")
+async def process_suggest(order_request: OrderRequest):
     """
     Process an order request and return a structured response.
-
-    return은 id, count, option 가지고 있고, response에서 음료 이름들 가지고 있다.
-    비교시 각 id의 이름들과 비교하며 새로들어온 입력을 우선으로 넣는다.
     """
-    if order_request.need_temp == 0:
-        response = service_router.route_request(order_request)
+    try:
+
+        if order_request.need_temp == 0:
+            order_option = OrderOption(
+                shot=False,
+                sugar=False
+            )
+            # Append the processed order
+            item = OrderResponseItem(
+                menuId=0,
+                count=0,
+                option=order_option
+            )
+            response_text = "잘못된 접근입니다."
+            # Create the final OrderResponse
+            response = OrderResponse(
+                category=1,
+                need_temp=1,
+                message=order_request.sentence,
+                order=[item],
+                response=response_text
+            )
+        else:
+            response = service_router.route_request(order_request)
+            return response
+
         return response
-    else:
-        order_option = OrderOption(
-            shot=0,
-            sugar=0
-        )
-        # Append the processed order
-        item = OrderResponseItem(
-            menuId=0,
-            count=0,
-            option=order_option
-        )
-        response_text = "잘못된 접근입니다."
-        # Create the final OrderResponse
-        response = OrderResponse(
-            category=1,
-            need_temp=0,
-            message=order_request.sentence,
-            order=[item],
-            response=response_text
-        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"error response  {str(e)}")
 
-    return response
-
-
+@app.post("/recommend")
+async def get_recommendation(request: OrderRequest):
+    try:
+        response = await service_router.route_request(request)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 class PromptRequest(BaseModel):
     prompt: str

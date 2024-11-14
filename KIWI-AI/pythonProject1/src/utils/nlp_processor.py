@@ -17,7 +17,8 @@ class NLPProcessor:
         ("스물", 20), ("서른", 30), ("마흔", 40), ("쉰", 50), ("예순", 60),
         ("일곱개", 7), ("여덟개", 8), ("아홉개", 9), ("열개", 10),
         ("한개", 1), ("두개", 2), ("세개", 3), ("네개", 4), ("다섯개", 5),
-        ("여섯개", 6), ("열개", 10),
+        ("여섯개", 6), ("열개", 10),("한잔", 1), ("두잔", 2), ("세잔", 3), ("네잔", 4), ("다섯잔", 5),
+        ("여섯잔", 6),("일곱잔", 7),("여덜잔", 8),("아홉잔", 9), ("열잔", 10),
         ("두번", 2), ("세번", 3), ("네번", 4),
         ("몇개", 0),  # This could be used to imply a user asking for an uncertain quantity
         ("몇개씩", 0),  # For plural usage asking for how many per item
@@ -87,21 +88,22 @@ class NLPProcessor:
 
         raise HTTPException(status_code=400, detail="No matching menu item found in the sentence.")
 
-    def process_request(self, request: OrderRequest):
+    def process_request(self, sentence):
         """Process a Korean input sentence to extract intent and structured data."""
 
-        if request.need_temp == 0:
-            print("option line")
-            data = self.extract_data(request.sentence, 'order', request.order_items)
-            result,need_temp = self.compare_temperature(request,data)
-            return {"request_type": 'order', "data": result}
+        # if request.need_temp == 0:
+        #     print("option line")
+        #     data = self.extract_data(request.sentence, 'order', request.order_items)
+        #     result,need_temp = self.compare_temperature(request,data)
+        #     return {"request_type": 'order', "data": result}
 
-        order_type = self.detect_order_type(request.sentence)
+        order_type = self.detect_order_type(sentence)
         if order_type == "unknown":
             return {"request_type": order_type, "data": "다시 말씀해 주세요"}
-        else:
 
-            data = self.extract_data(request.sentence, order_type, request.order_items)
+        else:
+            data = self.extract_data(sentence, order_type)
+            print("data",data)
             if data is None:
                 return {"request_type": order_type, "data": "다시 말씀해 주세요"}
             return {"request_type": order_type, "data": data}
@@ -114,7 +116,7 @@ class NLPProcessor:
             return "modify_or_delete"
         elif re.search(r"(확인|주문내역|장바구니 확인)", sentence):
             return "check_order"
-        elif re.search(r"(추천|좋은거|뭐 없나)", sentence):
+        elif re.search(r"(추천|좋은거|뭐 없나|뭐 있나요)", sentence):
             return "recommendation"
         elif re.search(r"(주문|주세요)", sentence):
             return "order"
@@ -135,12 +137,15 @@ class NLPProcessor:
                     continue
         return None
 
-    def extract_data(self, sentence, order_type, orders):
+    def extract_data(self, sentence, order_type):
         """Extract information based on order type."""
         if order_type == "order":
             items = self.extract_multiple_orders(sentence)  # Handle multiple items
             return {"items": items}
-
+        elif order_type == "recommendation":
+            print("suggest_tmp")
+            suggest_items = self.extract_suggestions(sentence)
+            return suggest_items
         elif order_type == "modify_or_delete":
             action_type = self.extract_modification_type(sentence)
             cart_item = self.extract_cart_item(sentence)
@@ -180,6 +185,7 @@ class NLPProcessor:
     def extract_quantity(self, sentence):
         """Detect the quantity mentioned in the sentence."""
         for quantity_word, quantity_value in self.quantities1:
+            print("quantity_word, quantity_value",quantity_word, quantity_value)
             if quantity_word in sentence:
                 return quantity_value
         return 1  # Default to 1 if no quantity is mentioned
@@ -233,8 +239,8 @@ class NLPProcessor:
     def extract_temperature(self,sentence):
         """Identify temperature preference from the sentence using lists of keywords."""
         # Lists of keywords for temperature preferences
-        hot_words = ["따뜻한", "뜨거운", "온기"]
-        ice_words = ["차가운", "시원한", "얼음"]
+        hot_words = ["따뜻한", "뜨거운", "뜨겁게", "뜨끈한", "따뜻하게"]
+        ice_words = ["차가운", "시원한", "얼음", "아이스", "차갑게"]
 
         # Check if any hot word is in the sentence
         for word in hot_words:
@@ -251,37 +257,45 @@ class NLPProcessor:
         # Default case if no temperature keywords are found
         return "default", sentence
 
+    def extract_suggestions(self, sentence):
+        """Extract suggestions based on temperature preference and age."""
+        temperature = self.extract_suggest_keyworrds(sentence)
 
+        # Assuming we have access to age through some means
+        # For now, let's use a default age or you can modify to pass it as parameter
+        age = 30  # Default age or you could pass this as a parameter
 
-    def compare_temperature(self, request, data):
-        order_items = []
-        need_temp = 0
-        check = []
+        if temperature == "default":
+            # If no temperature preference, use general suggestion
+            suggests = self.db.get_suggest_age_order_menu(age)
+        else:
+            # If temperature preference exists, use temperature-specific suggestion
+            suggests = self.db.get_suggest_age_temp_order_menu(age, temperature)
 
-        previous_orders = request.order_items
+        if suggests is None:
+            raise HTTPException(status_code=500, detail="Error fetching suggestions from database")
 
-        for pr in previous_orders:
-            for menu_id, menu_info in self.menu_data.items():
-                if pr.menuId == menu_id:
-                    name = menu_info['menu_name']
-                    for comp in data.get("items", []):  # Use get() to avoid potential NoneType issues
-                        if name == comp.get('menu_name'):
-                            temp = comp.get("temp")
-                            new_id = self.find_menu_id_with_temp(name, temp)
+        return list(suggests)
 
-                            add_shot = comp.get('option', {}).get('shot', 0) or pr.option.get('shot', 0)
-                            add_sugar = comp.get('option', {}).get('sugar', 0) or pr.option.get('sugar', 0)
+    def extract_suggest_keyworrds(self, sentence):
+        """Extract temperature preference from suggestion request."""
+        hot_words = ["따뜻한거", "따뜻한", "뜨거운", "뜨겁게", "뜨끈한", "따뜻하게"]
+        ice_words = ["차가운", "시원한", "시원한거", "얼음", "아이스", "차갑게"]
 
-                            order_option = OrderOption(shot=add_shot, sugar=add_sugar)
-                            order_items.append(OrderResponseItem(
-                                menuId=new_id,
-                                count=pr.count,
-                                option=order_option
-                            ))
-                        else:
-                            order_items.append(name)
+        temp = "default"
 
-                    return order_items, need_temp
-                else:
-                    order_items.append()
-        return order_items, need_temp
+        # Check if any hot word is in the sentence
+        for word in hot_words:
+            if word in sentence:
+                sentence = sentence.replace(word, '')  # Remove the hot word from the sentence
+                temp = "HOT"
+
+        # Check if any cold word is in the sentence
+        for word in ice_words:
+            if word in sentence:
+                sentence = sentence.replace(word, '')  # Remove the cold word from the sentence
+                temp = "ICE"
+
+        print("온도",temp)
+        # Default case if no temperature keywords are found
+        return temp

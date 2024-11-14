@@ -115,3 +115,61 @@ class Database:
         finally:
             cursor.close()
 
+    def get_suggest_age_order_menu(self, age):
+        """Fetch unique combinations of menu category, name, and description based on age (rounded to the nearest 10)."""
+        if not self.connection:
+            self.connect()
+
+        # Round age to the nearest multiple of 10
+        age = round(age / 10) * 10
+
+        cursor = self.connection.cursor(dictionary=True)
+        try:
+            query = """
+                SELECT m.* 
+                FROM order_menu om
+                JOIN orders o ON o.id = om.order_id
+                JOIN menu m ON om.menu_id = m.menu_id
+                WHERE o.age = %s
+                ORDER BY om.quantity DESC
+                LIMIT 3;
+            """
+
+            # Execute the query with the rounded age parameter
+            cursor.execute(query, (age,))
+            combinations = cursor.fetchall()
+            return combinations
+        except Error as e:
+            print(f"Error fetching unique menu combinations: {e}")
+            return None
+        finally:
+            cursor.close()
+
+    def get_suggest_age_temp_order_menu(self, age, temperature):
+        """Fetch unique combinations of menu category, name, and description based on age (rounded to the nearest 10) and temperature."""
+        if not self.connection:
+            self.connect()
+
+        # Round age to the nearest multiple of 10
+        age = round(age / 10) * 10
+        cursor = self.connection.cursor(dictionary=True)
+        try:
+            query = """
+                SELECT m.* 
+                FROM order_menu om
+                JOIN orders o ON o.id = om.order_id
+                JOIN menu m ON om.menu_id = m.menu_id
+                WHERE o.age = %s AND m.hot_or_ice = %s
+                ORDER BY om.quantity DESC
+                LIMIT 3;
+            """
+
+            # Execute the query with the rounded age and temperature parameters
+            cursor.execute(query, (age, temperature))
+            combinations = cursor.fetchall()
+            return combinations
+        except Error as e:
+            print(f"Error fetching unique menu combinations: {e}")
+            return None
+        finally:
+            cursor.close()
