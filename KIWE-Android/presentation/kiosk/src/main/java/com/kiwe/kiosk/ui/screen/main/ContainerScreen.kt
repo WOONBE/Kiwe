@@ -126,6 +126,9 @@ fun ContainerScreen(
         Timber.tag("ContainerScreenOrder").d("ordered end")
         isOrderListDialogOpen = false
         isQueryStateBoxOpen = false
+        if (state.isOrderEndFalse) {
+            viewModel.showSpeechScreen()
+        }
     }
 
     QueryStateBox(

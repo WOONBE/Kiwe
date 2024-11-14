@@ -82,6 +82,7 @@ fun MainNavHost() {
                         composable(route = MainRoute.PAYMENT.route) {
                             PaymentScreen(
                                 shoppingCartViewModel = shoppingCartViewModel,
+                                mainViewModel = mainViewModel,
                                 onCompletePayment = {
                                     navController.navigate(MainRoute.RECEIPT.route)
                                 },

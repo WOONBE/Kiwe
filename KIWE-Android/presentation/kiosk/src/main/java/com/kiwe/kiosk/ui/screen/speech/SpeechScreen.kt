@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,7 +33,6 @@ import androidx.compose.ui.unit.sp
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.component.WavyAnimation
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
-import com.kiwe.kiosk.ui.screen.utils.TextToSpeechManager
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.Typography
 import kotlinx.coroutines.delay
@@ -51,8 +49,8 @@ fun SpeechScreen(
     shoppingCartViewModel: ShoppingCartViewModel,
 ) {
     val state = mainViewModel.collectAsState().value
-    val context = LocalContext.current
-    val ttsManager = remember { TextToSpeechManager(context) }
+//    val context = LocalContext.current
+//    val ttsManager = remember { TextToSpeechManager(context) }
 
     DisposableEffect(Unit) {
         onDispose {

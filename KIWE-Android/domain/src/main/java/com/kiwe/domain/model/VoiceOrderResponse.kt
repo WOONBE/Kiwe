@@ -5,6 +5,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class VoiceOrderResponse(
+    val status: String,
+    val data: VoiceBody,
+)
+
+@Serializable
+data class VoiceBody(
     @SerialName("category")
     val category: Int, // AnswerType
     @SerialName("need_temp")

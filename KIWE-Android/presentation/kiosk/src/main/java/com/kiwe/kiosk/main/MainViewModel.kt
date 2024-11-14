@@ -3,8 +3,8 @@ package com.kiwe.kiosk.main
 import androidx.compose.ui.geometry.Offset
 import com.kiwe.domain.model.Category
 import com.kiwe.domain.model.OrderList
+import com.kiwe.domain.model.VoiceBody
 import com.kiwe.domain.model.VoiceOrderRequest
-import com.kiwe.domain.model.VoiceOrderResponse
 import com.kiwe.domain.usecase.VoiceOrderUseCase
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
@@ -15,6 +15,7 @@ import com.kiwe.kiosk.ui.screen.utils.helpPopupRegex
 import com.kiwe.kiosk.ui.screen.utils.menuRegex
 import com.kiwe.kiosk.ui.screen.utils.noRegex
 import com.kiwe.kiosk.ui.screen.utils.orderRegex
+import com.kiwe.kiosk.ui.screen.utils.payRegex
 import com.kiwe.kiosk.ui.screen.utils.temperatureRegex
 import com.kiwe.kiosk.ui.screen.utils.yesRegex
 import com.kiwe.kiosk.utils.MainEnum
@@ -109,7 +110,7 @@ class MainViewModel
                         tempOrder = "",
                         isTemperatureEmpty = false,
                         voiceResult =
-                            VoiceOrderResponse(
+                            VoiceBody(
                                 category = 0,
                                 need_temp = 1,
                                 order = emptyList(),
@@ -132,7 +133,7 @@ class MainViewModel
                 }
             }
 
-        fun clearOrderEndState()  {
+        fun clearOrderEndState() {
             intent {
                 reduce {
                     state.copy(
@@ -157,8 +158,19 @@ class MainViewModel
                         // 긍정
                         reduce { state.copy(isOrderEndFalse = true) }
                     }
+                    if (state.page == 2 && payRegex.containsMatchIn(result)) {
+                        reduce { state.copy(isPayment = true) }
+                    }
                 }
             }
+
+        fun clearPaymentProcess() {
+            intent {
+                reduce {
+                    state.copy(isPayment = false)
+                }
+            }
+        }
 
         fun onSpeechResult(result: String) =
             intent {
@@ -174,7 +186,8 @@ class MainViewModel
                                     need_temp = 1, // hot, ice 정보가 있으면 1로 들어가야함
                                     order_items = state.voiceShoppingCart, // 빈 장바구니를 의미함(기존에 있는게 있으면 그걸 넣으면 됨)
                                 ),
-                        ).onSuccess {
+                        ).onSuccess { res ->
+                            val it = res.data
                             // 온도까지 잘 들어가 있다면
                             reduce {
                                 state.copy(
@@ -201,8 +214,9 @@ class MainViewModel
                                     need_temp = 1, // hot, ice 정보가 있으면 1로 들어가야함
                                     order_items = state.voiceShoppingCart, // 빈 장바구니를 의미함(기존에 있는게 있으면 그걸 넣으면 됨)
                                 ),
-                        ).onSuccess {
+                        ).onSuccess { res ->
                             // AI에서 성공해서 응답이 돌아오면
+                            val it = res.data
                             if (it.response == "잘못된 접근입니다.") {
                                 postSideEffect(MainSideEffect.Toast(it.response))
                                 reduce {
@@ -216,7 +230,7 @@ class MainViewModel
                                     val listPart =
                                         it.response.substringAfter("[").substringBefore("]")
                                     val itemList = listPart.replace("'", "").split(", ")
-                                    // 지금은 단일로 할 것 같긴 함
+                                    itemList// 지금은 단일로 할 것 같긴 함
                                     reduce {
                                         state.copy(
                                             tempOrder = removeHelpResult,
@@ -365,15 +379,15 @@ data class MainState(
     val isTemperatureEmpty: Boolean = false, // 온도가 선택되지않았을 때
     val isOrderEndTrue: Boolean = false, // 장바구니에서 더이상 메뉴를 담지 않을 때
     val isOrderEndFalse: Boolean = false, // 장바구니에서 계속 담기
-    val isTogo: Boolean = false, // 포장인지 매장인지 고를 때
+    val isPayment: Boolean = false, // 포장인지 매장인지 고를 때
     val voiceShoppingCart: List<OrderList> = mutableListOf(),
     val category: List<Category> = emptyList(),
     val recognizedText: String = "",
     val tempOrder: String = "",
     val shouldShowRetryMessage: Boolean = false,
     val gazePoint: Offset? = null,
-    val voiceResult: VoiceOrderResponse =
-        VoiceOrderResponse(
+    val voiceResult: VoiceBody =
+        VoiceBody(
             category = 0,
             need_temp = 1,
             order = emptyList(),

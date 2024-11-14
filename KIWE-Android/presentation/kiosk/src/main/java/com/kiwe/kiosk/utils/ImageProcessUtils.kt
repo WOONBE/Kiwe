@@ -118,12 +118,12 @@ class ImageProcessUtils
                                     val blendList = result.faceBlendshapes()
                                     val shapeList =
                                         blendList.get().flatMap { innerList -> innerList.orEmpty() }
-
-                                    for (shape in shapeList) {
+                                    shapeList
+//                                    for (shape in shapeList) {
 //                                        Timber
 //                                            .tag("BlendShape")
 //                                            .d("Blend shape: ${shape.categoryName()} || ${shape.score()} || ${shape.index()}")
-                                    }
+//                                    }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                 }

@@ -1,6 +1,6 @@
 package com.kiwe.kiosk.ui.screen.order
 
-import com.kiwe.domain.model.VoiceOrderResponse
+import com.kiwe.domain.model.VoiceBody
 import com.kiwe.domain.usecase.manager.menu.GetMenuByIdUseCase
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
@@ -26,7 +26,7 @@ class ShoppingCartViewModel
             }
         }
 
-        fun onVoiceResult(voiceOrder: VoiceOrderResponse) =
+        fun onVoiceResult(voiceOrder: VoiceBody) =
             intent {
                 // voice order -> 실제 장바구니 아이템 변환하고
                 val cartList = mutableListOf<ShoppingCartItem>()
