@@ -160,6 +160,7 @@ fun DashBoardScreen() {
                 Row {
                     DashBoardAnalytics(
                         modifier = Modifier.weight(1F),
+                        buttonModifier = Modifier.width(100.dp),
                         dropDownMenuFirst = listOf("음료", "디저트"),
                         dropDownMenuSecond = listOf("음료", "디저트"),
                         title = "연령대별 인기 메뉴",
@@ -182,6 +183,7 @@ fun DashBoardScreen() {
 
                     DashBoardAnalytics(
                         modifier = Modifier.weight(1F),
+                        buttonModifier = Modifier.width(100.dp),
                         dropDownMenuFirst = listOf("음료", "디저트"),
                         title = "판매량 기반 추천메뉴 구성",
                     ) {
