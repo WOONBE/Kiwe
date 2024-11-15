@@ -16,8 +16,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.kiwe.kiosk.main.MainSideEffect
 import androidx.navigation.navArgument
+import com.kiwe.kiosk.main.MainSideEffect
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.ad.AdScreen
 import com.kiwe.kiosk.ui.screen.intro.IntroScreen
@@ -50,6 +50,8 @@ fun MainNavHost() {
             MainSideEffect.ClearCart -> {
                 shoppingCartViewModel.onClearAllItem() // 장바구니 아이템 삭제
             }
+
+            MainSideEffect.NavigateToLoginScreen -> {}
         }
     }
 
@@ -92,6 +94,7 @@ fun MainNavHost() {
                                 shoppingCartViewModel = shoppingCartViewModel,
                                 getShoppingCartPosition = { shoppingCartOffset },
                             ) { page ->
+                                mainViewModel.startSpeechRecognition() // 음성인식 ON
                                 mainViewModel.setPage(page)
                             }
                         }
