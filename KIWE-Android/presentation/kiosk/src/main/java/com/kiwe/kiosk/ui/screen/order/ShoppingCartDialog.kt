@@ -218,7 +218,7 @@ private fun ShoppingCartDialog(
                         )
                         ShoppingCartDataInfo(
                             shoppingCartItemList[it],
-                            modifier = Modifier.weight(2F),
+                            modifier = Modifier.weight(3F),
                             onDeleteItem = onDeleteItem,
                             onAddItem = onAddItem,
                             onMinusItem = onMinusItem,
@@ -276,28 +276,7 @@ private fun ShoppingCartDataInfo(
             text =
                 buildAnnotatedString {
                     item.menuRadioOption.onEachIndexed { index, entry ->
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    fontFamily = FontFamily(Font(R.font.pretendard_regular)),
-                                    fontSize = 16.sp,
-                                    letterSpacing = letterSpacing,
-                                ),
-                        ) {
-                            append(entry.key + ":")
-                        }
-
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    fontFamily = FontFamily(Font(R.font.pretendard_semibold)),
-                                    fontSize = 16.sp,
-                                    letterSpacing = letterSpacing,
-                                ),
-                        ) {
-                            append(entry.value.first)
-                        }
-                        if (index != item.menuRadioOption.size - 1) {
+                        if (entry.value.first != "없음") {
                             withStyle(
                                 style =
                                     SpanStyle(
@@ -306,7 +285,30 @@ private fun ShoppingCartDataInfo(
                                         letterSpacing = letterSpacing,
                                     ),
                             ) {
-                                append(" | ")
+                                append(entry.key + ":")
+                            }
+
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        fontFamily = FontFamily(Font(R.font.pretendard_semibold)),
+                                        fontSize = 16.sp,
+                                        letterSpacing = letterSpacing,
+                                    ),
+                            ) {
+                                append(entry.value.first)
+                            }
+                            if (index != item.menuRadioOption.size - 1) {
+                                withStyle(
+                                    style =
+                                        SpanStyle(
+                                            fontFamily = FontFamily(Font(R.font.pretendard_regular)),
+                                            fontSize = 16.sp,
+                                            letterSpacing = letterSpacing,
+                                        ),
+                                ) {
+                                    append(" | ")
+                                }
                             }
                         }
                     }
