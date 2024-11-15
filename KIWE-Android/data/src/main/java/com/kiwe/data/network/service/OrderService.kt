@@ -70,5 +70,14 @@ class OrderService
 
         suspend fun getKioskTotalOrdersLastMonth(kioskId: Int): Result<Int> = client.getResult("api/orders/total-price/last-month/$kioskId")
 
+        suspend fun getTotalPriceLastMonth(): Result<Int> = client.getResult("api/orders/total-price/last-month/member")
+
+        suspend fun getTotalPriceRecentSixMonth(): Result<Map<String, Int>> =
+            client.getResult("api/orders/monthly-sales/last-six-months/member")
+
         suspend fun getOrderAll(): Result<List<com.kiwe.domain.model.OrderResponse>> = client.getResult("api/orders/all")
+
+        suspend fun getOrderLastMonth(): Result<Int> = client.getResult("api/orders/order-count-last-month")
+
+        suspend fun getOrderRecentSixMonth(): Result<Map<String, Int>> = client.getResult("api/orders/order-count/last-six-months")
     }

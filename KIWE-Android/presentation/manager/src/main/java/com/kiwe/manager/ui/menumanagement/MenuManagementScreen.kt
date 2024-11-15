@@ -2,6 +2,7 @@ package com.kiwe.manager.ui.menumanagement
 
 import android.content.Intent
 import android.provider.OpenableColumns
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -46,11 +47,40 @@ import com.kiwe.manager.R
 import com.kiwe.manager.ui.component.DashBoardAnalytics
 import com.kiwe.manager.ui.theme.Typography
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 import java.util.Locale
 
 @Composable
 fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hiltViewModel()) {
     val state by menuManagementViewModel.collectAsState()
+    var showDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    menuManagementViewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is MenuManagementSideEffect.Toast -> {
+                Toast
+                    .makeText(
+                        context,
+                        sideEffect.message,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+            }
+            else -> {
+            }
+        }
+    }
+    if (showDialog) {
+        MenuEditDialog(
+            onDismissRequest = {
+                showDialog = false
+            },
+            onConfirm = {
+                menuManagementViewModel.onEditItem(it)
+                showDialog = false
+            },
+            item = state.itemEdited,
+        )
+    }
     Column(
         modifier =
             Modifier
@@ -99,16 +129,26 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         items(state.menuList.size) {
-                            MenuItem(state.menuList[it]) { menuId ->
-                                menuManagementViewModel.onDelete(menuId)
-                            }
+                            MenuItem(
+                                state.menuList[it],
+                                onItemDelete = { menuId ->
+                                    menuManagementViewModel.onDelete(menuId)
+                                },
+                                onItemEdit = {
+                                    menuManagementViewModel.onClickEditItem(state.menuList[it])
+                                    showDialog = true
+                                },
+                            )
                         }
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(modifier = Modifier.weight(1F)) {
                     Card(
-                        modifier = Modifier.weight(1F).fillMaxHeight(),
+                        modifier =
+                            Modifier
+                                .weight(1F)
+                                .fillMaxHeight(),
                         colors =
                             CardDefaults.cardColors(
                                 containerColor = colorResource(R.color.dashboard_card_background),
@@ -116,7 +156,10 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                         shape = RoundedCornerShape(20.dp),
                     ) {
                         Box(
-                            modifier = Modifier.fillMaxSize().padding(8.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp),
                         ) {
                             Column(modifier = Modifier.fillMaxSize()) {
                                 var text by remember { mutableStateOf("파일을 첨부해주세요!") }
@@ -147,14 +190,13 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                                                     )?.use { cursor ->
                                                         val nameIndex =
                                                             cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                                                        val sizeIndex =
-                                                            cursor.getColumnIndex(OpenableColumns.SIZE)
+//                                                        val sizeIndex =
+//                                                            cursor.getColumnIndex(OpenableColumns.SIZE)
                                                         cursor.moveToFirst()
 
                                                         val fileName = cursor.getString(nameIndex)
                                                         text = fileName
-                                                        val fileSize = cursor.getLong(sizeIndex)
-                                                        fileSize // TODO
+                                                        // val fileSize = cursor.getLong(sizeIndex)
                                                     }
                                             }
                                         }
@@ -184,7 +226,10 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                     }
                     Spacer(modifier = Modifier.width(20.dp))
                     Card(
-                        modifier = Modifier.weight(1F).fillMaxHeight(),
+                        modifier =
+                            Modifier
+                                .weight(1F)
+                                .fillMaxHeight(),
                         colors =
                             CardDefaults.cardColors(
                                 containerColor = colorResource(R.color.dashboard_card_background),
@@ -192,7 +237,10 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                         shape = RoundedCornerShape(20.dp),
                     ) {
                         Box(
-                            modifier = Modifier.fillMaxSize().padding(8.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp),
                         ) {
                             Column(modifier = Modifier.fillMaxSize()) {
                                 Text(
@@ -285,6 +333,7 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
 fun MenuItem(
     item: MenuCategoryParam,
     onItemDelete: (Int) -> Unit,
+    onItemEdit: () -> Unit,
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 10.dp),
@@ -305,7 +354,9 @@ fun MenuItem(
         )
         Row {
             Button(
-                onClick = { },
+                onClick = {
+                    onItemEdit()
+                },
             ) {
                 Text(
                     text = "수정",
