@@ -3,8 +3,10 @@ package com.kiwe.manager.ui.menumanagement
 import androidx.lifecycle.ViewModel
 import com.kiwe.domain.exception.APIException
 import com.kiwe.domain.model.MenuCategoryParam
+import com.kiwe.domain.model.MenuParam
 import com.kiwe.domain.usecase.GetCategoryListUseCase
 import com.kiwe.domain.usecase.manager.menu.DeleteMenuUseCase
+import com.kiwe.domain.usecase.manager.menu.EditMenuUseCase
 import com.kiwe.domain.usecase.manager.menu.GetAllMenuListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -21,6 +23,7 @@ class MenuManagementViewModel
         private val getAllMenuListUseCase: GetAllMenuListUseCase,
         private val getCategoryListUseCase: GetCategoryListUseCase,
         private val deleteMenuUseCase: DeleteMenuUseCase,
+        private val editMenuUseCase: EditMenuUseCase,
     ) : ViewModel(),
         ContainerHost<MenuManagementState, MenuManagementSideEffect> {
         override val container: Container<MenuManagementState, MenuManagementSideEffect> =
@@ -60,6 +63,30 @@ class MenuManagementViewModel
                 }
             }
 
+        fun onClickEditItem(menuCategoryParam: MenuCategoryParam) =
+            intent {
+                reduce {
+                    state.copy(itemEdited = menuCategoryParam)
+                }
+            }
+
+        fun onEditItem(menuParam: MenuParam) =
+            intent {
+                val response = editMenuUseCase(state.itemEdited.id, menuParam).getOrThrow()
+                postSideEffect(MenuManagementSideEffect.Toast("성공적으로 메뉴를 수정했습니다!"))
+                val newList =
+                    state.menuList.map {
+                        if (it.id == state.itemEdited.id) {
+                            response
+                        } else {
+                            it
+                        }
+                    }
+                reduce {
+                    state.copy(menuList = newList)
+                }
+            }
+
         fun onDelete(menuId: Int) =
             intent {
                 deleteMenuUseCase(menuId).getOrThrow()
@@ -83,6 +110,17 @@ class MenuManagementViewModel
 data class MenuManagementState(
     val menuList: List<MenuCategoryParam> = emptyList(),
     val category: String = "전체",
+    val itemEdited: MenuCategoryParam =
+        MenuCategoryParam(
+            id = 9694,
+            category = "lacus",
+            categoryNumber = 5465,
+            hotOrIce = "definitiones",
+            name = "Clair Bryant",
+            price = 4876,
+            description = "putent",
+            imgPath = "viderer",
+        ),
 )
 
 sealed interface MenuManagementSideEffect {
