@@ -1,7 +1,6 @@
 package com.kiwe.manager.ui.component
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material3.Button
@@ -13,10 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun DropDown(
+    modifier: Modifier,
     expanded: Boolean,
     selectedItem: String,
     menu: List<String>,
@@ -27,7 +26,7 @@ fun DropDown(
     Box {
         // 버튼 클릭 시 메뉴를 열거나 닫음
         Button(
-            modifier = Modifier.width(100.dp),
+            modifier = modifier,
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = Color.White,

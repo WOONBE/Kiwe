@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -16,6 +17,7 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 @Composable
 fun PaymentScreen(
     modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel,
     viewModel: PaymentViewModel = hiltViewModel(),
     shoppingCartViewModel: ShoppingCartViewModel = hiltViewModel(),
     onCompletePayment: (String) -> Unit = {},
@@ -52,6 +54,7 @@ fun PaymentScreen(
             PaymentStatus.TAKEOUT -> {
                 TakeOutChoiceScreen(
                     modifier = Modifier.fillMaxSize(),
+                    mainViewModel = mainViewModel,
                     onPackagingClick = {
                         viewModel.postOrder(paymentState.kioskId, shoppingCartState)
                         viewModel.showDialog()

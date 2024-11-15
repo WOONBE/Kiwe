@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.kiwe.kiosk.main.MainSideEffect
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.ad.AdScreen
 import com.kiwe.kiosk.ui.screen.intro.IntroScreen
@@ -28,6 +29,7 @@ import com.kiwe.kiosk.ui.screen.payment.PaymentScreen
 import com.kiwe.kiosk.ui.screen.receipt.ReceiptScreen
 import com.kiwe.kiosk.ui.screen.speech.SpeechScreen
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 import timber.log.Timber
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -38,6 +40,20 @@ fun MainNavHost() {
     val shoppingCartViewModel: ShoppingCartViewModel = hiltViewModel()
     val state = mainViewModel.collectAsState().value
     var shoppingCartOffset by remember { mutableStateOf(Offset.Zero) }
+
+    // 사이드 이펙트 처리
+    mainViewModel.collectSideEffect {
+        when (it) {
+            is MainSideEffect.Toast -> {}
+            MainSideEffect.NavigateToNextScreen -> {}
+            MainSideEffect.NavigateToAdvertisement -> {}
+            MainSideEffect.ClearCart -> {
+                shoppingCartViewModel.onClearAllItem() // 장바구니 아이템 삭제
+            }
+
+            MainSideEffect.NavigateToLoginScreen -> {}
+        }
+    }
 
     Surface {
         Scaffold(
@@ -78,6 +94,7 @@ fun MainNavHost() {
                                 shoppingCartViewModel = shoppingCartViewModel,
                                 getShoppingCartPosition = { shoppingCartOffset },
                             ) { page ->
+                                mainViewModel.startSpeechRecognition() // 음성인식 ON
                                 mainViewModel.setPage(page)
                             }
                         }
@@ -93,6 +110,7 @@ fun MainNavHost() {
                         composable(route = MainRoute.PAYMENT.route) {
                             PaymentScreen(
                                 shoppingCartViewModel = shoppingCartViewModel,
+                                mainViewModel = mainViewModel,
                                 onCompletePayment = { orderNumber ->
                                     navController.navigate("${MainRoute.RECEIPT.route}/$orderNumber")
                                 },
@@ -116,6 +134,7 @@ fun MainNavHost() {
                                 orderNumber = orderNumber,
                                 onEnterScreen = { page ->
                                     mainViewModel.setPage(page)
+                                    mainViewModel.stopSpeechRecognition()
                                 },
                                 onBackHome = {
                                     navController.navigate(MainRoute.AD.route) {
@@ -132,8 +151,8 @@ fun MainNavHost() {
 
         LaunchedEffect(state.isExistPerson, state.page) {
             if (state.isExistPerson && state.page == 0) {
-                navController.navigate(MainRoute.INTRO.route) {
-                    popUpTo(MainRoute.INTRO.route)
+                navController.navigate(MainRoute.ORDER.route) {
+                    popUpTo(MainRoute.ORDER.route)
                 }
             }
 
@@ -147,7 +166,8 @@ fun MainNavHost() {
 
         if (state.page > 0) {
             SpeechScreen(
-                viewModel = mainViewModel,
+                mainViewModel = mainViewModel,
+                shoppingCartViewModel = shoppingCartViewModel,
             )
         }
     }

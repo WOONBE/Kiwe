@@ -24,13 +24,17 @@ class SpeechRecognizerManager
         @ApplicationContext
         private val context: Context,
     ) {
+        private val delayTime = 200L
         private var speechRecognizer: SpeechRecognizer? = null
         private val recognizerIntent: Intent =
             Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     putExtra(RecognizerIntent.EXTRA_MASK_OFFENSIVE_WORDS, true)
                 }
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(
+                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM,
+                )
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.KOREAN)
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             }
@@ -74,7 +78,6 @@ class SpeechRecognizerManager
 
                 override fun onEndOfSpeech() {
                     Timber.tag(TAG).d("onEndOfSpeech")
-//                    listener?.onSpeechEnded()
                 }
 
                 override fun onError(error: Int) {
@@ -88,11 +91,12 @@ class SpeechRecognizerManager
                         Timber.tag(TAG).d("onResults: $it")
                         listener?.onResultsReceived(it)
                     }
-                    restartListeningWithDelay()
+                    restartListeningImmediately() // 결과 후 즉시 다시 시작
                 }
 
                 override fun onPartialResults(partialResults: Bundle?) {
-                    val partial = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    val partial =
+                        partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     partial?.let {
                         Timber.tag(TAG).d("onPartialResults: $it")
                         listener?.onPartialResultsReceived(it)
@@ -107,17 +111,26 @@ class SpeechRecognizerManager
                 }
             }
 
+        private fun restartListeningImmediately() {
+            CoroutineScope(Dispatchers.Main).launch {
+                speechRecognizer?.stopListening() // 기존 인식 종료
+                startListening() // 바로 다시 시작
+            }
+        }
+
         private fun handleError(error: Int) {
             when (error) {
                 SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
                     Timber.tag(TAG).d("Recognizer is busy. Retrying after delay...")
-                    resetSpeechRecognizerWithDelay(1000L) // 1초 후 재설정
+                    resetSpeechRecognizerWithDelay(delayTime) // 1초 후 재설정
                 }
+
                 SpeechRecognizer.ERROR_CLIENT -> {
                     Timber.tag(TAG).d("Client error. Resetting SpeechRecognizer.")
                     resetSpeechRecognizer()
                     startListening()
                 }
+
                 else -> {
                     Timber.tag(TAG).d("Unhandled error: $error. Restarting...")
                     restartListeningWithDelay()
@@ -131,7 +144,7 @@ class SpeechRecognizerManager
             speechRecognizer?.startListening(recognizerIntent)
         }
 
-        private fun restartListeningWithDelay(delayMillis: Long = 500L) {
+        private fun restartListeningWithDelay(delayMillis: Long = delayTime) {
             CoroutineScope(Dispatchers.Main).launch {
                 delay(delayMillis)
                 if (isListening) {

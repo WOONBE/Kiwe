@@ -13,10 +13,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.rememberNavController
 import com.kiwe.manager.ui.component.HomeSideBar
 import com.kiwe.manager.ui.theme.KIWEAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,29 +34,77 @@ class HomeActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
+            val state = homeViewModel.collectAsState().value
+            val navController = rememberNavController()
+
+            LaunchedEffect(state.tabIdx) {
+                when (state.tabIdx) {
+                    0 -> {
+                        navController.navigate(HomeRoute.DashBoardScreen.route) {
+                            popUpTo(HomeRoute.DashBoardScreen.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+
+                    1 -> {
+                        navController.navigate(HomeRoute.MenuManagementScreen.route) {
+                            popUpTo(HomeRoute.MenuManagementScreen.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+
+                    2 -> {
+                        navController.navigate(HomeRoute.SalesOverviewScreen.route) {
+                            popUpTo(HomeRoute.SalesOverviewScreen.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+
+                    3 -> {
+                        navController.navigate(HomeRoute.KioskManagementScreen.route) {
+                            popUpTo(HomeRoute.KioskManagementScreen.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+
+                    4 -> {
+                        navController.navigate(HomeRoute.SettingScreen.route) {
+                            popUpTo(HomeRoute.SettingScreen.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                }
+            }
             KIWEAndroidTheme {
                 Surface(modifier = Modifier.systemBarsPadding()) {
-                    val state = homeViewModel.collectAsState().value
+                    homeViewModel.collectSideEffect { sideEffect ->
+                        when (sideEffect) {
+                            is HomeSideEffect.Toast ->
+                                Toast
+                                    .makeText(
+                                        this,
+                                        sideEffect.message,
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+
+                            HomeSideEffect.NavigateToDashBoardScreen -> {
+                            }
+
+                            else -> {}
+                        }
+                    }
                     Row {
                         HomeSideBar(
                             tabIdx = state.tabIdx,
                             onTabChanged = { idx -> homeViewModel.onTabChanged(idx) },
                         )
-                        HomeNavHost()
+                        HomeNavHost(navController)
                     }
-//                HomeScreen(
-//                    onNavigateToLoginScreen = {
-//                        startActivity(
-//                            Intent(
-//                                this,
-//                                LoginActivity::class.java,
-//                            ).apply {
-//                                flags =
-//                                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-//                            },
-//                        )
-//                    },
-//                )
                 }
             }
         }
@@ -80,6 +130,7 @@ fun HomeScreen(
             }
 
             HomeSideEffect.NavigateToLoginScreen -> onNavigateToLoginScreen()
+            else -> {}
         }
     }
 

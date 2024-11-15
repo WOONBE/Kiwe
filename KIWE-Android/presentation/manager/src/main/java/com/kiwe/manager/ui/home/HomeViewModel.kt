@@ -177,6 +177,12 @@ data class HomeState(
 sealed interface HomeSideEffect {
     object NavigateToLoginScreen : HomeSideEffect
 
+    object NavigateToDashBoardScreen : HomeSideEffect
+    object NavigateToMenuManagementScreen : HomeSideEffect
+    object NavigateToSalesOverviewScreen : HomeSideEffect
+    object NavigateToKioskManagementScreen : HomeSideEffect
+    object NavigateToSettingScreen : HomeSideEffect
+
     class Toast(
         val message: String,
     ) : HomeSideEffect
