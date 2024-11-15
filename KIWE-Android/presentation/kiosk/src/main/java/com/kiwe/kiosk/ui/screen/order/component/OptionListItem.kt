@@ -45,7 +45,7 @@ fun OptionListItem(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (orderOptionList.first().radio) {
-                var selectedOption by remember { mutableIntStateOf(-1) }
+                var selectedOption by remember { mutableIntStateOf(0) }
                 OptionListItem(
                     selectedOption,
                     onRadioOptionClick = { index, optionTitle, optionPrice ->
@@ -75,6 +75,7 @@ fun OptionListItem(
                 optionName = orderOption.title,
                 optionPrice = orderOption.price,
                 optionImg = orderOption.optionImgUrl,
+                optionImgRes = orderOption.optionImgRes,
                 selected = (index == selectedOption),
                 onRadioOptionClick = {
                     onRadioOptionClick(
@@ -96,12 +97,14 @@ fun OptionListItemPreview() {
         listOf(
             OrderOption(
                 optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+                optionImgRes = null,
                 title = "1샷 추가",
                 price = 500,
                 radio = true,
             ),
             OrderOption(
                 optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+                optionImgRes = null,
                 title = "",
                 price = 0,
                 radio = true,

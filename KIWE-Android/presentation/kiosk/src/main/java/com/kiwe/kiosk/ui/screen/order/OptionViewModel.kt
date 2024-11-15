@@ -2,6 +2,7 @@ package com.kiwe.kiosk.ui.screen.order
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.kiwe.kiosk.R
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
@@ -19,12 +20,14 @@ class OptionViewModel
         @Assisted("menuId") private val menuId: Int,
         @Assisted("menuImgPath") private val menuImgPath: String,
         @Assisted("menuTitle") private val menuTitle: String,
+        @Assisted("menuDescription") private val menuDescription: String,
         @Assisted("menuCost") private val menuCost: Int,
     ) : BaseViewModel<OptionState, OptionSideEffect>(
             OptionState(
                 menuId,
                 menuImgPath,
                 menuTitle,
+                menuDescription,
                 menuCost,
             ),
         ) {
@@ -41,6 +44,7 @@ class OptionViewModel
             menuId: Int,
             menuImgPath: String,
             menuTitle: String,
+            menuDescription: String,
             menuCost: Int,
         ) = intent {
             reduce {
@@ -48,6 +52,7 @@ class OptionViewModel
                     menuId = menuId,
                     menuImgPath = menuImgPath,
                     menuTitle = menuTitle,
+                    menuDescription = menuDescription,
                     menuCost = menuCost,
                 )
             }
@@ -56,7 +61,7 @@ class OptionViewModel
         fun onClear() =
             intent {
                 reduce {
-                    OptionState(0, "", "", 0)
+                    OptionState(0, "", "", "", 0)
                 }
             }
 
@@ -98,6 +103,7 @@ class OptionViewModel
                 @Assisted("menuId") menuId: Int,
                 @Assisted("menuImgPath") menuImgPath: String,
                 @Assisted("menuTitle") menuTitle: String,
+                @Assisted("menuDescription") menuDescription: String,
                 @Assisted("menuCost") menuCost: Int,
             ): OptionViewModel
         }
@@ -108,11 +114,18 @@ class OptionViewModel
                 menuId: Int,
                 menuImgPath: String,
                 menuTitle: String,
+                menuDescription: String,
                 menuCost: Int,
             ): ViewModelProvider.Factory =
                 object : ViewModelProvider.Factory {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                        assistedFactory.create(menuId, menuImgPath, menuTitle, menuCost) as T
+                        assistedFactory.create(
+                            menuId,
+                            menuImgPath,
+                            menuTitle,
+                            menuDescription,
+                            menuCost,
+                        ) as T
                 }
         }
     }
@@ -121,6 +134,7 @@ data class OptionState(
     val menuId: Int,
     val menuImgPath: String,
     val menuTitle: String,
+    val menuDescription: String,
     val menuCost: Int,
     val menuCount: Int = 1,
     val radioOptionCost: MutableMap<String, Pair<String, Int>> = mutableMapOf(),
@@ -131,14 +145,16 @@ data class OptionState(
                 listOf(
                     OrderOption(
                         optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "1샷 추가",
-                        price = 500,
+                        optionImgRes = R.drawable.img_option_shot_one,
+                        title = "없음",
+                        price = 0,
                         radio = true,
                     ),
                     OrderOption(
                         optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "",
-                        price = 0,
+                        optionImgRes = R.drawable.img_option_shot_two,
+                        title = "1샷 추가",
+                        price = 500,
                         radio = true,
                     ),
                 )
@@ -147,49 +163,51 @@ data class OptionState(
                 listOf(
                     OrderOption(
                         optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+                        optionImgRes = R.drawable.img_option_sugar_one,
+                        title = "없음",
+                        price = 0,
+                        radio = true,
+                    ),
+                    OrderOption(
+                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+                        optionImgRes = R.drawable.img_option_sugar_two,
                         title = "1개 추가",
                         price = 100,
                         radio = true,
                     ),
-                    OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "2개 추가",
-                        price = 200,
-                        radio = true,
-                    ),
                 )
 
-            this["추가 선택"] =
-                listOf(
-                    OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "기타1",
-                        price = 0,
-                        radio = true,
-                    ),
-                    OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "기타2",
-                        price = 0,
-                        radio = true,
-                    ),
-                )
-
-            this["옵션2"] =
-                listOf(
-                    OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "테이크 아웃",
-                        price = -500,
-                        radio = true,
-                    ),
-                    OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "매장에서",
-                        price = 0,
-                        radio = true,
-                    ),
-                )
+//            this["추가 선택"] =
+//                listOf(
+//                    OrderOption(
+//                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                        title = "기타1",
+//                        price = 0,
+//                        radio = true,
+//                    ),
+//                    OrderOption(
+//                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                        title = "기타2",
+//                        price = 0,
+//                        radio = true,
+//                    ),
+//                )
+//
+//            this["옵션2"] =
+//                listOf(
+//                    OrderOption(
+//                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                        title = "테이크 아웃",
+//                        price = -500,
+//                        radio = true,
+//                    ),
+//                    OrderOption(
+//                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                        title = "매장에서",
+//                        price = 0,
+//                        radio = true,
+//                    ),
+//                )
         },
 ) : BaseState {
     val totalPrice

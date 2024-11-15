@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,13 +30,16 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
+import coil.compose.AsyncImage
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.model.OrderOption
 import com.kiwe.kiosk.model.ShoppingCartItem
 import com.kiwe.kiosk.ui.screen.order.component.OptionListItem
+import com.kiwe.kiosk.ui.screen.utils.prefixingImagePaths
 import com.kiwe.kiosk.ui.theme.Typography
 import org.orbitmvi.orbit.compose.collectAsState
 import timber.log.Timber
@@ -99,6 +104,25 @@ private fun OptionDialog(
         Text(
             text = state.menuTitle,
             color = Color.Black,
+        )
+        Timber.tag("OrderItem").d(state.menuImgPath)
+        AsyncImage(
+            modifier =
+                Modifier
+                    .size(200.dp)
+                    .aspectRatio(1F),
+            model = state.menuImgPath.prefixingImagePaths(),
+            contentDescription = "메뉴 이미지",
+        )
+        Spacer(Modifier.height(5.dp))
+        Text(
+            text = state.menuDescription,
+            style = Typography.bodyMedium.copy(fontSize = 10.sp),
+        )
+        Spacer(Modifier.height(5.dp))
+        Text(
+            text = "${state.menuCost}원",
+            style = Typography.bodyMedium,
         )
         state.optionList.forEach {
             OptionListItem(it.key, it.value, onRadioOptionClick) {
@@ -223,6 +247,7 @@ private fun OptionDialogPreview() {
                 menuId = 1,
                 menuImgPath = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                 menuTitle = "",
+                menuDescription = "",
                 menuCost = 0,
                 optionList =
                     mutableMapOf<String, List<OrderOption>>().apply {
@@ -231,12 +256,14 @@ private fun OptionDialogPreview() {
                                 OrderOption(
                                     optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                                     title = "1샷 추가",
+                                    optionImgRes = null,
                                     price = 500,
                                     radio = true,
                                 ),
                                 OrderOption(
                                     optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
                                     title = "",
+                                    optionImgRes = null,
                                     price = 0,
                                     radio = true,
                                 ),
@@ -246,49 +273,51 @@ private fun OptionDialogPreview() {
                             listOf(
                                 OrderOption(
                                     optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+                                    optionImgRes = null,
                                     title = "1개 추가",
                                     price = 100,
                                     radio = true,
                                 ),
                                 OrderOption(
                                     optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+                                    optionImgRes = null,
                                     title = "2개",
                                     price = 200,
                                     radio = true,
                                 ),
                             )
 
-                        this["추가 선택"] =
-                            listOf(
-                                OrderOption(
-                                    optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                                    title = "기타1",
-                                    price = 0,
-                                    radio = false,
-                                ),
-                                OrderOption(
-                                    optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                                    title = "기타2",
-                                    price = 0,
-                                    radio = false,
-                                ),
-                            )
-
-                        this["옵션2"] =
-                            listOf(
-                                OrderOption(
-                                    optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                                    title = "테이크 아웃",
-                                    price = -500,
-                                    radio = true,
-                                ),
-                                OrderOption(
-                                    optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                                    title = "매장에서",
-                                    price = 0,
-                                    radio = true,
-                                ),
-                            )
+//                        this["추가 선택"] =
+//                            listOf(
+//                                OrderOption(
+//                                    optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                                    title = "기타1",
+//                                    price = 0,
+//                                    radio = false,
+//                                ),
+//                                OrderOption(
+//                                    optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                                    title = "기타2",
+//                                    price = 0,
+//                                    radio = false,
+//                                ),
+//                            )
+//
+//                        this["옵션2"] =
+//                            listOf(
+//                                OrderOption(
+//                                    optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                                    title = "테이크 아웃",
+//                                    price = -500,
+//                                    radio = true,
+//                                ),
+//                                OrderOption(
+//                                    optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+//                                    title = "매장에서",
+//                                    price = 0,
+//                                    radio = true,
+//                                ),
+//                            )
                     },
             ),
         change = 0,
