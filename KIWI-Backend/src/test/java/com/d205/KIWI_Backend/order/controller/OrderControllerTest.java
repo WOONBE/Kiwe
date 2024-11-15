@@ -1,9 +1,12 @@
 package com.d205.KIWI_Backend.order.controller;
 
+import com.d205.KIWI_Backend.global.exception.BadRequestException;
+import com.d205.KIWI_Backend.global.exception.ExceptionCode;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
 import com.d205.KIWI_Backend.order.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -43,6 +46,8 @@ class OrderControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
+
+    private final Long kioskId = 1L;
 
     @Test
     void createOrder_shouldReturnCreatedOrder() throws Exception {
@@ -148,4 +153,38 @@ class OrderControllerTest {
 
         verify(orderService, times(1)).getAllOrders();
     }
+
+
+    @Test
+    @DisplayName("주문 상태 확인 - 성공")
+    void getOrderStatusSuccess() throws Exception {
+        // given
+        String expectedStatus = "PENDING";
+        when(orderService.getOrderStatus(kioskId)).thenReturn(expectedStatus);
+
+        ResponseEntity<String> result = orderController.getOrderStatus(kioskId);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertNotNull(result.getBody());
+        assertEquals(expectedStatus, result.getBody());
+        verify(orderService, times(1)).getOrderStatus(kioskId);
+
+
+    }
+
+    @Test
+    @DisplayName("주문 결제 처리 - 성공")
+    void updateOrderStatusToCompletedSuccess() throws Exception {
+        // given
+        String expectedStatus = "SUCCESS";
+        when(orderService.updateOrderStatusToCompleted(kioskId)).thenReturn(expectedStatus);
+
+        // when & then
+        ResponseEntity<String> result = orderController.updateOrderStatusToCompleted(kioskId);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertNotNull(result.getBody());
+        assertEquals(expectedStatus, result.getBody());
+        verify(orderService, times(1)).updateOrderStatusToCompleted(kioskId);
+
+    }
+
 }
