@@ -20,35 +20,24 @@ class NewOrderCommand:
 
         # Check if any item requires a temperature preference
         print("rq.items",request.order_items)
-        if request.order_items == [] or request.order_items[0].menuId == 0:
-            pass
-        else:
-            for prev_item in request.order_items:
-                order_option = OrderOption(
-                    shot=prev_item.option.get('shot'),
-                    sugar=prev_item.option.get('sugar')
-                )
-                order_items.append(OrderResponseItem(
-                    menuId=prev_item.menuId,
-                    count=prev_item.count,
-                    option=order_option
-                ))
+
 
         for item in order_data['items']:
+            print("item",item)
             # Validate required fields in each item
             if 'menuId' not in item or 'count' not in item or 'options' not in item:
                 raise HTTPException(status_code=400, detail="Missing fields in one or more order items")
             # Extract and process item details
             menu_id = item['menuId']
-            menu_name = item.get('menu_name')  # Default if menu_name is missing
+            # menu_name = item.get('menu_name')  # Default if menu_name is missing
             count = item['count']
             options = item['options']
             # temperature = item.get("temp")  # Default to "default" if temperature is not specified
-
+            print("item.get(temp)",item.get("temp"))
             # Check for "spike" temperature and add to issues if found
             if item.get("temp") == "spike":
-                print("spike")
-                check.append(menu_name)
+                print("spike",item.get('menu'))
+                check.append(item.get('menu'))
                 need_temp = 0
 
             # Create OrderOption instance for options
@@ -62,9 +51,24 @@ class NewOrderCommand:
                 count=count,
                 option=order_option
             ))
+        print("checker",check)
         print("order_items",order_items,type(need_temp))
         print("need_temp", need_temp, type(need_temp))
         # Build OrderResponse
+
+        if request.order_items == [] or request.order_items[0].menuId == 0:
+            pass
+        else:
+            for prev_item in request.order_items:
+                order_option = OrderOption(
+                    shot=prev_item.option.get('shot'),
+                    sugar=prev_item.option.get('sugar')
+                )
+                order_items.append(OrderResponseItem(
+                    menuId=prev_item.menuId,
+                    count=prev_item.count,
+                    option=order_option
+                ))
 
         if need_temp == 0:
             response_text = f"{check}의 온도를 확인해주세요"
