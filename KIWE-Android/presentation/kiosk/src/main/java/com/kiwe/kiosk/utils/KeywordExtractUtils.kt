@@ -3,13 +3,19 @@ package com.kiwe.kiosk.utils
 import android.util.Log
 
 enum class Sentiment {
-    POSITIVE, NEGATIVE, UNKNOWN
+    POSITIVE,
+    NEGATIVE,
+    UNKNOWN,
 }
 
 enum class OrderType {
-    PACKAGING, IN_STORE, UNKNOWN
+    PACKAGING,
+    IN_STORE,
+    UNKNOWN,
 }
+
 private const val TAG = "키워드 기반 추출"
+
 object KeywordExtractUtils {
     private val packagingKeywords = setOf("포장", "테이크", "가져", "들고", "싸주세")
     private val inStoreKeywords = setOf("매장", "여기서", "먹고")
@@ -36,28 +42,26 @@ object KeywordExtractUtils {
         return negativeKeywords.any { it in lowerCaseInput }
     }
 
-    fun detectSentiment(input: String): Sentiment {
-        return when {
+    fun detectSentiment(input: String): Sentiment =
+        when {
             positiveIntent(input) -> Sentiment.POSITIVE
             negativeIntent(input) -> Sentiment.NEGATIVE
             else -> Sentiment.UNKNOWN
         }
-    }
 
-    fun detectOrderType(input: String): OrderType {
-        return when {
+    fun detectOrderType(input: String): OrderType =
+        when {
             isPackagingIntent(input) -> OrderType.PACKAGING
             isInStoreIntent(input) -> OrderType.IN_STORE
             else -> OrderType.UNKNOWN
         }
-    }
 
     fun exampleForHereOrToGo() {
         val userInput = "커피 한 잔 포장해주세요"
         val extractResult = detectOrderType(userInput)
         when (extractResult) {
-            OrderType.PACKAGING ->  Log.d(TAG, "포장 요청 주문입니다.")
-            OrderType.IN_STORE ->  Log.d(TAG, "매장 요청 주문입니다.")
+            OrderType.PACKAGING -> Log.d(TAG, "포장 요청 주문입니다.")
+            OrderType.IN_STORE -> Log.d(TAG, "매장 요청 주문입니다.")
             OrderType.UNKNOWN -> Log.d(TAG, "다시 말씀해주세요.")
         }
     }

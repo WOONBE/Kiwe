@@ -40,36 +40,40 @@ class HomeActivity : ComponentActivity() {
             LaunchedEffect(state.tabIdx) {
                 when (state.tabIdx) {
                     0 -> {
-                        navController.navigate(HomeRoute.DashBoardScreen.route){
-                            popUpTo(HomeRoute.DashBoardScreen.route){
+                        navController.navigate(HomeRoute.DashBoardScreen.route) {
+                            popUpTo(HomeRoute.DashBoardScreen.route) {
                                 inclusive = true
                             }
                         }
                     }
+
                     1 -> {
-                        navController.navigate(HomeRoute.MenuManagementScreen.route){
-                            popUpTo(HomeRoute.MenuManagementScreen.route){
+                        navController.navigate(HomeRoute.MenuManagementScreen.route) {
+                            popUpTo(HomeRoute.MenuManagementScreen.route) {
                                 inclusive = true
                             }
                         }
                     }
+
                     2 -> {
-                        navController.navigate(HomeRoute.SalesOverviewScreen.route){
-                            popUpTo(HomeRoute.SalesOverviewScreen.route){
+                        navController.navigate(HomeRoute.SalesOverviewScreen.route) {
+                            popUpTo(HomeRoute.SalesOverviewScreen.route) {
                                 inclusive = true
                             }
                         }
                     }
+
                     3 -> {
-                        navController.navigate(HomeRoute.KioskManagementScreen.route){
-                            popUpTo(HomeRoute.KioskManagementScreen.route){
+                        navController.navigate(HomeRoute.KioskManagementScreen.route) {
+                            popUpTo(HomeRoute.KioskManagementScreen.route) {
                                 inclusive = true
                             }
                         }
                     }
+
                     4 -> {
-                        navController.navigate(HomeRoute.SettingScreen.route){
-                            popUpTo(HomeRoute.SettingScreen.route){
+                        navController.navigate(HomeRoute.SettingScreen.route) {
+                            popUpTo(HomeRoute.SettingScreen.route) {
                                 inclusive = true
                             }
                         }
@@ -90,6 +94,7 @@ class HomeActivity : ComponentActivity() {
 
                             HomeSideEffect.NavigateToDashBoardScreen -> {
                             }
+
                             else -> {}
                         }
                     }
