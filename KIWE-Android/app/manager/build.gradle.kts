@@ -37,4 +37,6 @@ dependencies {
     implementation(project(":presentation:manager"))
     implementation(project(":domain"))
     implementation(project(":data"))
+    // timber
+    implementation(libs.jakewharton.timber)
 }
