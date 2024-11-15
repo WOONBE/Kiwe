@@ -467,9 +467,9 @@ public class OrderService {
             .filter(Objects::nonNull) // null이 아닌 메뉴만 포함
             .collect(Collectors.toList());
 
-        if (menuResponses.isEmpty()) {
-            throw new BadRequestException(MENU_NOT_SALES);
-        }
+//        if (menuResponses.isEmpty()) {
+//            throw new BadRequestException(MENU_NOT_SALES);
+//        }
 
         return menuResponses;
     }
@@ -702,6 +702,33 @@ public class OrderService {
         }
 
         return topSoldMenusByAgeGroup;
+    }
+
+    public Map<YearMonth, Integer> getMonthlySalesForLastSixMonthsByMemberId(Integer memberId) {
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = endDate.minusMonths(6).withDayOfMonth(1).toLocalDate().atStartOfDay();
+
+        List<Object[]> salesData = orderRepository.findMonthlySalesByMemberIdForLastSixMonths(memberId, startDate, endDate);
+
+        // 결과를 YearMonth 키와 Integer 매출 값으로 매핑
+        Map<YearMonth, Integer> monthlySales = new HashMap<>();
+        for (Object[] data : salesData) {
+            int year = (int) data[0];
+            int month = (int) data[1];
+            int totalSales = ((Number) data[2]).intValue();
+
+            YearMonth yearMonth = YearMonth.of(year, month);
+            monthlySales.put(yearMonth, totalSales);
+        }
+
+        // 지난 6개월의 데이터가 없을 경우, 0으로 초기화
+        YearMonth currentMonth = YearMonth.now();
+        for (int i = 0; i < 6; i++) {
+            YearMonth month = currentMonth.minusMonths(i);
+            monthlySales.putIfAbsent(month, 0);
+        }
+
+        return monthlySales;
     }
 
     private String getAgeGroup(Integer age) {
