@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.kiwe.domain.model.MenuCategoryParam
 import com.kiwe.domain.model.OrderItem
 import com.kiwe.manager.R
@@ -39,10 +40,14 @@ import com.kiwe.manager.ui.component.DashBoardAnalytics
 import com.kiwe.manager.ui.component.DashBoardCard
 import com.kiwe.manager.ui.component.OrderItem
 import com.kiwe.manager.ui.theme.Typography
+import org.orbitmvi.orbit.compose.collectAsState
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashBoardScreen() {
+fun DashBoardScreen(viewModel: DashBoardViewModel = hiltViewModel()) {
+    val state = viewModel.collectAsState().value
+
     Column(
         modifier =
             Modifier
@@ -126,7 +131,7 @@ fun DashBoardScreen() {
                         modifier = Modifier.weight(1F),
                         R.drawable.sale,
                         "이번달 판매 매출",
-                        "₩ 8,454,500",
+                        "₩ ${String.format(Locale.getDefault(), "%,d원", state.lastMonthIncome)}",
                         R.drawable.increase,
                         R.color.dashboard_card_increase,
                         "12% 매출이 증가했습니다",
