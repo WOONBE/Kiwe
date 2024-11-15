@@ -1,9 +1,10 @@
 package com.kiwe.kiosk.ui.screen.main
 
-import androidx.compose.animation.core.animateFloatAsState
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,9 +36,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalConfiguration
@@ -48,6 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Dialog
+import coil.compose.rememberAsyncImagePainter
+import com.kiwe.domain.model.MenuCategoryParam
+import com.kiwe.kiosk.BuildConfig
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.login.LoginActivity
 import com.kiwe.kiosk.main.MainSideEffect
@@ -62,9 +68,9 @@ import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
-import com.kiwe.kiosk.ui.theme.KiweOrange1
 import com.kiwe.kiosk.ui.theme.KiweGray1
 import com.kiwe.kiosk.ui.theme.KiweGreen5
+import com.kiwe.kiosk.ui.theme.KiweOrange1
 import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.utils.MainEnum
 import kotlinx.coroutines.delay
@@ -96,6 +102,9 @@ fun ContainerScreen(
             Timber.tag(TAG).d("LaunchedEffect")
 //            viewModel.speakWithTTS("음성 도움을 받으시려면, '도와줘'라고 말씀해주세요", tts)
         }
+        if (state.page == 0) {
+            isShoppingCartDialogOpen = false
+        }
     }
 
     DisposableEffect(Unit) {
@@ -106,10 +115,12 @@ fun ContainerScreen(
     }
 
     LaunchedEffect(shoppingCartState.isVoiceOrderConfirm, shoppingCartState.shoppingCartItem) {
-        isShoppingCartDialogOpen = shoppingCartState.isVoiceOrderConfirm
-        delay(1000L)
-        isQueryStateBoxOpen = isShoppingCartDialogOpen
-        Timber.tag("ContainerScreen").d("LaunchedEffect $isQueryStateBoxOpen")
+        if (shoppingCartState.isVoiceOrderConfirm) {
+            isShoppingCartDialogOpen = true
+            delay(1000L)
+            isQueryStateBoxOpen = isShoppingCartDialogOpen
+            Timber.tag("ContainerScreen").d("LaunchedEffect $isQueryStateBoxOpen")
+        }
     }
 
     viewModel.collectSideEffect { sideEffect ->
@@ -139,10 +150,19 @@ fun ContainerScreen(
     }
 
     if (isShoppingCartDialogOpen) {
+        viewModel.openShoppingCart()
+        Timber
+            .tag("추천")
+            .d(
+                "${state.voiceShoppingCart}\n " +
+                    "${state.isOrderEndTrue} \n " +
+                    "${state.isOrderEndFalse}",
+            )
         ShoppingCartDialog(
             viewModel = shoppingCartViewModel,
             mainViewModel = viewModel,
             goOrderList = {
+                viewModel.closeShoppingCart()
                 isShoppingCartDialogOpen = false
                 if (state.voiceShoppingCart.isNotEmpty()) {
                     // 바로 다음 화면으로 보냄
@@ -152,6 +172,7 @@ fun ContainerScreen(
                 }
             },
             onClose = {
+                viewModel.closeShoppingCart()
                 isShoppingCartDialogOpen = false
                 shoppingCartViewModel.onConfirmVoiceOrder() // 음성주문 상태 날리는 코드
             },
@@ -166,13 +187,17 @@ fun ContainerScreen(
         )
     }
 
-    if (state.isOrderEndTrue || state.isOrderEndFalse) {
-        Timber.tag("ContainerScreenOrder").d("ordered end")
+    if (state.isOrderEndTrue || state.isOrderEndFalse) { // 계속 안해?
+        Timber.tag("추천").d("ordered end ${state.isOrderEndTrue}")
+        // 여기까지는 오는데 뭐가 문제일까
         isOrderListDialogOpen = false
         isQueryStateBoxOpen = false
         if (state.isOrderEndFalse) {
             viewModel.showSpeechScreen()
+        } else {
+            viewModel.closeSpeechScreen()
         }
+        viewModel.clearOrderEndState()
     }
 
     QueryStateBox(
@@ -182,6 +207,7 @@ fun ContainerScreen(
             isQueryStateBoxOpen = false
         },
         onNoClick = {
+            // 더 이상 주문하지 않겠다 -> 결제도와달라는 의미
             isQueryStateBoxOpen = false
             isShoppingCartDialogOpen = false
         },
@@ -191,6 +217,34 @@ fun ContainerScreen(
             viewModel.showSpeechScreen()
         },
     )
+
+    if (state.isAddCartTrue || state.isAddCartFalse) {
+        Timber.tag("ContainerScreenOrder").d("rc end")
+        if (state.isAddCartTrue) {
+            // 장바구니에 넣어줌
+            shoppingCartViewModel.onVoiceResult(state.voiceResult)
+            viewModel.clearVoiceRecord()
+            // 장바구니 오픈
+            viewModel.openShoppingCart()
+        }
+
+        if (state.isAddCartFalse) {
+            shoppingCartViewModel.onVoiceResult(state.voiceResult)
+            viewModel.clearVoiceRecord()
+        }
+        viewModel.clearRecommendHistory()
+    }
+
+    if (state.isRecommend.isNotEmpty()) {
+        RecommendStateBox(
+            recommendString = state.isRecommend,
+            recommendMenu = state.recommendMenu,
+            onClose = { viewModel.clearRecommendHistory() },
+            onYesClick = {
+                viewModel.clearRecommendHistory()
+            },
+        )
+    }
 
     if (isLogoutDialogOpen) {
         CustomPasswordInputDialog(
@@ -337,6 +391,103 @@ private fun ContainerScreen(
             }
         },
     )
+}
+
+@Composable
+fun RecommendStateBox(
+    recommendString: String,
+    recommendMenu: MenuCategoryParam,
+    onClose: () -> Unit,
+    onYesClick: () -> Unit = {}, // 바로 장바구니에 넣기
+) {
+    if (recommendString.isNotEmpty()) {
+        Dialog(onDismissRequest = {
+            onClose()
+        }) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            onClose()
+                        },
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "추천 메뉴 입니다",
+                        style = Typography.titleLarge.copy(color = Color.White),
+                    )
+                    Box(
+                        modifier =
+                            Modifier
+                                .padding(vertical = 12.dp)
+                                .size(80.dp)
+                                .clip(shape = RoundedCornerShape(10.dp)),
+                    ) {
+                        val imgUrl = "https://" + BuildConfig.BASE_IMAGE_URL + recommendMenu.imgPath
+                        Timber.tag("추천").d(imgUrl)
+                        Image(
+                            painter =
+                                rememberAsyncImagePainter(
+                                    model = imgUrl,
+                                ),
+                            contentScale = ContentScale.Crop,
+                            contentDescription = recommendString,
+                        )
+                    }
+                    Text(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        text = recommendMenu.name,
+                        style = Typography.titleMedium.copy(color = Color.White),
+                    )
+                    Text(
+                        text = "주문하시겠습니까?",
+                        style = Typography.titleMedium.copy(color = Color.White),
+                    )
+                    Text(
+                        text = "음성으로 하셔도 됩니다",
+                        style = Typography.titleMedium.copy(color = Color.White),
+                    )
+                    Row(modifier = Modifier.padding(top = 12.dp)) {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .background(color = KiweGray1, shape = RoundedCornerShape(20.dp))
+                                    .padding(8.dp)
+                                    .clickable {
+                                        onYesClick()
+                                        onClose()
+                                    },
+                        ) {
+                            Text(
+                                text = "네",
+                                modifier = Modifier.padding(8.dp),
+                                style = Typography.titleLarge.copy(color = Color.White),
+                            )
+                        }
+
+                        Box(
+                            modifier =
+                                Modifier
+                                    .padding(start = 12.dp)
+                                    .background(color = KiweGreen5, shape = RoundedCornerShape(20.dp))
+                                    .padding(8.dp)
+                                    .clickable {
+                                        onClose()
+                                    },
+                        ) {
+                            Text(
+                                text = "아니오",
+                                modifier = Modifier.padding(8.dp),
+                                style = Typography.titleLarge.copy(color = Color.White),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -578,5 +729,27 @@ fun ContainerScreenPreview() {
 fun QueryStateBoxPreview() {
     KIWEAndroidTheme {
         QueryStateBox(isQueryStateBoxOpen = true, page = 0, {})
+    }
+}
+
+@Composable
+@Preview
+fun RecommendStateBoxPreview() {
+    KIWEAndroidTheme {
+        RecommendStateBox(
+            recommendString = "추천 문구",
+            recommendMenu =
+                MenuCategoryParam(
+                    id = 3913,
+                    category = "taciti",
+                    categoryNumber = 3413,
+                    hotOrIce = "sumo",
+                    name = "Ralph Rios",
+                    price = 3282,
+                    description = "fabulas",
+                    imgPath = "lacinia",
+                ),
+            onClose = {},
+        )
     }
 }

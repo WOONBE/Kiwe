@@ -74,7 +74,10 @@ fun MainNavHost() {
                         enterTransition = { EnterTransition.None },
                     ) {
                         composable(route = MainRoute.AD.route) {
-                            AdScreen()
+                            AdScreen {
+                                // 광고화면으로 오면 mainViewModel 청소
+                                mainViewModel.resetMainViewModel()
+                            }
                         }
                         composable(route = MainRoute.INTRO.route) {
                             IntroScreen(

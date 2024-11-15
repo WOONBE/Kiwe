@@ -49,6 +49,9 @@ interface OrderModule {
     fun bindVoiceOrderUseCase(uc: VoiceOrderUseCaseImpl): VoiceOrderUseCase
 
     @Binds
+    fun bindVoiceRecommendUseCase(uc: VoiceRecommendUseCaseImpl): VoiceRecommendUseCase
+
+    @Binds
     fun bindGetLastMonthIncomeUseCase(uc: GetLastMonthIncomeUseCaseImpl): GetLastMonthIncomeUseCase
 
     @Binds
