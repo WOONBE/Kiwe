@@ -770,8 +770,9 @@ public class OrderService {
         // 멤버가 운영하는 키오스크 목록을 조회합니다.
         List<Kiosk> kiosks = kioskRepository.findByMemberId(memberId);
 
-        // 월별 주문 횟수를 저장할 Map
-        Map<YearMonth, Integer> monthlyOrderCount = new HashMap<>();
+        // 월별 주문 횟수를 저장할 Map (초기화: 모든 월은 0으로 설정)
+        Map<YearMonth, Integer> monthlyOrderCount = lastSixMonths.stream()
+            .collect(Collectors.toMap(month -> month, month -> 0));
 
         // 각 키오스크에 대해 6개월 동안의 주문 횟수를 계산합니다.
         for (Kiosk kiosk : kiosks) {
@@ -790,6 +791,39 @@ public class OrderService {
 
         return monthlyOrderCount;
     }
+
+//    @Transactional
+//    public Map<YearMonth, Integer> calculateOrderCountForLastSixMonthsByMemberId(Integer memberId) {
+//        YearMonth currentMonth = YearMonth.now();
+//
+//        // 6개월 전부터 현재까지의 6개월 동안 각 달을 구합니다.
+//        List<YearMonth> lastSixMonths = IntStream.range(0, 6)
+//            .mapToObj(currentMonth::minusMonths)
+//            .collect(Collectors.toList());
+//
+//        // 멤버가 운영하는 키오스크 목록을 조회합니다.
+//        List<Kiosk> kiosks = kioskRepository.findByMemberId(memberId);
+//
+//        // 월별 주문 횟수를 저장할 Map
+//        Map<YearMonth, Integer> monthlyOrderCount = new HashMap<>();
+//
+//        // 각 키오스크에 대해 6개월 동안의 주문 횟수를 계산합니다.
+//        for (Kiosk kiosk : kiosks) {
+//            for (YearMonth month : lastSixMonths) {
+//                LocalDateTime startOfMonth = month.atDay(1).atStartOfDay();
+//                LocalDateTime endOfMonth = month.atEndOfMonth().atTime(23, 59, 59);
+//
+//                // 키오스크별로 해당 월의 주문을 조회합니다.
+//                List<Order> orders = orderRepository.findByKioskIdAndOrderDateBetween(kiosk.getId(), startOfMonth, endOfMonth);
+//                int orderCount = orders.size();
+//
+//                // 월별 주문 횟수를 누적합니다.
+//                monthlyOrderCount.put(month, monthlyOrderCount.getOrDefault(month, 0) + orderCount);
+//            }
+//        }
+//
+//        return monthlyOrderCount;
+//    }
 
     private String getAgeGroup(Integer age) {
         if (age >= 10 && age < 20) {
