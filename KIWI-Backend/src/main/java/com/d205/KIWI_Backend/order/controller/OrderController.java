@@ -164,12 +164,22 @@ public class OrderController {
 
 
     @GetMapping("/order-count-last-month")
-    @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 총 주문 횟수", description = "로그인 된 멤버가 운영하는 키오스크의 총 주문 횟수을 리턴하는 API")
+    @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 한달 주문 횟수", description = "로그인 된 멤버가 운영하는 키오스크의 한달 주문 횟수을 리턴하는 API")
     public ResponseEntity<Integer> getOrderCountForLastMonth() {
         int orderCount = orderService.calculateOrderCountForLastMonthByMemberId();
 
         return ResponseEntity.ok(orderCount);
     }
+
+    @GetMapping("/order-count/last-six-months")
+    @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 6개월 별 주문 횟수", description = "특정 멤버가 운영하는 키오스크의 지난 6개월 동안의 주문 횟수를 월별로 리턴하는 API")
+    public ResponseEntity<Map<YearMonth, Integer>> getMonthlyOrderCount() {
+        Integer memberId = memberService.getCurrentMemberId();
+        Map<YearMonth, Integer> monthlyCounts = orderService.calculateOrderCountForLastSixMonthsByMemberId(memberId);
+        return ResponseEntity.ok(monthlyCounts);
+    }
+
+
 
     @GetMapping("/top-20-menu-sales")
     @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 판매량 별 메뉴 조회", description = "로그인 된 멤버가 운영하는 키오스크의 판매량 별 메뉴 조회하는 API")
