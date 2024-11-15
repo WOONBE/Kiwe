@@ -4,13 +4,15 @@ import com.kiwe.data.usecase.CancelPaymentUseCaseImpl
 import com.kiwe.data.usecase.ConfirmPaymentUseCaseImpl
 import com.kiwe.data.usecase.PostOrderUseCaseImpl
 import com.kiwe.data.usecase.VoiceOrderUseCaseImpl
-import com.kiwe.domain.usecase.VoiceOrderUseCase
+import com.kiwe.data.usecase.VoiceRecommendUseCaseImpl
 import com.kiwe.data.usecase.manager.order.CheckOrderStatusUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetKioskTotalOrdersLast6MonthsUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetKioskTotalOrdersLastMonthUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetLastMonthIncomeUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetOrderAllUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetOrderUseCaseImpl
+import com.kiwe.domain.usecase.VoiceOrderUseCase
+import com.kiwe.domain.usecase.VoiceRecommendUseCase
 import com.kiwe.domain.usecase.kiosk.CancelPaymentUseCase
 import com.kiwe.domain.usecase.kiosk.ConfirmPaymentUseCase
 import com.kiwe.domain.usecase.kiosk.PostOrderUseCase
@@ -39,6 +41,9 @@ interface OrderModule {
 
     @Binds
     fun bindVoiceOrderUseCase(uc: VoiceOrderUseCaseImpl): VoiceOrderUseCase
+
+    @Binds
+    fun bindVoiceRecommendUseCase(uc: VoiceRecommendUseCaseImpl): VoiceRecommendUseCase
 
     @Binds
     fun bindGetLastMonthIncomeUseCase(uc: GetLastMonthIncomeUseCaseImpl): GetLastMonthIncomeUseCase

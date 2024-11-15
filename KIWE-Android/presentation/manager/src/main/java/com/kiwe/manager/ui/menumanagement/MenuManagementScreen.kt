@@ -73,7 +73,11 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                 DashBoardAnalytics(
                     modifier = Modifier.weight(1F),
                     buttonModifier = Modifier.width(150.dp),
-                    onFirstDropdownMenuChanged = { category -> menuManagementViewModel.onChangeCategory(category) },
+                    onFirstDropdownMenuChanged = { category ->
+                        menuManagementViewModel.onChangeCategory(
+                            category,
+                        )
+                    },
                     dropDownMenuFirst =
                         listOf(
                             "전체",
@@ -133,15 +137,25 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                                             val uri = result.data?.data
                                             // uri를 통해 선택된 파일 처리
                                             uri?.let {
-                                                context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
-                                                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                                                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-                                                    cursor.moveToFirst()
+                                                context.contentResolver
+                                                    .query(
+                                                        it,
+                                                        null,
+                                                        null,
+                                                        null,
+                                                        null,
+                                                    )?.use { cursor ->
+                                                        val nameIndex =
+                                                            cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                                                        val sizeIndex =
+                                                            cursor.getColumnIndex(OpenableColumns.SIZE)
+                                                        cursor.moveToFirst()
 
-                                                    val fileName = cursor.getString(nameIndex)
-                                                    text = fileName
-                                                    val fileSize = cursor.getLong(sizeIndex)
-                                                }
+                                                        val fileName = cursor.getString(nameIndex)
+                                                        text = fileName
+                                                        val fileSize = cursor.getLong(sizeIndex)
+                                                        fileSize // TODO
+                                                    }
                                             }
                                         }
                                     Text(
@@ -290,7 +304,6 @@ fun MenuItem(
             text = String.format(Locale.getDefault(), "%,d원", item.price),
         )
         Row {
-
             Button(
                 onClick = { },
             ) {

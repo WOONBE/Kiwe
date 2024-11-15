@@ -2,13 +2,19 @@ package com.kiwe.kiosk.main
 
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.viewModelScope
+import com.kiwe.domain.model.AnswerType
 import com.kiwe.domain.model.Category
+import com.kiwe.domain.model.MenuCategoryParam
+import com.kiwe.domain.model.Option
 import com.kiwe.domain.model.OrderList
 import com.kiwe.domain.model.VoiceBody
 import com.kiwe.domain.model.VoiceOrderRequest
+import com.kiwe.domain.model.VoiceRecommendRequest
 import com.kiwe.domain.usecase.VoiceOrderUseCase
+import com.kiwe.domain.usecase.VoiceRecommendUseCase
 import com.kiwe.domain.usecase.kiosk.datasource.ClearAllDataUseCase
 import com.kiwe.domain.usecase.manager.kiosk.SignOutKioskUseCase
+import com.kiwe.domain.usecase.manager.menu.GetMenuByIdUseCase
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
@@ -19,6 +25,7 @@ import com.kiwe.kiosk.ui.screen.utils.menuRegex
 import com.kiwe.kiosk.ui.screen.utils.noRegex
 import com.kiwe.kiosk.ui.screen.utils.orderRegex
 import com.kiwe.kiosk.ui.screen.utils.payRegex
+import com.kiwe.kiosk.ui.screen.utils.recommendRegex
 import com.kiwe.kiosk.ui.screen.utils.temperatureRegex
 import com.kiwe.kiosk.ui.screen.utils.yesRegex
 import com.kiwe.kiosk.utils.MainEnum
@@ -39,6 +46,8 @@ class MainViewModel
     constructor(
         private val speechRecognizerManager: SpeechRecognizerManager,
         private val voiceOrderUseCase: VoiceOrderUseCase,
+        private val voiceRecommendUseCase: VoiceRecommendUseCase,
+        private val getMenuByIdUseCase: GetMenuByIdUseCase,
         private val signOutKioskUseCase: SignOutKioskUseCase,
         private val clearAllDataUseCase: ClearAllDataUseCase,
     ) : BaseViewModel<MainState, MainSideEffect>(MainState()),
@@ -91,6 +100,7 @@ class MainViewModel
                     }
                 } else {
                     onProcessResult(resultText)
+                    onRecommendProcess(resultText)
                 }
             }
         }
@@ -116,6 +126,7 @@ class MainViewModel
                     state.copy(
                         tempOrder = "",
                         isTemperatureEmpty = false,
+                        isRecommend = "",
                         voiceResult =
                             VoiceBody(
                                 category = 0,
@@ -140,12 +151,33 @@ class MainViewModel
                 }
             }
 
+        fun closeSpeechScreen() =
+            intent {
+                reduce {
+                    state.copy(
+                        isScreenShowing = false,
+                    )
+                }
+            }
+
         fun clearOrderEndState() {
             intent {
                 reduce {
                     state.copy(
                         isOrderEndTrue = false,
                         isOrderEndFalse = false,
+                    )
+                }
+            }
+        }
+
+        fun clearRecommendHistory() {
+            intent {
+                reduce {
+                    state.copy(
+                        isRecommend = "",
+                        isAddCartFalse = false,
+                        isAddCartTrue = false,
                     )
                 }
             }
@@ -158,7 +190,6 @@ class MainViewModel
                 if (state.voiceShoppingCart.isNotEmpty()) {
                     if (noRegex.containsMatchIn(result)) {
                         // 부정
-                        Timber.tag("MainViewModel").d(result)
                         reduce { state.copy(isOrderEndTrue = true) }
                     }
                     if (yesRegex.containsMatchIn(result)) {
@@ -170,6 +201,46 @@ class MainViewModel
                     }
                 }
             }
+
+        private fun onRecommendProcess(result: String) {
+            intent {
+                if (state.isRecommend.isNotEmpty()) {
+                    if (noRegex.containsMatchIn(result)) {
+                        reduce {
+                            state.copy(
+                                isAddCartFalse = true,
+                            )
+                        }
+                    }
+                    if (yesRegex.containsMatchIn(result)) {
+                        val recommendVoiceBody =
+                            VoiceBody(
+                                category = AnswerType.SUGGESTION.value,
+                                need_temp = 1,
+                                order =
+                                    state.voiceShoppingCart +
+                                        listOf(
+                                            OrderList(
+                                                state.recommendMenu.id,
+                                                1,
+                                                Option(shot = 0, sugar = 0),
+                                            ),
+                                        ),
+                                message = "",
+                                response = "주문을 추가하였습니다",
+                            )
+                        Timber.tag("추천").d("$recommendVoiceBody")
+                        reduce {
+                            state.copy(
+                                isAddCartTrue = true,
+                                voiceResult = recommendVoiceBody,
+                                voiceShoppingCart = recommendVoiceBody.order,
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         fun clearPaymentProcess() {
             intent {
@@ -269,6 +340,33 @@ class MainViewModel
                             }
                         }
                     }
+                } else if (recommendRegex.containsMatchIn(result)) { // 도와줘 이후에 이용가능
+                    voiceRecommendUseCase(
+                        VoiceRecommendRequest(
+                            age = 20,
+                            sentence = result,
+                        ),
+                    ).onSuccess { response ->
+                        val numberListRegex = "\\[(.*?)]".toRegex()
+                        val numberListMatch = numberListRegex.find(response.message)
+                        val menuList =
+                            numberListMatch
+                                ?.groups
+                                ?.get(1)
+                                ?.value
+                                ?.split(", ")
+                                ?.map { it.toInt() }
+                        val requestMenuId = menuList!!.shuffled().first()
+                        val menu = getMenuByIdUseCase(requestMenuId).getOrThrow()
+                        Timber.tag("추천").d("$menu")
+                        reduce {
+                            state.copy(
+                                isScreenShowing = false,
+                                isRecommend = menu.description,
+                                recommendMenu = menu,
+                            )
+                        }
+                    }
                 } else {
                     reduce {
                         state.copy(
@@ -360,7 +458,7 @@ class MainViewModel
             timerJob?.cancel()
             timerJob =
                 viewModelScope.launch {
-                    var timeLeft = 15L // 5분을 초로 변환 // TODO : 5분
+                    var timeLeft = 60L // 5분을 초로 변환 // TODO : 5분
                     while (timeLeft > 0) {
                         intent {
                             reduce { state.copy(remainingTime = timeLeft) }
@@ -431,6 +529,8 @@ data class MainState(
     val isTemperatureEmpty: Boolean = false, // 온도가 선택되지않았을 때
     val isOrderEndTrue: Boolean = false, // 장바구니에서 더이상 메뉴를 담지 않을 때
     val isOrderEndFalse: Boolean = false, // 장바구니에서 계속 담기
+    val isAddCartTrue: Boolean = false, // 장바구니에 추가
+    val isAddCartFalse: Boolean = false, // 장바구니에 추가 안함
     val isPayment: Boolean = false, // 포장인지 매장인지 고를 때
     val voiceShoppingCart: List<OrderList> = mutableListOf(),
     val category: List<Category> = emptyList(),
@@ -446,6 +546,17 @@ data class MainState(
             order = emptyList(),
             message = "",
             response = "",
+        ),
+    val recommendMenu: MenuCategoryParam =
+        MenuCategoryParam(
+            id = 0,
+            category = "",
+            categoryNumber = 0,
+            hotOrIce = "",
+            name = "",
+            price = 0,
+            description = "",
+            imgPath = "",
         ),
 ) : BaseState
 
