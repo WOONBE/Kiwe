@@ -58,6 +58,7 @@ fun OrderScreen(
     var orderDialogMenuId by remember { mutableIntStateOf(0) }
     var orderDialogMenuImgPath by remember { mutableStateOf("") }
     var orderDialogMenuTitle by remember { mutableStateOf("") }
+    var orderDialogMenuDescription by remember { mutableStateOf("") }
     var orderDialogMenuCost by remember { mutableIntStateOf(0) }
     var targetOffset by remember { mutableStateOf(Offset.Zero) }
 
@@ -85,7 +86,7 @@ fun OrderScreen(
                 x = getShoppingCartPosition().x,
                 y = getShoppingCartPosition().y,
             ),
-            targetOffset
+            targetOffset,
         )
     }
 
@@ -122,6 +123,7 @@ fun OrderScreen(
                     orderDialogMenuId,
                     orderDialogMenuImgPath,
                     orderDialogMenuTitle,
+                    orderDialogMenuDescription,
                     orderDialogMenuCost,
                 )
             },
@@ -132,6 +134,7 @@ fun OrderScreen(
                 orderDialogMenuId,
                 orderDialogMenuImgPath,
                 orderDialogMenuTitle,
+                orderDialogMenuDescription,
                 orderDialogMenuCost,
             )
         } else {
@@ -173,10 +176,11 @@ fun OrderScreen(
             ) { index ->
                 OrderListScreen(
                     orderItemList = categoryStatus.menuList[index].chunked(4),
-                    onItemClick = { id, imgPath, title, cost, offset ->
+                    onItemClick = { id, imgPath, title, description,  cost, offset ->
                         orderDialogMenuId = id
                         orderDialogMenuImgPath = imgPath
                         orderDialogMenuTitle = title
+                        orderDialogMenuDescription = description
                         orderDialogMenuCost = cost
                         isOrderOptionDialogOpen = true
                         targetOffset = offset
@@ -251,7 +255,7 @@ fun OrderScreen(
 @Composable
 private fun OrderListScreen(
     orderItemList: List<List<MenuCategoryParam>>,
-    onItemClick: (Int, String, String, Int, Offset) -> Unit,
+    onItemClick: (Int, String, String, String, Int, Offset) -> Unit,
 ) {
     val firstRowList = orderItemList[0]
     val secondRowList =

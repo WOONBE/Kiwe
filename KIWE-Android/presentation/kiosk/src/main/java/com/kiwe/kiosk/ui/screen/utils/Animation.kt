@@ -3,6 +3,7 @@ package com.kiwe.kiosk.ui.screen.utils
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.kiwe.kiosk.BuildConfig.BASE_IMAGE_URL
+import com.kiwe.kiosk.ui.theme.KiweWhite1
 import kotlinx.coroutines.launch
 
 @Composable
@@ -22,6 +24,7 @@ fun Animation(
     imageUrl: String,
     target: Offset,
     startOffset: Offset,
+    durationMills: Int = 1500,
 ) {
     val scale = remember { Animatable(1f) }
     val offsetX = remember { Animatable(startOffset.x) }
@@ -32,7 +35,7 @@ fun Animation(
                 targetValue = 0.2f,
                 animationSpec =
                     tween(
-                        durationMillis = 2000,
+                        durationMillis = durationMills,
                         easing = EaseIn,
                     ),
             )
@@ -42,7 +45,7 @@ fun Animation(
                 target.x,
                 animationSpec =
                     tween(
-                        durationMillis = 2000,
+                        durationMillis = durationMills,
                         easing = EaseIn,
                     ),
             ) // 이동할 X 좌표 (대략적인 예시)
@@ -53,7 +56,7 @@ fun Animation(
                 target.y,
                 animationSpec =
                     tween(
-                        durationMillis = 2000,
+                        durationMillis = durationMills,
                         easing = EaseIn,
                     ),
             ) // 이동할 Y 좌표 (대략적인 예시)
@@ -66,12 +69,12 @@ fun Animation(
         modifier =
             Modifier
                 .size(100.dp)
-                .zIndex(10F)
                 .graphicsLayer(
                     scaleX = scale.value,
                     scaleY = scale.value,
                     translationX = offsetX.value,
                     translationY = offsetY.value,
-                ),
+                ).background(KiweWhite1)
+                .zIndex(10F),
     )
 }
