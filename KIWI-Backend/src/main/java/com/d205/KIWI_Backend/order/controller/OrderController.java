@@ -159,25 +159,14 @@ public class OrderController {
         return ResponseEntity.ok(totalPrice);
     }
 
-//    @GetMapping("/monthly-order-counts")
-//    @Operation(summary = "로그인 된 멤버의 모든 키오스크의 한달 간 총 수익", description = "특정 멤버가 운영하는 모든 키오스크의 한달 간 총 수익을 리턴하는 API")
-//    public ResponseEntity<Map<YearMonth, Integer>> getSixMonthlyOrderCounts() {
-//        Map<YearMonth, Integer> monthlyOrderCounts = orderService.calculateMonthlyOrderCountForLastSixMonthsByMemberId();
+
+//    @GetMapping("/order-count-last-month")
+//    @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 총 주문 횟수", description = "로그인 된 멤버가 운영하는 키오스크의 총 주문 횟수을 리턴하는 API")
+//    public ResponseEntity<Integer> getOrderCountForLastMonth() {
+//        int orderCount = orderService.calculateOrderCountForLastMonthByMemberId();
 //
-//        if (monthlyOrderCounts.isEmpty()) {
-//            return ResponseEntity.noContent().build();
-//        }
-//
-//        return ResponseEntity.ok(monthlyOrderCounts);
+//        return ResponseEntity.ok(orderCount);
 //    }
-
-    @GetMapping("/order-count-last-month")
-    @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 총 주문 횟수", description = "로그인 된 멤버가 운영하는 키오스크의 총 주문 횟수을 리턴하는 API")
-    public ResponseEntity<Integer> getOrderCountForLastMonth() {
-        int orderCount = orderService.calculateOrderCountForLastMonthByMemberId();
-
-        return ResponseEntity.ok(orderCount);
-    }
 
     @GetMapping("/top-20-menu-sales")
     @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 판매량 별 메뉴 조회", description = "로그인 된 멤버가 운영하는 키오스크의 판매량 별 메뉴 조회하는 API")
