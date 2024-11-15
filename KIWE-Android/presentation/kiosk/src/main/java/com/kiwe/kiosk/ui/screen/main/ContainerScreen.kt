@@ -145,11 +145,19 @@ fun ContainerScreen(
     }
 
     if (isShoppingCartDialogOpen) {
-        Timber.tag("추천").d("${state.voiceShoppingCart}")
+        viewModel.openShoppingCart()
+        Timber
+            .tag("추천")
+            .d(
+                "${state.voiceShoppingCart}\n " +
+                    "${state.isOrderEndTrue} \n " +
+                    "${state.isOrderEndFalse}",
+            )
         ShoppingCartDialog(
             viewModel = shoppingCartViewModel,
             mainViewModel = viewModel,
             goOrderList = {
+                viewModel.closeShoppingCart()
                 isShoppingCartDialogOpen = false
                 if (state.voiceShoppingCart.isNotEmpty()) {
                     // 바로 다음 화면으로 보냄
@@ -159,6 +167,7 @@ fun ContainerScreen(
                 }
             },
             onClose = {
+                viewModel.closeShoppingCart()
                 isShoppingCartDialogOpen = false
                 shoppingCartViewModel.onConfirmVoiceOrder() // 음성주문 상태 날리는 코드
             },
@@ -174,7 +183,7 @@ fun ContainerScreen(
     }
 
     if (state.isOrderEndTrue || state.isOrderEndFalse) { // 계속 안해?
-        Timber.tag("추천").d("ordered end")
+        Timber.tag("추천").d("ordered end ${state.isOrderEndTrue}")
         // 여기까지는 오는데 뭐가 문제일까
         isOrderListDialogOpen = false
         isQueryStateBoxOpen = false
@@ -183,6 +192,7 @@ fun ContainerScreen(
         } else {
             viewModel.closeSpeechScreen()
         }
+        viewModel.clearOrderEndState()
     }
 
     QueryStateBox(
@@ -192,6 +202,7 @@ fun ContainerScreen(
             isQueryStateBoxOpen = false
         },
         onNoClick = {
+            // 더 이상 주문하지 않겠다 -> 결제도와달라는 의미
             isQueryStateBoxOpen = false
             isShoppingCartDialogOpen = false
         },
@@ -209,6 +220,12 @@ fun ContainerScreen(
             shoppingCartViewModel.onVoiceResult(state.voiceResult)
             viewModel.clearVoiceRecord()
             // 장바구니 오픈
+            viewModel.openShoppingCart()
+        }
+
+        if (state.isAddCartFalse) {
+            shoppingCartViewModel.onVoiceResult(state.voiceResult)
+            viewModel.clearVoiceRecord()
         }
         viewModel.clearRecommendHistory()
     }

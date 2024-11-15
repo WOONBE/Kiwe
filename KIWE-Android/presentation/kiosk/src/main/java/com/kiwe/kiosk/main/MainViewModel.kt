@@ -92,15 +92,21 @@ class MainViewModel
             val resultText = results.firstOrNull() ?: ""
             intent {
                 Timber.tag("MainViewModel").d("Result: $resultText 하고 ${state.isScreenShowing}")
-                if (state.isScreenShowing) {
+                if (state.isScreenShowing) { // SpeechScreen여부
                     onSpeechResult(resultText)
                 } else if (helpPopupRegex.containsMatchIn(resultText)) {
                     reduce {
                         state.copy(isScreenShowing = true)
                     }
                 } else {
-                    onProcessResult(resultText)
-                    onRecommendProcess(resultText)
+                    // 여기서 로직 문제가 생겼음
+                    Timber.tag("추천췍").d("$resultText  ${state.isCartOpen}")
+                    if (state.isCartOpen) {
+                        onProcessResult(resultText)
+                    } else {
+                        onPayProcess(resultText)
+                        onRecommendProcess(resultText)
+                    }
                 }
             }
         }
@@ -135,8 +141,7 @@ class MainViewModel
                                 message = "",
                                 response = "",
                             ),
-                        isOrderEndTrue = false,
-                        isOrderEndFalse = false,
+                        isScreenShowing = false,
 //                        voiceShoppingCart = emptyList() // 어디에 넣을지 생각하자
                     )
                 }
@@ -183,6 +188,24 @@ class MainViewModel
             }
         }
 
+        fun openShoppingCart() =
+            intent {
+                reduce {
+                    state.copy(
+                        isCartOpen = true, // 기본값은 state
+                    )
+                }
+            }
+
+        fun closeShoppingCart() =
+            intent {
+                reduce {
+                    state.copy(
+                        isCartOpen = false, // 기본값은 state
+                    )
+                }
+            }
+
         private fun onProcessResult(result: String) =
             intent {
                 // 음성 주문을 했고, 장바구니 카트에 담겨있다면
@@ -196,11 +219,16 @@ class MainViewModel
                         // 긍정
                         reduce { state.copy(isOrderEndFalse = true) }
                     }
-                    if (state.page == 2 && payRegex.containsMatchIn(result)) {
-                        reduce { state.copy(isPayment = true) }
-                    }
                 }
             }
+
+        private fun onPayProcess(result: String) {
+            intent {
+                if (state.page == 2 && payRegex.containsMatchIn(result)) {
+                    reduce { state.copy(isPayment = true) }
+                }
+            }
+        }
 
         private fun onRecommendProcess(result: String) {
             intent {
@@ -209,6 +237,7 @@ class MainViewModel
                         reduce {
                             state.copy(
                                 isAddCartFalse = true,
+                                isRecommend = "",
                             )
                         }
                     }
@@ -532,6 +561,7 @@ data class MainState(
     val isAddCartTrue: Boolean = false, // 장바구니에 추가
     val isAddCartFalse: Boolean = false, // 장바구니에 추가 안함
     val isPayment: Boolean = false, // 포장인지 매장인지 고를 때
+    val isCartOpen: Boolean = false,
     val voiceShoppingCart: List<OrderList> = mutableListOf(),
     val category: List<Category> = emptyList(),
     val recognizedText: String = "",
