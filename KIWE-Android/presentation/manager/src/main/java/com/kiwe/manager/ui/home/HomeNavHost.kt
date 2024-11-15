@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.kiwe.manager.ui.dashboard.DashBoardScreen
 import com.kiwe.manager.ui.menumanagement.MenuManagementScreen
+import com.kiwe.manager.ui.salesoverview.SalesOverviewScreen
 
 @Composable
 fun HomeNavHost(navController: NavHostController) {
@@ -48,7 +49,7 @@ fun HomeNavHost(navController: NavHostController) {
         }
 
         composable(route = HomeRoute.SalesOverviewScreen.route) {
-//            SalesOverviewScreen(
+            SalesOverviewScreen()
 //                onNavigateToLoginScreen = {
 //                    navController.navigate(
 //                        route = LoginRoute.LoginScreen.name,
