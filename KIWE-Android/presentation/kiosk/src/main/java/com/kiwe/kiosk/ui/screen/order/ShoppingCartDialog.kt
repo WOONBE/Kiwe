@@ -214,7 +214,10 @@ private fun ShoppingCartDialog(
                         AsyncImage(
                             model = "https://" + BASE_IMAGE_URL + shoppingCartItemList[it].menuImgPath,
                             contentDescription = "메뉴 이미지 주소",
-                            modifier = Modifier.weight(1F).aspectRatio(1F),
+                            modifier =
+                                Modifier
+                                    .weight(1F)
+                                    .aspectRatio(1F),
                         )
                         ShoppingCartDataInfo(
                             shoppingCartItemList[it],
@@ -276,28 +279,7 @@ private fun ShoppingCartDataInfo(
             text =
                 buildAnnotatedString {
                     item.menuRadioOption.onEachIndexed { index, entry ->
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    fontFamily = FontFamily(Font(R.font.pretendard_regular)),
-                                    fontSize = 16.sp,
-                                    letterSpacing = letterSpacing,
-                                ),
-                        ) {
-                            append(entry.key + ":")
-                        }
-
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    fontFamily = FontFamily(Font(R.font.pretendard_semibold)),
-                                    fontSize = 16.sp,
-                                    letterSpacing = letterSpacing,
-                                ),
-                        ) {
-                            append(entry.value.first)
-                        }
-                        if (index != item.menuRadioOption.size - 1) {
+                        if (entry.value.first != "없음") {
                             withStyle(
                                 style =
                                     SpanStyle(
@@ -306,7 +288,30 @@ private fun ShoppingCartDataInfo(
                                         letterSpacing = letterSpacing,
                                     ),
                             ) {
-                                append(" | ")
+                                append(entry.key + ":")
+                            }
+
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        fontFamily = FontFamily(Font(R.font.pretendard_semibold)),
+                                        fontSize = 16.sp,
+                                        letterSpacing = letterSpacing,
+                                    ),
+                            ) {
+                                append(entry.value.first)
+                            }
+                            if (index != item.menuRadioOption.size - 1) {
+                                withStyle(
+                                    style =
+                                        SpanStyle(
+                                            fontFamily = FontFamily(Font(R.font.pretendard_regular)),
+                                            fontSize = 16.sp,
+                                            letterSpacing = letterSpacing,
+                                        ),
+                                ) {
+                                    append(" | ")
+                                }
                             }
                         }
                     }
