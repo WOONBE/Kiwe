@@ -1,5 +1,6 @@
 package com.d205.KIWI_Backend.order.service;
 
+import static com.d205.KIWI_Backend.global.exception.ExceptionCode.MENU_NOT_SALES;
 import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_KIOSK_ID;
 import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_ORDER;
 
@@ -465,6 +466,10 @@ public class OrderService {
             })
             .filter(Objects::nonNull) // null이 아닌 메뉴만 포함
             .collect(Collectors.toList());
+
+        if (menuResponses.isEmpty()) {
+            throw new BadRequestException(MENU_NOT_SALES);
+        }
 
         return menuResponses;
     }
