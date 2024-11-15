@@ -487,7 +487,7 @@ class MainViewModel
             timerJob?.cancel()
             timerJob =
                 viewModelScope.launch {
-                    var timeLeft = 60L // 5분을 초로 변환 // TODO : 5분
+                    var timeLeft = 180L // 5분을 초로 변환 // TODO : 5분
                     while (timeLeft > 0) {
                         intent {
                             reduce { state.copy(remainingTime = timeLeft) }
@@ -547,6 +547,53 @@ class MainViewModel
                     postSideEffect(MainSideEffect.Toast(it.message ?: "알수 없는 에러"))
                 }
             }
+
+        fun resetMainViewModel() {
+            intent {
+                reduce {
+                    state.copy(
+                        isRecommend = "",
+                        isAddCartFalse = false,
+                        isAddCartTrue = false,
+                        isPayment = false,
+                        isScreenShowing = false,
+                        voiceShoppingCart = emptyList(),
+                        shouldShowRetryMessage = false,
+                        recognizedText = "",
+                        tempOrder = "",
+                        voiceResult =
+                            VoiceBody(
+                                category = 0,
+                                need_temp = 1,
+                                order = emptyList(),
+                                message = "",
+                                response = "",
+                            ),
+                        isCartOpen = false,
+                        isOrderEndTrue = false,
+                        isOrderEndFalse = false,
+                        isTemperatureEmpty = false,
+                        gazePoint = null,
+                        remainingTime = 0,
+                        isExistPerson = false,
+                        page = 0,
+                        mode = MainEnum.KioskMode.ASSIST,
+                        category = emptyList(),
+                        recommendMenu =
+                            MenuCategoryParam(
+                                id = 0,
+                                category = "",
+                                categoryNumber = 0,
+                                hotOrIce = "",
+                                name = "",
+                                price = 0,
+                                description = "",
+                                imgPath = "",
+                            ),
+                    )
+                }
+            }
+        }
     }
 
 data class MainState(

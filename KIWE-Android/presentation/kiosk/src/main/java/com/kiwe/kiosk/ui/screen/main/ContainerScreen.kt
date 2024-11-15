@@ -102,6 +102,9 @@ fun ContainerScreen(
             Timber.tag(TAG).d("LaunchedEffect")
 //            viewModel.speakWithTTS("음성 도움을 받으시려면, '도와줘'라고 말씀해주세요", tts)
         }
+        if (state.page == 0) {
+            isShoppingCartDialogOpen = false
+        }
     }
 
     DisposableEffect(Unit) {

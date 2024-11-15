@@ -20,7 +20,7 @@ import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun AdScreen() {
+fun AdScreen(resetMainViewModel: () -> Unit = {}) {
     val imageResIds =
         listOf(
             R.drawable.img_ad_a,
@@ -31,6 +31,9 @@ fun AdScreen() {
         )
 
     var currentPage by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        resetMainViewModel()
+    }
 
     LaunchedEffect(key1 = currentPage) {
         delay(5000L) // 5초 대기
