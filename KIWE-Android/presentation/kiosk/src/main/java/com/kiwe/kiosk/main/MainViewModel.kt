@@ -179,7 +179,7 @@ class MainViewModel
             }
         }
 
-        fun onSpeechResult(result: String) =
+        private fun onSpeechResult(result: String) =
             intent {
                 if (state.tempOrder.isNotEmpty() && state.isTemperatureEmpty) { // 온도 선택을 안한 경우
                     // 저장된 문장이 있다는 것은 진행중인 음성 주문이 있다는 것
@@ -427,6 +427,7 @@ data class MainState(
     val mode: MainEnum.KioskMode = MainEnum.KioskMode.ASSIST,
     val isScreenShowing: Boolean = false,
     val isExistPerson: Boolean = false,
+    val isRecommend: String = "", // 추천 문장 유무 -> 이걸 보여줄 거라서 String으로 받음
     val isTemperatureEmpty: Boolean = false, // 온도가 선택되지않았을 때
     val isOrderEndTrue: Boolean = false, // 장바구니에서 더이상 메뉴를 담지 않을 때
     val isOrderEndFalse: Boolean = false, // 장바구니에서 계속 담기

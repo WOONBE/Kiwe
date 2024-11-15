@@ -134,6 +134,7 @@ fun ContainerScreen(
             }
 
             MainSideEffect.NavigateToNextScreen -> TODO()
+            else -> {}
         }
     }
 
@@ -260,7 +261,6 @@ private fun ContainerScreen(
                             )
                         }
                     }
-                    StepIndicator(page)
                     Box(modifier = Modifier, contentAlignment = Alignment.Center) {
                         AnimatedImageSwitcher(80.dp, onLogoutRequested = onLogoutRequested)
                         VoiceIntro()

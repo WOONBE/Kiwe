@@ -140,3 +140,5 @@ val payCommands =
     listOf("포장", "테이크", "가져", "들고", "싸주세", "매장", "여기서", "먹고")
 val payPattern = payCommands.joinToString("|") { "(?:$it)" }
 val payRegex = Regex(payPattern)
+
+val recommendRegex = Regex("추천|좋은거|뭐 없나|뭐 있나요|있나요|추천해")
