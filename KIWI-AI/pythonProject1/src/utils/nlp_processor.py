@@ -172,20 +172,23 @@ class NLPProcessor:
         items = []
         quantity = self.extract_quantity(sentence)  # Extract the total quantity of items
         remaining_sentence = sentence
+        flag = True
+        while flag:
+            try:
+                # Each iteration extracts one order (with its options)
+                menu_name, menuId, tmp, remaining_sentence = self.extract_menu_item_and_options(remaining_sentence)
 
-        for _ in range(quantity):
-            # Each iteration extracts one order (with its options)
-            menu_name, menuId, tmp, remaining_sentence = self.extract_menu_item_and_options(remaining_sentence)
-
-            numbers = self.extract_quantity(remaining_sentence)
-            options = self.extract_options_for_each_item(remaining_sentence)
-            items.append({
-                "menuId": menuId,
-                "menu_name": menu_name,
-                "temp": tmp,
-                "count": numbers,  # As we're processing one item at a time
-                "options": options
-            })
+                numbers = self.extract_quantity(remaining_sentence)
+                options = self.extract_options_for_each_item(remaining_sentence)
+                items.append({
+                    "menuId": menuId,
+                    "menu_name": menu_name,
+                    "temp": tmp,
+                    "count": numbers,  # As we're processing one item at a time
+                    "options": options
+                })
+            except:
+                flag = False
 
         return items
 
@@ -324,41 +327,3 @@ class NLPProcessor:
                 menus.append({"menu_name":menu_info['menu_name'],"menu_desc":menu_info['menu_desc']})
         print("menu_list + desc_list",menus)
         return menus
-
-
-    # def extract_menu_item_and_options(self, sentence):
-    #     """Extract the menu item, options, and temperature preference."""
-    #
-    #     for menu_id, menu_info in self.menu_data.items():
-    #         # Use regular expression to find menu_name as a whole word in the sentence
-    #         pattern = r'\b' + re.escape(menu_info['menu_name']) + r'\b'
-    #         match = re.search(pattern, sentence)
-    #
-    #         if match:
-    #             # Remove the matched menu name from the sentence to process remaining words
-    #             sentence = sentence.replace(menu_info['menu_name'], '')
-    #
-    #             # Extract category and temperature
-    #             category = menu_info["menu_category"]
-    #             temperature, sentence = self.extract_temperature(sentence)
-    #
-    #             # Determine if menu_id can be found with just the name
-    #             if category in self.special_categories:
-    #                 menu_id = menu_info["menu_id"]  # Fetch by name only
-    #             else:
-    #                 print("path, coffee")
-    #                 if temperature == "default":
-    #                     print("no temp")
-    #                     temperature = "spike"
-    #                     menu_id = menu_info["menu_id"]
-    #                     return menu_info['menu_name'], menu_id, temperature, sentence
-    #                 # Find menu_id with additional temperature filtering
-    #                 menu_id = self.find_menu_id_with_temp(menu_info['menu_name'], temperature)
-    #             print("menu_id", menu_id)
-    #             # If menu_id is still not found, raise an error
-    #             if not menu_id:
-    #                 raise HTTPException(status_code=400, detail="No matching menu item found with specified details.")
-    #
-    #             return menu_info['menu_name'], menu_id, temperature, sentence
-    #
-    #     raise HTTPException(status_code=400, detail="No matching menu item found in the sentence.")
