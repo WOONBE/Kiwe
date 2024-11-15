@@ -1,8 +1,8 @@
 package com.kiwe.kiosk.ui.screen.main
 
-import androidx.compose.animation.core.animateFloatAsState
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,6 +42,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontVariation.width
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -62,9 +63,9 @@ import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
-import com.kiwe.kiosk.ui.theme.KiweOrange1
 import com.kiwe.kiosk.ui.theme.KiweGray1
 import com.kiwe.kiosk.ui.theme.KiweGreen5
+import com.kiwe.kiosk.ui.theme.KiweOrange1
 import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.utils.MainEnum
 import kotlinx.coroutines.delay
@@ -290,8 +291,8 @@ private fun ContainerScreen(
                 ) {
                     ImageButton(
                         modifier = Modifier.weight(1F),
-                        "이전으로",
-                        R.drawable.arrow_square_left,
+                        "직원호출",
+                        R.drawable.ic_employee_call,
                         R.color.KIWE_gray1,
                     ) {
                         // TODO : 직원 호출
@@ -493,6 +494,9 @@ fun StepIndicator(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             steps.forEachIndexed { index, step ->
+                if (index != 0) {
+                    Spacer(Modifier.width(5.dp))
+                }
                 val widthWeight by animateFloatAsState(
                     targetValue = if (index == currentStep - 1) 4f else 3f,
                     label = "",
