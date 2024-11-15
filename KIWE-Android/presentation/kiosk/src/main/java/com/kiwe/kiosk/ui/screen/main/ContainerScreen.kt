@@ -112,10 +112,12 @@ fun ContainerScreen(
     }
 
     LaunchedEffect(shoppingCartState.isVoiceOrderConfirm, shoppingCartState.shoppingCartItem) {
-        isShoppingCartDialogOpen = shoppingCartState.isVoiceOrderConfirm
-        delay(1000L)
-        isQueryStateBoxOpen = isShoppingCartDialogOpen
-        Timber.tag("ContainerScreen").d("LaunchedEffect $isQueryStateBoxOpen")
+        if (shoppingCartState.isVoiceOrderConfirm) {
+            isShoppingCartDialogOpen = true
+            delay(1000L)
+            isQueryStateBoxOpen = isShoppingCartDialogOpen
+            Timber.tag("ContainerScreen").d("LaunchedEffect $isQueryStateBoxOpen")
+        }
     }
 
     viewModel.collectSideEffect { sideEffect ->
