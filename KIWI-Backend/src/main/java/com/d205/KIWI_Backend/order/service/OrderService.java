@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -704,31 +705,90 @@ public class OrderService {
         return topSoldMenusByAgeGroup;
     }
 
+//    public Map<YearMonth, Integer> getMonthlySalesForLastSixMonthsByMemberId(Integer memberId) {
+//        LocalDateTime endDate = LocalDateTime.now();
+//        LocalDateTime startDate = endDate.minusMonths(6).withDayOfMonth(1).toLocalDate().atStartOfDay();
+//
+//        List<Object[]> salesData = orderRepository.findMonthlySalesByMemberIdForLastSixMonths(memberId, startDate, endDate);
+//
+//        // 결과를 YearMonth 키와 Integer 매출 값으로 매핑
+//        Map<YearMonth, Integer> monthlySales = new HashMap<>();
+//        for (Object[] data : salesData) {
+//            int year = (int) data[0];
+//            int month = (int) data[1];
+//            int totalSales = ((Number) data[2]).intValue();
+//
+//            YearMonth yearMonth = YearMonth.of(year, month);
+//            monthlySales.put(yearMonth, totalSales);
+//        }
+//
+//        // 지난 6개월의 데이터가 없을 경우, 0으로 초기화
+//        YearMonth currentMonth = YearMonth.now();
+//        for (int i = 0; i < 6; i++) {
+//            YearMonth month = currentMonth.minusMonths(i);
+//            monthlySales.putIfAbsent(month, 0);
+//        }
+//
+//        return monthlySales;
+//    }
+
     public Map<YearMonth, Integer> getMonthlySalesForLastSixMonthsByMemberId(Integer memberId) {
-        LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = endDate.minusMonths(6).withDayOfMonth(1).toLocalDate().atStartOfDay();
-
-        List<Object[]> salesData = orderRepository.findMonthlySalesByMemberIdForLastSixMonths(memberId, startDate, endDate);
-
-        // 결과를 YearMonth 키와 Integer 매출 값으로 매핑
-        Map<YearMonth, Integer> monthlySales = new HashMap<>();
-        for (Object[] data : salesData) {
-            int year = (int) data[0];
-            int month = (int) data[1];
-            int totalSales = ((Number) data[2]).intValue();
-
-            YearMonth yearMonth = YearMonth.of(year, month);
-            monthlySales.put(yearMonth, totalSales);
-        }
-
-        // 지난 6개월의 데이터가 없을 경우, 0으로 초기화
+        // 현재 월 기준 지난 6개월의 YearMonth 계산
         YearMonth currentMonth = YearMonth.now();
-        for (int i = 0; i < 6; i++) {
-            YearMonth month = currentMonth.minusMonths(i);
-            monthlySales.putIfAbsent(month, 0);
+        List<YearMonth> lastSixMonths = IntStream.range(0, 6)
+            .mapToObj(currentMonth::minusMonths)
+            .collect(Collectors.toList());
+
+        Map<YearMonth, Integer> monthlySales = new HashMap<>();
+
+        for (YearMonth month : lastSixMonths) {
+            LocalDateTime startOfMonth = month.atDay(1).atStartOfDay();
+            LocalDateTime endOfMonth = month.atEndOfMonth().atTime(23, 59, 59);
+
+            // 각 월별 데이터를 조회하여 결과를 매핑
+            Integer totalSales = orderRepository.findMonthlySalesByMemberIdForLastSixMonths(memberId, startOfMonth, endOfMonth)
+                .stream()
+                .map(data -> ((Number) data[2]).intValue())
+                .findFirst()
+                .orElse(0);
+
+            monthlySales.put(month, totalSales);
         }
 
         return monthlySales;
+    }
+
+    @Transactional
+    public Map<YearMonth, Integer> calculateOrderCountForLastSixMonthsByMemberId(Integer memberId) {
+        YearMonth currentMonth = YearMonth.now();
+
+        // 6개월 전부터 현재까지의 6개월 동안 각 달을 구합니다.
+        List<YearMonth> lastSixMonths = IntStream.range(0, 6)
+            .mapToObj(currentMonth::minusMonths)
+            .collect(Collectors.toList());
+
+        // 멤버가 운영하는 키오스크 목록을 조회합니다.
+        List<Kiosk> kiosks = kioskRepository.findByMemberId(memberId);
+
+        // 월별 주문 횟수를 저장할 Map
+        Map<YearMonth, Integer> monthlyOrderCount = new HashMap<>();
+
+        // 각 키오스크에 대해 6개월 동안의 주문 횟수를 계산합니다.
+        for (Kiosk kiosk : kiosks) {
+            for (YearMonth month : lastSixMonths) {
+                LocalDateTime startOfMonth = month.atDay(1).atStartOfDay();
+                LocalDateTime endOfMonth = month.atEndOfMonth().atTime(23, 59, 59);
+
+                // 키오스크별로 해당 월의 주문을 조회합니다.
+                List<Order> orders = orderRepository.findByKioskIdAndOrderDateBetween(kiosk.getId(), startOfMonth, endOfMonth);
+                int orderCount = orders.size();
+
+                // 월별 주문 횟수를 누적합니다.
+                monthlyOrderCount.put(month, monthlyOrderCount.getOrDefault(month, 0) + orderCount);
+            }
+        }
+
+        return monthlyOrderCount;
     }
 
     private String getAgeGroup(Integer age) {
