@@ -31,8 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.kiwe.domain.model.MenuCategoryParam
-import com.kiwe.kiosk.BuildConfig.BASE_IMAGE_URL
 import com.kiwe.kiosk.R
+import com.kiwe.kiosk.ui.screen.utils.prefixingImagePaths
+import com.kiwe.kiosk.ui.theme.KiweWhite1
 import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.utils.dropShadow
 import java.util.Locale
@@ -41,7 +42,7 @@ import java.util.Locale
 fun OrderItem(
     orderItem: MenuCategoryParam,
     modifier: Modifier = Modifier,
-    onClick: (Int, String, String, Int, Offset) -> Unit,
+    onClick: (MenuCategoryParam, Offset) -> Unit,
 ) {
     var cartPosition by remember { mutableStateOf(Offset.Zero) }
     Box(
@@ -55,13 +56,10 @@ fun OrderItem(
                     offsetX = 4.dp,
                     spread = 0.dp,
                 ).clip(RoundedCornerShape(5.dp))
-                .background(color = Color.White)
+                .background(color = KiweWhite1)
                 .clickable {
                     onClick(
-                        orderItem.id,
-                        orderItem.imgPath,
-                        orderItem.name,
-                        orderItem.price,
+                        orderItem,
                         cartPosition,
                     )
                 }.onGloballyPositioned {
@@ -74,16 +72,14 @@ fun OrderItem(
                     .padding(1.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-//            Log.d(TAG, "https://" + BASE_IMAGE_URL + URLEncoder.encode(orderItem.imgPath, StandardCharsets.UTF_8.toString()))
-//            Log.d(TAG, "OrderItem: ${"https://" + BASE_IMAGE_URL + orderItem.imgPath}")
-
             AsyncImage(
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .padding(bottom = 2.dp),
-                model = "https://" + BASE_IMAGE_URL + orderItem.imgPath,
+                        .padding(bottom = 2.dp)
+                        .background(KiweWhite1),
+                model = orderItem.imgPath.prefixingImagePaths(),
                 contentScale = ContentScale.Crop,
                 contentDescription = "Translated description of what the image contains",
             )
@@ -141,6 +137,6 @@ fun OrderItemPreview() {
             description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
             imgPath = "drinks/HOT_디카페인 아메리카노.jpg",
         ),
-        onClick = { _, _, _, _, _ -> },
+        onClick = { _, _ -> },
     )
 }

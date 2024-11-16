@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kiwe.kiosk.ui.theme.KiweBrown2
+import com.kiwe.kiosk.ui.theme.KiweBrown1
 import com.kiwe.kiosk.ui.theme.KiweBrown3
 import com.kiwe.kiosk.ui.theme.KiweBrown5
 import com.kiwe.kiosk.ui.theme.KiweGray1
@@ -41,7 +41,7 @@ fun RoundStepItem(
         label = "",
     )
     val endColor by animateColorAsState(
-        targetValue = if (isActive) KiweBrown5 else KiweBrown2,
+        targetValue = if (isActive) KiweBrown5 else KiweBrown1,
         label = "",
     )
 

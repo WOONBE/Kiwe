@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -55,10 +54,8 @@ fun OrderScreen(
     val categoryStatus = viewModel.collectAsState().value
     var isOrderOptionDialogOpen by remember { mutableStateOf(false) }
     var showShoppingCartAnimation by remember { mutableStateOf(false) }
-    var orderDialogMenuId by remember { mutableIntStateOf(0) }
-    var orderDialogMenuImgPath by remember { mutableStateOf("") }
-    var orderDialogMenuTitle by remember { mutableStateOf("") }
-    var orderDialogMenuCost by remember { mutableIntStateOf(0) }
+    var orderDialogMenuItem by remember { mutableStateOf(MenuCategoryParam()) }
+
     var targetOffset by remember { mutableStateOf(Offset.Zero) }
 
     val context = LocalContext.current
@@ -80,12 +77,12 @@ fun OrderScreen(
     if (showShoppingCartAnimation) {
         Animation(
             { showShoppingCartAnimation = false },
-            orderDialogMenuImgPath,
+            orderDialogMenuItem.imgPath,
             Offset(
                 x = getShoppingCartPosition().x,
                 y = getShoppingCartPosition().y,
             ),
-            targetOffset
+            targetOffset,
         )
     }
 
@@ -119,20 +116,14 @@ fun OrderScreen(
         hiltViewModel(
             creationCallback = { factory: OptionViewModel.OptionViewModelFactory ->
                 factory.create(
-                    orderDialogMenuId,
-                    orderDialogMenuImgPath,
-                    orderDialogMenuTitle,
-                    orderDialogMenuCost,
+                    orderDialogMenuItem,
                 )
             },
         )
     LaunchedEffect(isOrderOptionDialogOpen) {
         if (isOrderOptionDialogOpen) {
             optionViewModel.init(
-                orderDialogMenuId,
-                orderDialogMenuImgPath,
-                orderDialogMenuTitle,
-                orderDialogMenuCost,
+                orderDialogMenuItem,
             )
         } else {
             optionViewModel.onClear()
@@ -173,11 +164,8 @@ fun OrderScreen(
             ) { index ->
                 OrderListScreen(
                     orderItemList = categoryStatus.menuList[index].chunked(4),
-                    onItemClick = { id, imgPath, title, cost, offset ->
-                        orderDialogMenuId = id
-                        orderDialogMenuImgPath = imgPath
-                        orderDialogMenuTitle = title
-                        orderDialogMenuCost = cost
+                    onItemClick = { menuItem, offset ->
+                        orderDialogMenuItem = menuItem
                         isOrderOptionDialogOpen = true
                         targetOffset = offset
                     },
@@ -251,7 +239,7 @@ fun OrderScreen(
 @Composable
 private fun OrderListScreen(
     orderItemList: List<List<MenuCategoryParam>>,
-    onItemClick: (Int, String, String, Int, Offset) -> Unit,
+    onItemClick: (MenuCategoryParam, Offset) -> Unit,
 ) {
     val firstRowList = orderItemList[0]
     val secondRowList =

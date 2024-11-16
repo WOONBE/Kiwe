@@ -102,8 +102,9 @@ class MainActivity : ComponentActivity() {
 
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
-//            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA // 좌표는 현재 후면카메라에 맞춰져있음
+            // FIXME : 카메라 포지션 설정
+//            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA // 좌표는 현재 후면카메라에 맞춰져있음
 
             val imageAnalysis =
                 ImageAnalysis

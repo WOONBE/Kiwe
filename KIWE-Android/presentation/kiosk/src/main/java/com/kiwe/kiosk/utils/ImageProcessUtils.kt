@@ -78,7 +78,7 @@ class ImageProcessUtils
                                 val faceHeight = bounds.height()
 
                                 // 얼굴의 크기에 따른 콜백 호출
-                                if (faceWidth >= 200 || faceHeight >= 200) {
+                                if (faceWidth >= 100 || faceHeight >= 100) { // FIXME : 얼굴 크기 수정
                                     faceDetection(true)
                                 } else {
                                     faceDetection(false)

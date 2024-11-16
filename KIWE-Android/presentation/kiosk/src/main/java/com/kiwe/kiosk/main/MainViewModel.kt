@@ -123,6 +123,11 @@ class MainViewModel
             gender: String,
         ) {
             // 나이랑 성별 받아오기
+            intent {
+                reduce {
+                    state.copy(age = age, gender = gender)
+                }
+            }
             Timber.tag("MainViewModel").d("age: $age, gender: $gender")
         }
 
@@ -616,6 +621,8 @@ data class MainState(
     val shouldShowRetryMessage: Boolean = false,
     val gazePoint: Offset? = null,
     val remainingTime: Long = 0,
+    val age: Int = 30,
+    val gender: String = "male",
     val voiceResult: VoiceBody =
         VoiceBody(
             category = 0,

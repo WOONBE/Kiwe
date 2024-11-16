@@ -1,6 +1,7 @@
 package com.kiwe.kiosk.ui.screen.order.component
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
@@ -29,13 +31,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.kiwe.kiosk.R
+import com.kiwe.kiosk.ui.theme.KiweBlack1
+import com.kiwe.kiosk.ui.theme.KiweOrange1
+import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.ui.theme.letterSpacing
 
 @Composable
 fun OptionItem(
     optionName: String,
     optionPrice: Int,
-    optionImg: String,
+    optionImg: String?,
+    optionImgRes: Int?,
     selected: Boolean,
     onRadioOptionClick: () -> Unit,
 ) {
@@ -47,7 +53,7 @@ fun OptionItem(
                     .aspectRatio(1F)
                     .clip(RoundedCornerShape(5.dp))
                     .border(
-                        border = BorderStroke(2.dp, color = Color.Red),
+                        border = BorderStroke(2.dp, color = KiweOrange1),
                         shape = RoundedCornerShape(5.dp),
                     )
             } else {
@@ -69,14 +75,27 @@ fun OptionItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            AsyncImage(
-                modifier =
-                    Modifier
-                        .aspectRatio(1F)
-                        .weight(1F),
-                model = optionImg,
-                contentDescription = "옵션 이미지",
-            )
+            if (optionImgRes != null) {
+                // R.drawable 리소스를 표시
+                Image(
+                    modifier =
+                        Modifier
+                            .aspectRatio(1F)
+                            .weight(1F),
+                    painter = painterResource(id = optionImgRes),
+                    contentDescription = "옵션 이미지",
+                )
+            } else if (optionImg != null) {
+                // URL 이미지를 표시
+                AsyncImage(
+                    modifier =
+                        Modifier
+                            .aspectRatio(1F)
+                            .weight(1F),
+                    model = optionImg,
+                    contentDescription = "옵션 이미지",
+                )
+            }
             Box(
                 modifier = Modifier.weight(1F),
                 contentAlignment = Alignment.Center,
@@ -84,10 +103,10 @@ fun OptionItem(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = optionName,
+                        style = Typography.bodyMedium.copy(fontSize = 12.sp),
                         textAlign = TextAlign.Center,
                         color = Color.Black,
                     )
-
                     Text(
                         text =
                             buildAnnotatedString {
@@ -95,12 +114,12 @@ fun OptionItem(
                                     style =
                                         SpanStyle(
                                             fontFamily = FontFamily(Font(R.font.pretendard_semibold)),
-                                            fontSize = 16.sp,
+                                            fontSize = 12.sp,
                                             letterSpacing = letterSpacing,
                                             color = colorResource(R.color.KIWE_orange1),
                                         ),
                                 ) {
-                                    if (optionPrice >= 0) {
+                                    if (optionPrice > 0) {
                                         append("+")
                                     }
                                 }
@@ -108,7 +127,7 @@ fun OptionItem(
                                     style =
                                         SpanStyle(
                                             fontFamily = FontFamily(Font(R.font.pretendard_semibold)),
-                                            fontSize = 16.sp,
+                                            fontSize = 12.sp,
                                             letterSpacing = letterSpacing,
                                             color = colorResource(R.color.KIWE_orange1),
                                         ),
@@ -118,9 +137,9 @@ fun OptionItem(
                                 withStyle(
                                     style =
                                         SpanStyle(
-                                            fontFamily = FontFamily(Font(R.font.pretendard_semibold)),
-                                            fontSize = 16.sp,
-                                            color = Color.Black,
+                                            fontFamily = FontFamily(Font(R.font.pretendard_regular)),
+                                            fontSize = 12.sp,
+                                            color = KiweBlack1,
                                             letterSpacing = letterSpacing,
                                         ),
                                 ) {
@@ -141,6 +160,7 @@ private fun OptionItemPreview() {
         "설탕 추가",
         300,
         "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+        R.drawable.img_option_sugar_two,
         false,
         {},
     )
