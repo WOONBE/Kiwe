@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.kiwe.kiosk.R
-import com.kiwe.kiosk.ui.component.BoldTextWithKeywords
 import com.kiwe.kiosk.ui.theme.KiweBlack1
 import com.kiwe.kiosk.ui.theme.KiweOrange1
 import com.kiwe.kiosk.ui.theme.Typography
@@ -79,18 +78,20 @@ fun OptionItem(
             if (optionImgRes != null) {
                 // R.drawable 리소스를 표시
                 Image(
-                    modifier = Modifier
-                        .aspectRatio(1F)
-                        .weight(1F),
+                    modifier =
+                        Modifier
+                            .aspectRatio(1F)
+                            .weight(1F),
                     painter = painterResource(id = optionImgRes),
                     contentDescription = "옵션 이미지",
                 )
             } else if (optionImg != null) {
                 // URL 이미지를 표시
                 AsyncImage(
-                    modifier = Modifier
-                        .aspectRatio(1F)
-                        .weight(1F),
+                    modifier =
+                        Modifier
+                            .aspectRatio(1F)
+                            .weight(1F),
                     model = optionImg,
                     contentDescription = "옵션 이미지",
                 )

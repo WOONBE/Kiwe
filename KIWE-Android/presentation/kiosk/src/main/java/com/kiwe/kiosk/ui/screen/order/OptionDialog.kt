@@ -44,8 +44,6 @@ import com.kiwe.kiosk.ui.screen.utils.prefixingImagePaths
 import com.kiwe.kiosk.ui.theme.Typography
 import org.orbitmvi.orbit.compose.collectAsState
 
-private const val TAG = "OptionDialog 싸피"
-
 @Composable
 fun OptionDialog(
     onClose: () -> Unit,
@@ -68,7 +66,6 @@ fun OptionDialog(
         dialogWindowProvider.window.setGravity(Gravity.BOTTOM)
         OptionDialog(
             state,
-            change,
             { change += 1 },
             onPlus = optionViewModel::onPlus,
             onMinus = optionViewModel::onMinus,
@@ -86,7 +83,6 @@ fun OptionDialog(
 @Composable
 private fun OptionDialog(
     state: OptionState,
-    change: Int,
     onChange: () -> Unit,
     onPlus: () -> Unit,
     onMinus: () -> Unit,
@@ -284,7 +280,6 @@ private fun OptionDialogPreview() {
                             )
                     },
             ),
-        change = 0,
         onChange = {},
         onPlus = {},
         onMinus = {},
