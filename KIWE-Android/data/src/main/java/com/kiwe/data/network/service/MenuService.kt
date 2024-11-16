@@ -45,4 +45,6 @@ class MenuService
             }
 
         suspend fun deleteMenu(menuId: Int): Result<Unit> = client.deleteResult("api/menus/$menuId")
+
+        suspend fun getMenuSuggested(): Result<List<MenuCategoryParam>> = client.getResult("api/suggested")
     }

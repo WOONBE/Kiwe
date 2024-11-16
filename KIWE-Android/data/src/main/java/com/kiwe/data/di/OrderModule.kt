@@ -13,6 +13,7 @@ import com.kiwe.data.usecase.manager.order.GetLastMonthOrderUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetOrderAllUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetOrderUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetRecentSixMonthOrderUseCaseImpl
+import com.kiwe.data.usecase.manager.order.GetTopSellingMenusSortByAgeUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetTotalPriceLastMonthsUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetTotalPriceRecentSixMonthsUseCaseImpl
 import com.kiwe.domain.usecase.VoiceOrderUseCase
@@ -28,6 +29,7 @@ import com.kiwe.domain.usecase.order.GetLastMonthOrderUseCase
 import com.kiwe.domain.usecase.order.GetOrderAllUseCase
 import com.kiwe.domain.usecase.order.GetOrderUseCase
 import com.kiwe.domain.usecase.order.GetRecentSixMonthOrderUseCase
+import com.kiwe.domain.usecase.order.GetTopSellingMenusSortByAgeUseCase
 import com.kiwe.domain.usecase.order.GetTotalPriceLastMonthUseCase
 import com.kiwe.domain.usecase.order.GetTotalPriceRecentSixMonthsUseCase
 import dagger.Binds
@@ -82,4 +84,7 @@ interface OrderModule {
 
     @Binds
     fun bindGetRecentSixMonthOrderUseCase(uc: GetRecentSixMonthOrderUseCaseImpl): GetRecentSixMonthOrderUseCase
+
+    @Binds
+    fun bindGetTopSellingMenusSortByAgeUseCase(uc: GetTopSellingMenusSortByAgeUseCaseImpl): GetTopSellingMenusSortByAgeUseCase
 }

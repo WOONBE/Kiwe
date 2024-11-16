@@ -2,8 +2,11 @@ package com.kiwe.manager.ui.dashboard
 
 import androidx.lifecycle.ViewModel
 import com.kiwe.domain.exception.APIException
+import com.kiwe.domain.model.MenuCategoryParam
+import com.kiwe.domain.usecase.manager.menu.GetMenuSuggestedUseCase
 import com.kiwe.domain.usecase.order.GetLastMonthOrderUseCase
 import com.kiwe.domain.usecase.order.GetRecentSixMonthOrderUseCase
+import com.kiwe.domain.usecase.order.GetTopSellingMenusSortByAgeUseCase
 import com.kiwe.domain.usecase.order.GetTotalPriceLastMonthUseCase
 import com.kiwe.domain.usecase.order.GetTotalPriceRecentSixMonthsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +25,8 @@ class DashBoardViewModel
         private val getTotalPriceRecentSixMonthsUseCase: GetTotalPriceRecentSixMonthsUseCase,
         private val getLastMonthOrderUseCase: GetLastMonthOrderUseCase,
         private val getRecentSixMonthOrderUseCase: GetRecentSixMonthOrderUseCase,
+        private val getTopSellingMenusSortByAgeUseCase: GetTopSellingMenusSortByAgeUseCase,
+        private val getMenuSuggestedUseCase: GetMenuSuggestedUseCase
     ) : ViewModel(),
         ContainerHost<DashBoardState, DashBoardSideEffect> {
         override val container: Container<DashBoardState, DashBoardSideEffect> =
@@ -56,12 +61,16 @@ class DashBoardViewModel
                 val totalSalesRecent6Month = getTotalPriceRecentSixMonthsUseCase().getOrThrow()
                 val lastMonthOrder = getLastMonthOrderUseCase().getOrThrow()
                 val totalOrderRecent6Month = getRecentSixMonthOrderUseCase().getOrThrow()
+                val topSellingMenusSortByAge = getTopSellingMenusSortByAgeUseCase().getOrThrow().toSortedMap()
+                val listMenuSuggested = getMenuSuggestedUseCase().getOrThrow()
                 reduce {
                     state.copy(
                         lastMonthSale = lastMonthSale,
                         lastMonthOrder = lastMonthOrder,
                         totalSalesRecent6Month = totalSalesRecent6Month,
-                        totalOrderRecent6Month = totalOrderRecent6Month
+                        totalOrderRecent6Month = totalOrderRecent6Month,
+                        topSellingMenusSortByAge = topSellingMenusSortByAge,
+                        listMenuSuggested = listMenuSuggested
                     )
                 }
             }
@@ -74,6 +83,8 @@ data class DashBoardState(
     val lastMonthOrder: Int = 0,
     val totalSalesRecent6Month: Map<String, Int> = emptyMap(),
     val totalOrderRecent6Month: Map<String, Int> = emptyMap(),
+    val topSellingMenusSortByAge: Map<String, Map<String, Int>> = emptyMap(),
+    val listMenuSuggested: List<MenuCategoryParam> = emptyList()
 )
 
 sealed interface DashBoardSideEffect {
