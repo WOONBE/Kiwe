@@ -32,12 +32,12 @@ enum class MenuCategoryGroup(
 
 @Serializable
 data class MenuCategoryParam(
-    val id: Int,
-    val category: String,
-    val categoryNumber: Int,
-    val hotOrIce: String,
-    val name: String,
-    val price: Int,
-    val description: String,
-    val imgPath: String,
+    val id: Int = 0,
+    val category: String = "",
+    val categoryNumber: Int = 0,
+    val hotOrIce: String = "",
+    val name: String = "",
+    val price: Int = 0,
+    val description: String = "",
+    val imgPath: String = "",
 )

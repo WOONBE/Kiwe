@@ -2,6 +2,8 @@ package com.kiwe.kiosk.ui.screen.order
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.kiwe.domain.model.MenuCategoryParam
+import com.kiwe.kiosk.R
 import com.kiwe.kiosk.base.BaseSideEffect
 import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
@@ -16,16 +18,10 @@ import kotlin.coroutines.CoroutineContext
 class OptionViewModel
     @AssistedInject
     constructor(
-        @Assisted("menuId") private val menuId: Int,
-        @Assisted("menuImgPath") private val menuImgPath: String,
-        @Assisted("menuTitle") private val menuTitle: String,
-        @Assisted("menuCost") private val menuCost: Int,
+        @Assisted("menuItem") private val menuItem: MenuCategoryParam,
     ) : BaseViewModel<OptionState, OptionSideEffect>(
             OptionState(
-                menuId,
-                menuImgPath,
-                menuTitle,
-                menuCost,
+                menuItem,
             ),
         ) {
         override fun handleExceptionIntent(
@@ -37,26 +33,21 @@ class OptionViewModel
             }
         }
 
-        fun init(
-            menuId: Int,
-            menuImgPath: String,
-            menuTitle: String,
-            menuCost: Int,
-        ) = intent {
-            reduce {
-                state.copy(
-                    menuId = menuId,
-                    menuImgPath = menuImgPath,
-                    menuTitle = menuTitle,
-                    menuCost = menuCost,
-                )
+        fun init(menuItem: MenuCategoryParam) =
+            intent {
+                reduce {
+                    state.copy(
+                        menuItem = menuItem,
+                        optionList = generateOptionList(menuItem),
+                        menuCount = 1,
+                    )
+                }
             }
-        }
 
         fun onClear() =
             intent {
                 reduce {
-                    OptionState(0, "", "", 0)
+                    OptionState(MenuCategoryParam(), 0)
                 }
             }
 
@@ -89,39 +80,79 @@ class OptionViewModel
             }
         }
 
+        private fun generateOptionList(menuItem: MenuCategoryParam): Map<String, List<OrderOption>> {
+            val options = mutableMapOf<String, List<OrderOption>>()
+
+            // 조건에 따라 옵션을 동적으로 추가
+            if (menuItem.category.contains("커피")) {
+                options["샷 추가"] =
+                    listOf(
+                        OrderOption(
+                            optionImgUrl = null,
+                            optionImgRes = R.drawable.img_option_shot_one,
+                            title = "없음",
+                            price = 0,
+                            radio = true,
+                        ),
+                        OrderOption(
+                            optionImgUrl = null,
+                            optionImgRes = R.drawable.img_option_shot_two,
+                            title = "1샷 추가",
+                            price = 500,
+                            radio = true,
+                        ),
+                    )
+            }
+
+            if (menuItem.category != "디저트") {
+                options["설탕 추가"] =
+                    listOf(
+                        OrderOption(
+                            optionImgUrl = null,
+                            optionImgRes = R.drawable.img_option_sugar_one,
+                            title = "없음",
+                            price = 0,
+                            radio = true,
+                        ),
+                        OrderOption(
+                            optionImgUrl = null,
+                            optionImgRes = R.drawable.img_option_sugar_two,
+                            title = "1개 추가",
+                            price = 100,
+                            radio = true,
+                        ),
+                    )
+            }
+
+            return options
+        }
+
 //        fun onCheckBoxOptionClick() {
 //        }
 
         @AssistedFactory
         interface OptionViewModelFactory {
             fun create(
-                @Assisted("menuId") menuId: Int,
-                @Assisted("menuImgPath") menuImgPath: String,
-                @Assisted("menuTitle") menuTitle: String,
-                @Assisted("menuCost") menuCost: Int,
+                @Assisted("menuItem") menuItem: MenuCategoryParam,
             ): OptionViewModel
         }
 
         companion object {
             fun provideFactory(
                 assistedFactory: OptionViewModelFactory,
-                menuId: Int,
-                menuImgPath: String,
-                menuTitle: String,
-                menuCost: Int,
+                menuItem: MenuCategoryParam,
             ): ViewModelProvider.Factory =
                 object : ViewModelProvider.Factory {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                        assistedFactory.create(menuId, menuImgPath, menuTitle, menuCost) as T
+                        assistedFactory.create(
+                            menuItem,
+                        ) as T
                 }
         }
     }
 
 data class OptionState(
-    val menuId: Int,
-    val menuImgPath: String,
-    val menuTitle: String,
-    val menuCost: Int,
+    val menuItem: MenuCategoryParam,
     val menuCount: Int = 1,
     val radioOptionCost: MutableMap<String, Pair<String, Int>> = mutableMapOf(),
     val checkBoxOptionCost: Map<Pair<String, String>, String> = mapOf(),
@@ -130,15 +161,17 @@ data class OptionState(
             this["샷 추가"] =
                 listOf(
                     OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "1샷 추가",
-                        price = 500,
+                        optionImgUrl = null,
+                        optionImgRes = R.drawable.img_option_shot_one,
+                        title = "없음",
+                        price = 0,
                         radio = true,
                     ),
                     OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "",
-                        price = 0,
+                        optionImgUrl = null,
+                        optionImgRes = R.drawable.img_option_shot_two,
+                        title = "1샷 추가",
+                        price = 500,
                         radio = true,
                     ),
                 )
@@ -146,47 +179,17 @@ data class OptionState(
             this["설탕 추가"] =
                 listOf(
                     OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
+                        optionImgUrl = null,
+                        optionImgRes = R.drawable.img_option_sugar_one,
+                        title = "없음",
+                        price = 0,
+                        radio = true,
+                    ),
+                    OrderOption(
+                        optionImgUrl = null,
+                        optionImgRes = R.drawable.img_option_sugar_two,
                         title = "1개 추가",
                         price = 100,
-                        radio = true,
-                    ),
-                    OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "2개 추가",
-                        price = 200,
-                        radio = true,
-                    ),
-                )
-
-            this["추가 선택"] =
-                listOf(
-                    OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "기타1",
-                        price = 0,
-                        radio = true,
-                    ),
-                    OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "기타2",
-                        price = 0,
-                        radio = true,
-                    ),
-                )
-
-            this["옵션2"] =
-                listOf(
-                    OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "테이크 아웃",
-                        price = -500,
-                        radio = true,
-                    ),
-                    OrderOption(
-                        optionImgUrl = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                        title = "매장에서",
-                        price = 0,
                         radio = true,
                     ),
                 )
@@ -194,7 +197,7 @@ data class OptionState(
 ) : BaseState {
     val totalPrice
         get() =
-            menuCost +
+            menuItem.price +
                 radioOptionCost.values.sumOf {
                     it.second
                 }

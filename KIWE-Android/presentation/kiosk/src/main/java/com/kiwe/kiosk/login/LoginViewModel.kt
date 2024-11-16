@@ -76,6 +76,7 @@ class LoginViewModel
             viewModelScope.launch {
                 val ownerId = getOwnerIdUseCase()
                 val kioskId = getKioskIdUseCase()
+                Timber.tag("중요").d("ownerId : $ownerId, kioskId: $kioskId")
                 if (!ownerId.isNullOrBlank() && !kioskId.isNullOrBlank()) {
                     performAutoLogin()
                 }

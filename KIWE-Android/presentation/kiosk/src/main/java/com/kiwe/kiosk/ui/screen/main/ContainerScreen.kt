@@ -161,14 +161,15 @@ fun ContainerScreen(
         ShoppingCartDialog(
             viewModel = shoppingCartViewModel,
             mainViewModel = viewModel,
-            goOrderList = {
+            onClickPayment = {
                 viewModel.closeShoppingCart()
                 isShoppingCartDialogOpen = false
                 if (state.voiceShoppingCart.isNotEmpty()) {
                     // 바로 다음 화면으로 보냄
                     onClickPayment()
                 } else {
-                    isOrderListDialogOpen = true
+                    onClickPayment()
+//                    isOrderListDialogOpen = true
                 }
             },
             onClose = {
@@ -344,8 +345,8 @@ private fun ContainerScreen(
                 ) {
                     ImageButton(
                         modifier = Modifier.weight(1F),
-                        "이전으로",
-                        R.drawable.arrow_square_left,
+                        "직원호출",
+                        R.drawable.ic_employee_call,
                         R.color.KIWE_gray1,
                     ) {
                         // TODO : 직원 호출
@@ -644,6 +645,9 @@ fun StepIndicator(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             steps.forEachIndexed { index, step ->
+                if (index != 0) {
+                    Spacer(Modifier.width(5.dp))
+                }
                 val widthWeight by animateFloatAsState(
                     targetValue = if (index == currentStep - 1) 4f else 3f,
                     label = "",

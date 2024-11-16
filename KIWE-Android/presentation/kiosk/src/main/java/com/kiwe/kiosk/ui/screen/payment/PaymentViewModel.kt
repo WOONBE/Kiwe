@@ -85,6 +85,15 @@ class PaymentViewModel
             }
         }
 
+        fun setAgeAndGender(
+            age: Int,
+            gender: String,
+        ) {
+            intent {
+                reduce { state.copy(age = age, gender = gender) }
+            }
+        }
+
         fun createOrderNumber() {
             intent {
                 val kioskName = getKioskNameUseCase()
@@ -101,6 +110,8 @@ class PaymentViewModel
 
         fun postOrder(
             kioskId: Int,
+            age: Int,
+            gender: String,
             shoppingCartState: ShoppingCartState,
         ) {
             val order =
@@ -112,7 +123,7 @@ class PaymentViewModel
                 )
             viewModelScope.launch {
                 runCatching {
-                    postOrderUseCase(kioskId, order)
+                    postOrderUseCase(kioskId, age, gender, order)
                 }.onSuccess {
                     startConfirmPayment(kioskId)
                     Timber.tag(javaClass.simpleName).d("postOrder success")
@@ -218,6 +229,8 @@ class PaymentViewModel
 
 data class PaymentState(
     val kioskId: Int = 1, // FIXME : DataStore로 변경
+    val age: Int = 30,
+    val gender: String = "Male",
     val order: Order? = null,
     val showDialog: Boolean = false,
     val remainingTime: Long = 0,
