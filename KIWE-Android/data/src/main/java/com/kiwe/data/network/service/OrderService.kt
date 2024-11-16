@@ -80,4 +80,7 @@ class OrderService
         suspend fun getOrderLastMonth(): Result<Int> = client.getResult("api/orders/order-count-last-month")
 
         suspend fun getOrderRecentSixMonth(): Result<Map<String, Int>> = client.getResult("api/orders/order-count/last-six-months")
+
+        suspend fun getTopSellingMenusSortByAge(): Result<Map<String, Map<String, Int>>> =
+            client.getResult("api/orders/all/top-selling-menus")
     }

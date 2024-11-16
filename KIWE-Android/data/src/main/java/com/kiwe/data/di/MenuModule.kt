@@ -6,12 +6,14 @@ import com.kiwe.data.usecase.manager.menu.DeleteMenuUseCaseImpl
 import com.kiwe.data.usecase.manager.menu.EditMenuUseCaseImpl
 import com.kiwe.data.usecase.manager.menu.GetAllMenuListUseCaseImpl
 import com.kiwe.data.usecase.manager.menu.GetMenuByIdUseCaseImpl
+import com.kiwe.data.usecase.manager.menu.GetMenuSuggestedUseCaseImpl
 import com.kiwe.domain.usecase.GetCategoryListUseCase
 import com.kiwe.domain.usecase.manager.menu.CreateMenuUseCase
 import com.kiwe.domain.usecase.manager.menu.DeleteMenuUseCase
 import com.kiwe.domain.usecase.manager.menu.EditMenuUseCase
 import com.kiwe.domain.usecase.manager.menu.GetAllMenuListUseCase
 import com.kiwe.domain.usecase.manager.menu.GetMenuByIdUseCase
+import com.kiwe.domain.usecase.manager.menu.GetMenuSuggestedUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -37,4 +39,7 @@ interface MenuModule {
 
     @Binds
     fun bindDeleteMenuUseCase(uc: DeleteMenuUseCaseImpl): DeleteMenuUseCase
+
+    @Binds
+    fun bindGetMenuSuggestedUseCase(uc: GetMenuSuggestedUseCaseImpl): GetMenuSuggestedUseCase
 }
