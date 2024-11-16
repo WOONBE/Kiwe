@@ -56,7 +56,7 @@ import java.util.Locale
 fun ShoppingCartDialog(
     viewModel: ShoppingCartViewModel,
     mainViewModel: MainViewModel,
-    goOrderList: () -> Unit,
+    onClickPayment: () -> Unit,
     onClose: () -> Unit,
 ) {
     val state = viewModel.collectAsState().value
@@ -66,7 +66,7 @@ fun ShoppingCartDialog(
         // 이게 true면
         Timber.tag("CotainerScreenOrder").d("ordered")
         if (mainState.isOrderEndTrue) {
-            goOrderList()
+            onClickPayment()
             mainViewModel.clearOrderEndState()
         }
         if (mainState.isOrderEndFalse) {
@@ -152,7 +152,7 @@ fun ShoppingCartDialog(
                     modifier = Modifier.weight(1F),
                     enabled = state.shoppingCartItem.isNotEmpty(),
                     shape = RoundedCornerShape(10.dp),
-                    onClick = goOrderList,
+                    onClick = onClickPayment,
                     colors =
                         ButtonColors(
                             contentColor = Color.White,
