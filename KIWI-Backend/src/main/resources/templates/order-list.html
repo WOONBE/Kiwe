@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>주문 내역</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+<h1>주문 내역</h1>
+<table>
+    <thead>
+    <tr>
+        <th>이름</th>
+        <th>가격</th>
+        <th>수량</th>
+        <th>총 금액</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="order : ${orderMenus}">
+        <td th:text="${order.menuName}">Name Placeholder</td>
+        <td th:text="${order.menuPrice}">Price Placeholder</td>
+        <td th:text="${order.quantity}">Quantity Placeholder</td>
+        <td th:text="${order.totalPrice}">Total Price Placeholder</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

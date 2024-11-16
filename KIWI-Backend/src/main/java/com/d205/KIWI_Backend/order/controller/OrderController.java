@@ -6,14 +6,17 @@ import com.d205.KIWI_Backend.menu.dto.MenuResponse;
 import com.d205.KIWI_Backend.order.dto.MenuSales;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
+import com.d205.KIWI_Backend.order.dto.OrderResponse.MenuOrderResponse;
 import com.d205.KIWI_Backend.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -197,11 +200,6 @@ public class OrderController {
         Map<YearMonth, Integer> monthlySales = orderService.getMonthlySalesForLastSixMonthsByMemberId(memberId);
         return ResponseEntity.ok(monthlySales);
     }
-
-
-
-
-
 
 
 

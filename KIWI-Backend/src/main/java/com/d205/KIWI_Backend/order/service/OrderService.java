@@ -18,6 +18,9 @@ import com.d205.KIWI_Backend.order.domain.OrderMenu;
 import com.d205.KIWI_Backend.order.dto.MenuSales;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
+import com.d205.KIWI_Backend.order.dto.OrderResponse.MenuOrderResponse;
+import com.d205.KIWI_Backend.order.dto.PaymentResult;
+import com.d205.KIWI_Backend.order.repository.OrderMenuRepository;
 import com.d205.KIWI_Backend.order.repository.OrderRepository;
 import java.time.YearMonth;
 import java.util.Collections;
@@ -42,14 +45,16 @@ import java.util.Optional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderMenuRepository orderMenuRepository;
     private final MenuRepository menuRepository;
     private final KioskRepository kioskRepository;
     private final MemberService memberservice;
     private final Logger logger = LoggerFactory.getLogger(MenuService.class);
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, MenuRepository menuRepository, KioskRepository kioskRepository, MemberService memberservice) {
+    public OrderService(OrderRepository orderRepository, OrderMenuRepository orderMenuRepository, MenuRepository menuRepository, KioskRepository kioskRepository, MemberService memberservice) {
         this.orderRepository = orderRepository;
+        this.orderMenuRepository = orderMenuRepository;
         this.menuRepository = menuRepository;
         this.kioskRepository = kioskRepository;
         this.memberservice = memberservice;
@@ -231,10 +236,10 @@ public class OrderService {
         orderRepository.delete(existingOrder.get());  // 주문 삭제
     }
 
-    private List<OrderResponse.MenuOrderResponse> createMenuOrderResponses(List<OrderMenu> orderMenus) {
-        List<OrderResponse.MenuOrderResponse> menuOrderResponses = new ArrayList<>();
+    private List<MenuOrderResponse> createMenuOrderResponses(List<OrderMenu> orderMenus) {
+        List<MenuOrderResponse> menuOrderResponses = new ArrayList<>();
         for (OrderMenu orderMenu : orderMenus) {
-            OrderResponse.MenuOrderResponse menuOrderResponse = OrderResponse.MenuOrderResponse.builder()
+            MenuOrderResponse menuOrderResponse = MenuOrderResponse.builder()
                 .menuId(orderMenu.getMenu().getId())
                 .name(orderMenu.getMenu().getName())
                 .quantity(orderMenu.getQuantity())
@@ -791,6 +796,31 @@ public class OrderService {
 
         return monthlyOrderCount;
     }
+
+    //TODO : 이거 대신 orderid로 주문 찾는거를 kioskId로 주문찾는거로 변동 후 메뉴 아이템 출력하는 객체를 컨버팅해서 해결하는방식으로 수정해서해보기
+    public List<PaymentResult> getLatestOrderMenu(int kioskId) {
+        return orderMenuRepository.findLatestOrderMenu(kioskId);
+    }
+    // 주문에 대해 결제 상황을 반환
+    public List<MenuOrderResponse> getLatestOrderMenuByKioskId(Long kioskId) {
+        String status = orderRepository.findLatestStatusByKioskId(kioskId);
+
+        if (status.equals("PENDING")) {
+            throw new BadRequestException(NOT_FOUND_ORDER);
+        }
+
+        Long orderId = orderRepository.findLatestOrderIdByKioskId(kioskId);
+        Optional<Order> existingOrder = orderRepository.findById(orderId);
+        if (existingOrder.isEmpty()) {
+            throw new BadRequestException(NOT_FOUND_ORDER);
+        }
+
+        Order order = existingOrder.get();
+        List<OrderMenu> orderMenus = order.getOrderMenus(); // 기존 메뉴 항목
+        return createMenuOrderResponses(orderMenus);
+    }
+
+
 
 //    @Transactional
 //    public Map<YearMonth, Integer> calculateOrderCountForLastSixMonthsByMemberId(Integer memberId) {
