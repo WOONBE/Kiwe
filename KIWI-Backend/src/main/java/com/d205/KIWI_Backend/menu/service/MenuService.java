@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,7 +91,7 @@ public class MenuService {
 
     // 메뉴 단건 수정
     @Transactional
-//    @CachePut(cacheNames = "menusByCategory", key = "#request.category", cacheManager = "rcm")
+//    @CacheEvict(cacheNames = "menus", key = "'allMenus'", cacheManager = "rcm")
     public MenuResponse updateMenu(Integer id, MenuRequest request) {
         Menu menu = menuRepository.findById(id)
             .orElseThrow(() ->  new BadRequestException(NOT_FOUND_MENU));

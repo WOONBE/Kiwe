@@ -214,7 +214,10 @@ private fun ShoppingCartDialog(
                         AsyncImage(
                             model = "https://" + BASE_IMAGE_URL + shoppingCartItemList[it].menuImgPath,
                             contentDescription = "메뉴 이미지 주소",
-                            modifier = Modifier.weight(1F).aspectRatio(1F),
+                            modifier =
+                                Modifier
+                                    .weight(1F)
+                                    .aspectRatio(1F),
                         )
                         ShoppingCartDataInfo(
                             shoppingCartItemList[it],

@@ -1,18 +1,22 @@
 package com.d205.KIWI_Backend.order.controller;
 
 import com.d205.KIWI_Backend.global.exception.BadRequestException;
+import com.d205.KIWI_Backend.member.service.MemberService;
 import com.d205.KIWI_Backend.menu.dto.MenuResponse;
 import com.d205.KIWI_Backend.order.dto.MenuSales;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
+import com.d205.KIWI_Backend.order.dto.OrderResponse.MenuOrderResponse;
 import com.d205.KIWI_Backend.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,10 +24,12 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
+    private final MemberService memberService;
 
     @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, MemberService memberService) {
         this.orderService = orderService;
+        this.memberService = memberService;
     }
 
     @PostMapping
@@ -159,25 +165,24 @@ public class OrderController {
         return ResponseEntity.ok(totalPrice);
     }
 
-    @GetMapping("/monthly-order-counts")
-    @Operation(summary = "로그인 된 멤버의 모든 키오스크의 한달 간 총 수익", description = "특정 멤버가 운영하는 모든 키오스크의 한달 간 총 수익을 리턴하는 API")
-    public ResponseEntity<Map<YearMonth, Integer>> getSixMonthlyOrderCounts() {
-        Map<YearMonth, Integer> monthlyOrderCounts = orderService.calculateMonthlyOrderCountForLastSixMonthsByMemberId();
-
-        if (monthlyOrderCounts.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(monthlyOrderCounts);
-    }
 
     @GetMapping("/order-count-last-month")
-    @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 총 주문 횟수", description = "로그인 된 멤버가 운영하는 키오스크의 총 주문 횟수을 리턴하는 API")
+    @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 한달 주문 횟수", description = "로그인 된 멤버가 운영하는 키오스크의 한달 주문 횟수을 리턴하는 API")
     public ResponseEntity<Integer> getOrderCountForLastMonth() {
         int orderCount = orderService.calculateOrderCountForLastMonthByMemberId();
 
         return ResponseEntity.ok(orderCount);
     }
+
+    @GetMapping("/order-count/last-six-months")
+    @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 6개월 별 주문 횟수", description = "특정 멤버가 운영하는 키오스크의 지난 6개월 동안의 주문 횟수를 월별로 리턴하는 API")
+    public ResponseEntity<Map<YearMonth, Integer>> getMonthlyOrderCount() {
+        Integer memberId = memberService.getCurrentMemberId();
+        Map<YearMonth, Integer> monthlyCounts = orderService.calculateOrderCountForLastSixMonthsByMemberId(memberId);
+        return ResponseEntity.ok(monthlyCounts);
+    }
+
+
 
     @GetMapping("/top-20-menu-sales")
     @Operation(summary = "로그인 된 멤버가 운영하는 키오스크의 판매량 별 메뉴 조회", description = "로그인 된 멤버가 운영하는 키오스크의 판매량 별 메뉴 조회하는 API")
@@ -185,18 +190,16 @@ public class OrderController {
         // 서비스 메서드를 호출하여 판매 수량이 많은 상위 20개의 메뉴 가져오기
         List<MenuResponse> top20MenuSales = orderService.getTop20MenuSalesForLastMonthByMemberId();
 
-        // 결과 반환
-        if (top20MenuSales.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
         return ResponseEntity.ok(top20MenuSales);
     }
 
-
-
-
-
+    @GetMapping("/monthly-sales/last-six-months/member")
+    @Operation(summary = "멤버의 키오스크 월별 매출 조회", description = "특정 멤버가 운영하는 키오스크의 지난 6개월 동안의 매출을 월별로 리턴하는 API")
+    public ResponseEntity<Map<YearMonth, Integer>> getMonthlySalesForLastSixMonthsByMemberId() {
+        Integer memberId = memberService.getCurrentMemberId();
+        Map<YearMonth, Integer> monthlySales = orderService.getMonthlySalesForLastSixMonthsByMemberId(memberId);
+        return ResponseEntity.ok(monthlySales);
+    }
 
 
 

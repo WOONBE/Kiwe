@@ -1,5 +1,6 @@
 package com.d205.KIWI_Backend.order.service;
 
+import static com.d205.KIWI_Backend.global.exception.ExceptionCode.MENU_NOT_SALES;
 import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_KIOSK_ID;
 import static com.d205.KIWI_Backend.global.exception.ExceptionCode.NOT_FOUND_ORDER;
 
@@ -17,6 +18,9 @@ import com.d205.KIWI_Backend.order.domain.OrderMenu;
 import com.d205.KIWI_Backend.order.dto.MenuSales;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
+import com.d205.KIWI_Backend.order.dto.OrderResponse.MenuOrderResponse;
+import com.d205.KIWI_Backend.order.dto.PaymentResult;
+import com.d205.KIWI_Backend.order.repository.OrderMenuRepository;
 import com.d205.KIWI_Backend.order.repository.OrderRepository;
 import java.time.YearMonth;
 import java.util.Collections;
@@ -25,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +45,16 @@ import java.util.Optional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderMenuRepository orderMenuRepository;
     private final MenuRepository menuRepository;
     private final KioskRepository kioskRepository;
     private final MemberService memberservice;
     private final Logger logger = LoggerFactory.getLogger(MenuService.class);
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, MenuRepository menuRepository, KioskRepository kioskRepository, MemberService memberservice) {
+    public OrderService(OrderRepository orderRepository, OrderMenuRepository orderMenuRepository, MenuRepository menuRepository, KioskRepository kioskRepository, MemberService memberservice) {
         this.orderRepository = orderRepository;
+        this.orderMenuRepository = orderMenuRepository;
         this.menuRepository = menuRepository;
         this.kioskRepository = kioskRepository;
         this.memberservice = memberservice;
@@ -229,10 +236,10 @@ public class OrderService {
         orderRepository.delete(existingOrder.get());  // 주문 삭제
     }
 
-    private List<OrderResponse.MenuOrderResponse> createMenuOrderResponses(List<OrderMenu> orderMenus) {
-        List<OrderResponse.MenuOrderResponse> menuOrderResponses = new ArrayList<>();
+    private List<MenuOrderResponse> createMenuOrderResponses(List<OrderMenu> orderMenus) {
+        List<MenuOrderResponse> menuOrderResponses = new ArrayList<>();
         for (OrderMenu orderMenu : orderMenus) {
-            OrderResponse.MenuOrderResponse menuOrderResponse = OrderResponse.MenuOrderResponse.builder()
+            MenuOrderResponse menuOrderResponse = MenuOrderResponse.builder()
                 .menuId(orderMenu.getMenu().getId())
                 .name(orderMenu.getMenu().getName())
                 .quantity(orderMenu.getQuantity())
@@ -466,6 +473,10 @@ public class OrderService {
             .filter(Objects::nonNull) // null이 아닌 메뉴만 포함
             .collect(Collectors.toList());
 
+//        if (menuResponses.isEmpty()) {
+//            throw new BadRequestException(MENU_NOT_SALES);
+//        }
+
         return menuResponses;
     }
 
@@ -698,6 +709,151 @@ public class OrderService {
 
         return topSoldMenusByAgeGroup;
     }
+
+//    public Map<YearMonth, Integer> getMonthlySalesForLastSixMonthsByMemberId(Integer memberId) {
+//        LocalDateTime endDate = LocalDateTime.now();
+//        LocalDateTime startDate = endDate.minusMonths(6).withDayOfMonth(1).toLocalDate().atStartOfDay();
+//
+//        List<Object[]> salesData = orderRepository.findMonthlySalesByMemberIdForLastSixMonths(memberId, startDate, endDate);
+//
+//        // 결과를 YearMonth 키와 Integer 매출 값으로 매핑
+//        Map<YearMonth, Integer> monthlySales = new HashMap<>();
+//        for (Object[] data : salesData) {
+//            int year = (int) data[0];
+//            int month = (int) data[1];
+//            int totalSales = ((Number) data[2]).intValue();
+//
+//            YearMonth yearMonth = YearMonth.of(year, month);
+//            monthlySales.put(yearMonth, totalSales);
+//        }
+//
+//        // 지난 6개월의 데이터가 없을 경우, 0으로 초기화
+//        YearMonth currentMonth = YearMonth.now();
+//        for (int i = 0; i < 6; i++) {
+//            YearMonth month = currentMonth.minusMonths(i);
+//            monthlySales.putIfAbsent(month, 0);
+//        }
+//
+//        return monthlySales;
+//    }
+
+    public Map<YearMonth, Integer> getMonthlySalesForLastSixMonthsByMemberId(Integer memberId) {
+        // 현재 월 기준 지난 6개월의 YearMonth 계산
+        YearMonth currentMonth = YearMonth.now();
+        List<YearMonth> lastSixMonths = IntStream.range(0, 6)
+            .mapToObj(currentMonth::minusMonths)
+            .collect(Collectors.toList());
+
+        Map<YearMonth, Integer> monthlySales = new HashMap<>();
+
+        for (YearMonth month : lastSixMonths) {
+            LocalDateTime startOfMonth = month.atDay(1).atStartOfDay();
+            LocalDateTime endOfMonth = month.atEndOfMonth().atTime(23, 59, 59);
+
+            // 각 월별 데이터를 조회하여 결과를 매핑
+            Integer totalSales = orderRepository.findMonthlySalesByMemberIdForLastSixMonths(memberId, startOfMonth, endOfMonth)
+                .stream()
+                .map(data -> ((Number) data[2]).intValue())
+                .findFirst()
+                .orElse(0);
+
+            monthlySales.put(month, totalSales);
+        }
+
+        return monthlySales;
+    }
+
+    @Transactional
+    public Map<YearMonth, Integer> calculateOrderCountForLastSixMonthsByMemberId(Integer memberId) {
+        YearMonth currentMonth = YearMonth.now();
+
+        // 6개월 전부터 현재까지의 6개월 동안 각 달을 구합니다.
+        List<YearMonth> lastSixMonths = IntStream.range(0, 6)
+            .mapToObj(currentMonth::minusMonths)
+            .collect(Collectors.toList());
+
+        // 멤버가 운영하는 키오스크 목록을 조회합니다.
+        List<Kiosk> kiosks = kioskRepository.findByMemberId(memberId);
+
+        // 월별 주문 횟수를 저장할 Map (초기화: 모든 월은 0으로 설정)
+        Map<YearMonth, Integer> monthlyOrderCount = lastSixMonths.stream()
+            .collect(Collectors.toMap(month -> month, month -> 0));
+
+        // 각 키오스크에 대해 6개월 동안의 주문 횟수를 계산합니다.
+        for (Kiosk kiosk : kiosks) {
+            for (YearMonth month : lastSixMonths) {
+                LocalDateTime startOfMonth = month.atDay(1).atStartOfDay();
+                LocalDateTime endOfMonth = month.atEndOfMonth().atTime(23, 59, 59);
+
+                // 키오스크별로 해당 월의 주문을 조회합니다.
+                List<Order> orders = orderRepository.findByKioskIdAndOrderDateBetween(kiosk.getId(), startOfMonth, endOfMonth);
+                int orderCount = orders.size();
+
+                // 월별 주문 횟수를 누적합니다.
+                monthlyOrderCount.put(month, monthlyOrderCount.getOrDefault(month, 0) + orderCount);
+            }
+        }
+
+        return monthlyOrderCount;
+    }
+
+    //TODO : 이거 대신 orderid로 주문 찾는거를 kioskId로 주문찾는거로 변동 후 메뉴 아이템 출력하는 객체를 컨버팅해서 해결하는방식으로 수정해서해보기
+    public List<PaymentResult> getLatestOrderMenu(int kioskId) {
+        return orderMenuRepository.findLatestOrderMenu(kioskId);
+    }
+    // 주문에 대해 결제 상황을 반환
+    public List<MenuOrderResponse> getLatestOrderMenuByKioskId(Long kioskId) {
+        String status = orderRepository.findLatestStatusByKioskId(kioskId);
+
+        if (status.equals("PENDING")) {
+            throw new BadRequestException(NOT_FOUND_ORDER);
+        }
+
+        Long orderId = orderRepository.findLatestOrderIdByKioskId(kioskId);
+        Optional<Order> existingOrder = orderRepository.findById(orderId);
+        if (existingOrder.isEmpty()) {
+            throw new BadRequestException(NOT_FOUND_ORDER);
+        }
+
+        Order order = existingOrder.get();
+        List<OrderMenu> orderMenus = order.getOrderMenus(); // 기존 메뉴 항목
+        return createMenuOrderResponses(orderMenus);
+    }
+
+
+
+//    @Transactional
+//    public Map<YearMonth, Integer> calculateOrderCountForLastSixMonthsByMemberId(Integer memberId) {
+//        YearMonth currentMonth = YearMonth.now();
+//
+//        // 6개월 전부터 현재까지의 6개월 동안 각 달을 구합니다.
+//        List<YearMonth> lastSixMonths = IntStream.range(0, 6)
+//            .mapToObj(currentMonth::minusMonths)
+//            .collect(Collectors.toList());
+//
+//        // 멤버가 운영하는 키오스크 목록을 조회합니다.
+//        List<Kiosk> kiosks = kioskRepository.findByMemberId(memberId);
+//
+//        // 월별 주문 횟수를 저장할 Map
+//        Map<YearMonth, Integer> monthlyOrderCount = new HashMap<>();
+//
+//        // 각 키오스크에 대해 6개월 동안의 주문 횟수를 계산합니다.
+//        for (Kiosk kiosk : kiosks) {
+//            for (YearMonth month : lastSixMonths) {
+//                LocalDateTime startOfMonth = month.atDay(1).atStartOfDay();
+//                LocalDateTime endOfMonth = month.atEndOfMonth().atTime(23, 59, 59);
+//
+//                // 키오스크별로 해당 월의 주문을 조회합니다.
+//                List<Order> orders = orderRepository.findByKioskIdAndOrderDateBetween(kiosk.getId(), startOfMonth, endOfMonth);
+//                int orderCount = orders.size();
+//
+//                // 월별 주문 횟수를 누적합니다.
+//                monthlyOrderCount.put(month, monthlyOrderCount.getOrDefault(month, 0) + orderCount);
+//            }
+//        }
+//
+//        return monthlyOrderCount;
+//    }
 
     private String getAgeGroup(Integer age) {
         if (age >= 10 && age < 20) {

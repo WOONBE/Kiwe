@@ -34,7 +34,7 @@ public enum ExceptionCode {
 
     DUPLICATED_MEMBER_NICKNAME(1013, "중복된 닉네임입니다."),
 
-    NOT_FOUND_THEME_WITH_GALLERY(1014, "요청한 갤러리에 해당 테마가 존재하지 않습니다."),
+    MENU_NOT_SALES(1014, "지난 한 달 동안 판매된 메뉴가 없습니다."),
 
     NOT_SUBSCRIBED_GALLERY(1015, "구독한 미술관이 아닙니다"),
 

@@ -1,5 +1,6 @@
 package com.kiwe.manager.ui.dashboard
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material3.Button
@@ -31,18 +33,40 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.kiwe.domain.model.MenuCategoryParam
-import com.kiwe.domain.model.OrderItem
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.kiwe.manager.R
 import com.kiwe.manager.ui.component.CenterAlignedTable
 import com.kiwe.manager.ui.component.DashBoardAnalytics
 import com.kiwe.manager.ui.component.DashBoardCard
 import com.kiwe.manager.ui.component.OrderItem
 import com.kiwe.manager.ui.theme.Typography
+import org.orbitmvi.orbit.compose.collectAsState
+import java.util.Locale
+
+private const val TAG = "DashBoardScreen_싸피"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashBoardScreen() {
+fun DashBoardScreen(viewModel: DashBoardViewModel = hiltViewModel()) {
+    val state = viewModel.collectAsState().value
+    val orderIncreaseRate =
+        state.totalOrderRecent6Month.toList().let {
+            if (it.isNotEmpty() && it[1].second != 0) {
+                (it[0].second - it[1].second).toDouble() / it[1].second * 100
+            } else {
+                (-9999).toDouble()
+            }
+        }
+
+    val saleIncreaseRate =
+        state.totalSalesRecent6Month.toList().let {
+            if (it.isNotEmpty() && it[1].second != 0) {
+                (it[0].second - it[1].second).toDouble() / it[1].second * 100
+            } else {
+                (-9999).toDouble()
+            }
+        }
+
     Column(
         modifier =
             Modifier
@@ -71,7 +95,7 @@ fun DashBoardScreen() {
                         style = Typography.headlineLarge,
                     )
                     var expanded by remember { mutableStateOf(false) }
-                    val items = listOf("1일", "일주일", "한 달")
+                    val items = listOf("한 달")
                     var selectedItem by remember { mutableStateOf(items[0]) }
 
                     Box {
@@ -114,10 +138,28 @@ fun DashBoardScreen() {
                         modifier = Modifier.weight(1F),
                         R.drawable.order,
                         "이번달 주문",
-                        "1,342",
-                        R.drawable.decrease,
-                        R.color.dashboard_card_decrease,
-                        "10% 매출이 감소했습니다",
+                        String.format(Locale.getDefault(), "%,d", state.lastMonthOrder),
+                        if (orderIncreaseRate >= 0) {
+                            R.drawable.increase
+                        } else if (orderIncreaseRate.toInt() == -9999) {
+                            R.drawable.none
+                        } else {
+                            R.drawable.decrease
+                        },
+                        if (orderIncreaseRate >= 0) {
+                            R.color.dashboard_card_increase
+                        } else if (orderIncreaseRate.toInt() == -9999) {
+                            R.color.black
+                        } else {
+                            R.color.dashboard_card_decrease
+                        },
+                        if (orderIncreaseRate >= 0) {
+                            "${orderIncreaseRate.toInt()}% 증가했습니다!"
+                        } else if (orderIncreaseRate.toInt() == -9999) {
+                            ""
+                        } else {
+                            "${orderIncreaseRate.toInt()}% 감소했습니다"
+                        },
                     )
 
                     Spacer(modifier = Modifier.width(10.dp))
@@ -126,10 +168,28 @@ fun DashBoardScreen() {
                         modifier = Modifier.weight(1F),
                         R.drawable.sale,
                         "이번달 판매 매출",
-                        "₩ 8,454,500",
-                        R.drawable.increase,
-                        R.color.dashboard_card_increase,
-                        "12% 매출이 증가했습니다",
+                        "₩ ${String.format(Locale.getDefault(), "%,d원", state.lastMonthSale)}",
+                        if (orderIncreaseRate >= 0) {
+                            R.drawable.increase
+                        } else if (orderIncreaseRate.toInt() == -9999) {
+                            R.drawable.none
+                        } else {
+                            R.drawable.decrease
+                        },
+                        if (orderIncreaseRate >= 0) {
+                            R.color.dashboard_card_increase
+                        } else if (orderIncreaseRate.toInt() == -9999) {
+                            R.color.black
+                        } else {
+                            R.color.dashboard_card_decrease
+                        },
+                        if (saleIncreaseRate >= 0) {
+                            "${saleIncreaseRate.toInt()}% 매출이증가했습니다!"
+                        } else if (saleIncreaseRate.toInt() == -9999) {
+                            ""
+                        } else {
+                            "${saleIncreaseRate.toInt()}% 매출이 감소했습니다"
+                        },
                     )
                     Spacer(modifier = Modifier.width(10.dp))
 
@@ -137,10 +197,28 @@ fun DashBoardScreen() {
                         modifier = Modifier.weight(1F),
                         R.drawable.sale,
                         "이번달 예상 수익",
-                        "₩ 4,975,800",
-                        R.drawable.increase,
-                        R.color.dashboard_card_increase,
-                        "12% 수익이 증가했습니다",
+                        "₩ ${String.format(Locale.getDefault(), "%,d원", (state.lastMonthSale * 0.4).toInt())}",
+                        if (orderIncreaseRate >= 0) {
+                            R.drawable.increase
+                        } else if (orderIncreaseRate.toInt() == -9999) {
+                            R.drawable.none
+                        } else {
+                            R.drawable.decrease
+                        },
+                        if (orderIncreaseRate >= 0) {
+                            R.color.dashboard_card_increase
+                        } else if (orderIncreaseRate.toInt() == -9999) {
+                            R.color.black
+                        } else {
+                            R.color.dashboard_card_decrease
+                        },
+                        if (saleIncreaseRate >= 0) {
+                            "${saleIncreaseRate.toInt()}% 수익이증가했습니다!"
+                        } else if (saleIncreaseRate.toInt() == -9999) {
+                            ""
+                        } else {
+                            "${saleIncreaseRate.toInt()}% 수익이 감소했습니다"
+                        },
                     )
                     Spacer(modifier = Modifier.width(10.dp))
 
@@ -156,25 +234,44 @@ fun DashBoardScreen() {
                 }
 
                 Spacer(modifier = Modifier.height(50.dp))
-
+                val tableData =
+                    state.topSellingMenusSortByAge.map {
+                        listOf(
+                            it.key,
+                            it.value.entries
+                                .first()
+                                .key,
+                            it.value.entries
+                                .first()
+                                .value
+                                .toString(),
+                        )
+                    }
+                Log.d(TAG, "DashBoardScreen: $tableData")
                 Row {
                     DashBoardAnalytics(
                         modifier = Modifier.weight(1F),
-                        buttonModifier = Modifier.width(100.dp),
-                        dropDownMenuFirst = listOf("음료", "디저트"),
-                        dropDownMenuSecond = listOf("음료", "디저트"),
+                        buttonModifier = Modifier.width(120.dp),
+                        dropDownMenuFirst = listOf("전체"),
+                        dropDownMenuSecond = listOf("나이 순"),
                         title = "연령대별 인기 메뉴",
                     ) {
                         val data =
                             listOf(
-                                listOf("나이", "나이", "나이"),
-                                listOf("10대", "자바 칩 프라푸치노", "121"),
-                                listOf("10대", "자바 칩 프라푸치노", "121"),
-                                listOf("10대", "자바 칩 프라푸치노", "121"),
-                                listOf("10대", "자바 칩 프라푸치노", "121"),
-                                listOf("10대", "자바 칩 프라푸치노", "121"),
-                                listOf("10대", "자바 칩 프라푸치노", "121"),
-                            )
+                                listOf("나이", "제품명", "판매량"),
+                            ) +
+                                state.topSellingMenusSortByAge.map {
+                                    listOf(
+                                        it.key,
+                                        it.value.entries
+                                            .first()
+                                            .key,
+                                        it.value.entries
+                                            .first()
+                                            .value
+                                            .toString(),
+                                    )
+                                }
 
                         CenterAlignedTable(data)
                     }
@@ -184,170 +281,62 @@ fun DashBoardScreen() {
                     DashBoardAnalytics(
                         modifier = Modifier.weight(1F),
                         buttonModifier = Modifier.width(100.dp),
-                        dropDownMenuFirst = listOf("음료", "디저트"),
+                        dropDownMenuFirst = listOf("전체"),
                         title = "판매량 기반 추천메뉴 구성",
                     ) {
-                        Column(
+                        val firstMenuList =
+                            if (state.listMenuSuggested.chunked(6).isNotEmpty()) {
+                                state.listMenuSuggested.chunked(6)[0]
+                            } else {
+                                emptyList()
+                            }
+                        val secondMenuList =
+                            if (state.listMenuSuggested.chunked(6).size >= 2) {
+                                state.listMenuSuggested.chunked(6)[1]
+                            } else {
+                                emptyList()
+                            }
+
+                        LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.SpaceAround,
                         ) {
-                            Row(
-                                modifier = Modifier.padding(18.dp),
-                            ) {
-                                OrderItem(
-                                    orderItem =
-                                        MenuCategoryParam(
-                                            id = 1,
-                                            category = "디카페인",
-                                            categoryNumber = 1,
-                                            hotOrIce = "HOT",
-                                            name = "디카페인 아메리카노",
-                                            price = 1000,
-                                            description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
-                                            imgPath = "drinks/딸기주스.jpg",
-                                        ),
-                                    modifier = Modifier.weight(1F),
-                                ) { _, _, _, _ ->
+                            if (firstMenuList.isNotEmpty()) {
+                                item {
+                                    Row(
+                                        modifier = Modifier.padding(18.dp),
+                                    ) {
+                                        firstMenuList.forEach {
+                                            OrderItem(
+                                                orderItem =
+                                                it,
+                                                modifier = Modifier.weight(1F),
+                                            ) { _, _, _, _ ->
+                                            }
+                                        }
+                                        repeat(6 - firstMenuList.size) {
+                                            Spacer(modifier = Modifier.weight(1F))
+                                        }
+                                    }
                                 }
-                                OrderItem(
-                                    orderItem =
-                                        MenuCategoryParam(
-                                            id = 1,
-                                            category = "디카페인",
-                                            categoryNumber = 1,
-                                            hotOrIce = "HOT",
-                                            name = "디카페인 아메리카노",
-                                            price = 1000,
-                                            description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
-                                            imgPath = "drinks/딸기주스.jpg",
-                                        ),
-                                    modifier = Modifier.weight(1F),
-                                ) { _, _, _, _ ->
-                                }
-                                OrderItem(
-                                    orderItem =
-                                        MenuCategoryParam(
-                                            id = 1,
-                                            category = "디카페인",
-                                            categoryNumber = 1,
-                                            hotOrIce = "HOT",
-                                            name = "디카페인 아메리카노",
-                                            price = 1000,
-                                            description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
-                                            imgPath = "drinks/딸기주스.jpg",
-                                        ),
-                                    modifier = Modifier.weight(1F),
-                                ) { _, _, _, _ ->
-                                }
-                                OrderItem(
-                                    orderItem =
-                                        MenuCategoryParam(
-                                            id = 1,
-                                            category = "디카페인",
-                                            categoryNumber = 1,
-                                            hotOrIce = "HOT",
-                                            name = "디카페인 아메리카노",
-                                            price = 1000,
-                                            description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
-                                            imgPath = "drinks/딸기주스.jpg",
-                                        ),
-                                    modifier = Modifier.weight(1F),
-                                ) { _, _, _, _ ->
-                                }
-                                OrderItem(
-                                    orderItem =
-                                        MenuCategoryParam(
-                                            id = 1,
-                                            category = "디카페인",
-                                            categoryNumber = 1,
-                                            hotOrIce = "HOT",
-                                            name = "디카페인 아메리카노",
-                                            price = 1000,
-                                            description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
-                                            imgPath = "drinks/딸기주스.jpg",
-                                        ),
-                                    modifier = Modifier.weight(1F),
-                                ) { _, _, _, _ ->
-                                }
-                            }
-
-                            Row(
-                                modifier = Modifier.padding(18.dp),
-                            ) {
-                                OrderItem(
-                                    orderItem =
-                                        MenuCategoryParam(
-                                            id = 1,
-                                            category = "디카페인",
-                                            categoryNumber = 1,
-                                            hotOrIce = "HOT",
-                                            name = "디카페인 아메리카노",
-                                            price = 1000,
-                                            description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
-                                            imgPath = "drinks/딸기주스.jpg",
-                                        ),
-                                    modifier = Modifier.weight(1F),
-                                ) { _, _, _, _ ->
-                                }
-                                OrderItem(
-                                    orderItem =
-                                        MenuCategoryParam(
-                                            id = 1,
-                                            category = "디카페인",
-                                            categoryNumber = 1,
-                                            hotOrIce = "HOT",
-                                            name = "디카페인 아메리카노",
-                                            price = 1000,
-                                            description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
-                                            imgPath = "drinks/딸기주스.jpg",
-                                        ),
-                                    modifier = Modifier.weight(1F),
-                                ) { _, _, _, _ ->
-                                }
-                                OrderItem(
-                                    orderItem =
-                                        MenuCategoryParam(
-                                            id = 1,
-                                            category = "디카페인",
-                                            categoryNumber = 1,
-                                            hotOrIce = "HOT",
-                                            name = "디카페인 아메리카노",
-                                            price = 1000,
-                                            description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
-                                            imgPath = "drinks/딸기주스.jpg",
-                                        ),
-                                    modifier = Modifier.weight(1F),
-                                ) { _, _, _, _ ->
-                                }
-                                OrderItem(
-                                    orderItem =
-                                        MenuCategoryParam(
-                                            id = 1,
-                                            category = "디카페인",
-                                            categoryNumber = 1,
-                                            hotOrIce = "HOT",
-                                            name = "디카페인 아메리카노",
-                                            price = 1000,
-                                            description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
-                                            imgPath = "drinks/딸기주스.jpg",
-                                        ),
-                                    modifier = Modifier.weight(1F),
-                                ) { _, _, _, _ ->
-                                }
-                                OrderItem(
-                                    orderItem =
-                                        MenuCategoryParam(
-                                            id = 1,
-                                            category = "디카페인",
-                                            categoryNumber = 1,
-                                            hotOrIce = "HOT",
-                                            name = "디카페인 아메리카노",
-                                            price = 1000,
-                                            description = "향과 풍미 그대로 카페인만을 낮춰 민감한 분들도 안심하고 매일매일 즐길 수 있는 디카페인 커피",
-                                            imgPath = "drinks/딸기주스.jpg",
-                                        ),
-                                    modifier = Modifier.weight(1F),
-                                ) { _, _, _, _ ->
+                                if (secondMenuList.isNotEmpty()) {
+                                    item {
+                                        Row(
+                                            modifier = Modifier.padding(18.dp),
+                                        ) {
+                                            secondMenuList.forEach {
+                                                OrderItem(
+                                                    orderItem =
+                                                    it,
+                                                    modifier = Modifier.weight(1F),
+                                                ) { _, _, _, _ ->
+                                                }
+                                            }
+                                            repeat(6 - secondMenuList.size) {
+                                                Spacer(modifier = Modifier.weight(1F))
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }

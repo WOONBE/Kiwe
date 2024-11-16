@@ -54,7 +54,7 @@ fun TableHeader(tableHeader: List<String>) {
                         text = text,
                         modifier =
                             Modifier
-                                .weight(1f)
+                                .weight(2f)
                                 .padding(4.dp),
                         color = Color.Black,
                         style = Typography.titleSmall,
@@ -80,7 +80,7 @@ fun TableHeader(tableHeader: List<String>) {
                         text = text,
                         modifier =
                             Modifier
-                                .weight(1f)
+                                .weight(2f)
                                 .padding(4.dp),
                         color = Color.Black,
                         style = Typography.titleSmall,
@@ -134,7 +134,7 @@ fun TableBody(tableBody: List<String>) {
                             },
                         modifier =
                             Modifier
-                                .weight(1f)
+                                .weight(2f)
                                 .padding(8.dp),
                         color = Color.Black,
                         style = Typography.labelSmall,
@@ -148,7 +148,7 @@ fun TableBody(tableBody: List<String>) {
                             String.format(Locale.getDefault(), "%,d", data.toInt()),
                         modifier =
                             Modifier
-                                .weight(1F)
+                                .weight(2F)
                                 .padding(8.dp),
                         color = Color.Black,
                         style = Typography.bodySmall,

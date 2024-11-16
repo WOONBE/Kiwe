@@ -4,13 +4,20 @@ import com.kiwe.data.usecase.CancelPaymentUseCaseImpl
 import com.kiwe.data.usecase.ConfirmPaymentUseCaseImpl
 import com.kiwe.data.usecase.PostOrderUseCaseImpl
 import com.kiwe.data.usecase.VoiceOrderUseCaseImpl
-import com.kiwe.domain.usecase.VoiceOrderUseCase
+import com.kiwe.data.usecase.VoiceRecommendUseCaseImpl
 import com.kiwe.data.usecase.manager.order.CheckOrderStatusUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetKioskTotalOrdersLast6MonthsUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetKioskTotalOrdersLastMonthUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetLastMonthIncomeUseCaseImpl
+import com.kiwe.data.usecase.manager.order.GetLastMonthOrderUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetOrderAllUseCaseImpl
 import com.kiwe.data.usecase.manager.order.GetOrderUseCaseImpl
+import com.kiwe.data.usecase.manager.order.GetRecentSixMonthOrderUseCaseImpl
+import com.kiwe.data.usecase.manager.order.GetTopSellingMenusSortByAgeUseCaseImpl
+import com.kiwe.data.usecase.manager.order.GetTotalPriceLastMonthsUseCaseImpl
+import com.kiwe.data.usecase.manager.order.GetTotalPriceRecentSixMonthsUseCaseImpl
+import com.kiwe.domain.usecase.VoiceOrderUseCase
+import com.kiwe.domain.usecase.VoiceRecommendUseCase
 import com.kiwe.domain.usecase.kiosk.CancelPaymentUseCase
 import com.kiwe.domain.usecase.kiosk.ConfirmPaymentUseCase
 import com.kiwe.domain.usecase.kiosk.PostOrderUseCase
@@ -18,8 +25,13 @@ import com.kiwe.domain.usecase.order.CheckOrderStatusUseCase
 import com.kiwe.domain.usecase.order.GetKioskTotalOrdersLast6MonthsUseCase
 import com.kiwe.domain.usecase.order.GetKioskTotalOrdersLastMonthUseCase
 import com.kiwe.domain.usecase.order.GetLastMonthIncomeUseCase
+import com.kiwe.domain.usecase.order.GetLastMonthOrderUseCase
 import com.kiwe.domain.usecase.order.GetOrderAllUseCase
 import com.kiwe.domain.usecase.order.GetOrderUseCase
+import com.kiwe.domain.usecase.order.GetRecentSixMonthOrderUseCase
+import com.kiwe.domain.usecase.order.GetTopSellingMenusSortByAgeUseCase
+import com.kiwe.domain.usecase.order.GetTotalPriceLastMonthUseCase
+import com.kiwe.domain.usecase.order.GetTotalPriceRecentSixMonthsUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -41,6 +53,9 @@ interface OrderModule {
     fun bindVoiceOrderUseCase(uc: VoiceOrderUseCaseImpl): VoiceOrderUseCase
 
     @Binds
+    fun bindVoiceRecommendUseCase(uc: VoiceRecommendUseCaseImpl): VoiceRecommendUseCase
+
+    @Binds
     fun bindGetLastMonthIncomeUseCase(uc: GetLastMonthIncomeUseCaseImpl): GetLastMonthIncomeUseCase
 
     @Binds
@@ -57,4 +72,19 @@ interface OrderModule {
 
     @Binds
     fun bindGetOrderAllUseCase(uc: GetOrderAllUseCaseImpl): GetOrderAllUseCase
+
+    @Binds
+    fun bindGetTotalPriceLastMonthUseCase(uc: GetTotalPriceLastMonthsUseCaseImpl): GetTotalPriceLastMonthUseCase
+
+    @Binds
+    fun bindGetTotalPriceRecentSixMonthsUseCase(uc: GetTotalPriceRecentSixMonthsUseCaseImpl): GetTotalPriceRecentSixMonthsUseCase
+
+    @Binds
+    fun bindGetLastMonthOrderUseCase(uc: GetLastMonthOrderUseCaseImpl): GetLastMonthOrderUseCase
+
+    @Binds
+    fun bindGetRecentSixMonthOrderUseCase(uc: GetRecentSixMonthOrderUseCaseImpl): GetRecentSixMonthOrderUseCase
+
+    @Binds
+    fun bindGetTopSellingMenusSortByAgeUseCase(uc: GetTopSellingMenusSortByAgeUseCaseImpl): GetTopSellingMenusSortByAgeUseCase
 }

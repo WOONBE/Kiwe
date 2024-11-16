@@ -79,6 +79,36 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByMemberIdAndOrderDateAfter(@Param("memberId") Integer memberId, @Param("oneMonthAgo") LocalDateTime oneMonthAgo);
 
 
+//    @Query("SELECT FUNCTION('YEAR', o.orderDate) AS year, FUNCTION('MONTH', o.orderDate) AS month, SUM(om.quantity * m.price) AS totalSales " +
+//        "FROM Order o " +
+//        "JOIN o.kioskOrders ko " +
+//        "JOIN ko.kiosk k " +
+//        "JOIN o.orderMenus om " +
+//        "JOIN om.menu m " +
+//        "WHERE k.member.id = :memberId " +
+//        "AND o.orderDate BETWEEN :startDate AND :endDate " +
+//        "GROUP BY FUNCTION('YEAR', o.orderDate), FUNCTION('MONTH', o.orderDate) " +
+//        "ORDER BY FUNCTION('YEAR', o.orderDate) DESC, FUNCTION('MONTH', o.orderDate) DESC")
+//    List<Object[]> findMonthlySalesByMemberIdForLastSixMonths(@Param("memberId") Integer memberId,
+//        @Param("startDate") LocalDateTime startDate,
+//        @Param("endDate") LocalDateTime endDate);
+
+
+    @Query("SELECT FUNCTION('YEAR', o.orderDate) AS year, FUNCTION('MONTH', o.orderDate) AS month, SUM(om.quantity * m.price) AS totalSales " +
+        "FROM Order o " +
+        "JOIN o.kioskOrders ko " +
+        "JOIN ko.kiosk k " +
+        "JOIN o.orderMenus om " +
+        "JOIN om.menu m " +
+        "WHERE k.member.id = :memberId " +
+        "AND o.orderDate BETWEEN :startDate AND :endDate " +
+        "GROUP BY FUNCTION('YEAR', o.orderDate), FUNCTION('MONTH', o.orderDate) " +
+        "ORDER BY FUNCTION('YEAR', o.orderDate) DESC, FUNCTION('MONTH', o.orderDate) DESC")
+    List<Object[]> findMonthlySalesByMemberIdForLastSixMonths(@Param("memberId") Integer memberId,
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate);
+
+
 
 
 
