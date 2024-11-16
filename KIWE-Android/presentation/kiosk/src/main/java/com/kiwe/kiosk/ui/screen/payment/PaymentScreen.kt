@@ -24,6 +24,7 @@ fun PaymentScreen(
     onEnterScreen: (Int) -> Unit = {},
 ) {
     val paymentState = viewModel.collectAsState().value
+    val mainState = mainViewModel.collectAsState().value
     val context = LocalContext.current
     val shoppingCartState = shoppingCartViewModel.collectAsState().value
     viewModel.collectSideEffect { sideEffect ->
@@ -44,6 +45,7 @@ fun PaymentScreen(
         })
     LaunchedEffect(Unit) {
         onEnterScreen(2)
+        viewModel.setAgeAndGender(mainState.age, mainState.gender)
     }
     HorizontalPager(
         modifier = modifier,
@@ -56,11 +58,11 @@ fun PaymentScreen(
                     modifier = Modifier.fillMaxSize(),
                     mainViewModel = mainViewModel,
                     onPackagingClick = {
-                        viewModel.postOrder(paymentState.kioskId, shoppingCartState)
+                        viewModel.postOrder(paymentState.kioskId, paymentState.age, paymentState.gender, shoppingCartState)
                         viewModel.showDialog()
                     },
                     onStoreClick = {
-                        viewModel.postOrder(paymentState.kioskId, shoppingCartState)
+                        viewModel.postOrder(paymentState.kioskId, paymentState.age, paymentState.gender, shoppingCartState)
                         viewModel.showDialog()
                     },
                 )
