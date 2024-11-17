@@ -424,7 +424,7 @@ class MainViewModel
                                 ?.map { it.toInt() }
                         val requestMenuId = menuList!!.shuffled().first()
                         val menu = getMenuByIdUseCase(requestMenuId).getOrThrow()
-                        textToSpeechManager.speak(TEXT_MENU_RECOMMENDATION)
+                        textToSpeechManager.speak(TEXT_MENU_RECOMMENDATION + menu.name + "로 드릴까요?")
                         Timber.tag("추천").d("$menu")
                         reduce {
                             state.copy(
