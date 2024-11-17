@@ -6,8 +6,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Locale
 import javax.inject.Inject
 
-private const val TAG = "TextToSpeechManager"
-
 class TextToSpeechManager
     @Inject
     constructor(
