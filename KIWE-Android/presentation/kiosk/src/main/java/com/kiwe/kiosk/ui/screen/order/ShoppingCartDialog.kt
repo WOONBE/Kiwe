@@ -13,11 +13,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -324,7 +327,7 @@ private fun ShoppingCartDataInfo(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                modifier = Modifier.weight(1F),
+                modifier = Modifier.weight(2F),
                 text = String.format(Locale.getDefault(), "%,d원", item.totalPrice * item.count),
                 style = Typography.bodyMedium,
                 color = Color.Black,
@@ -334,42 +337,56 @@ private fun ShoppingCartDataInfo(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (item.count != 1) {
-                    Image(
-                        modifier =
-                            Modifier
-                                .height(20.dp)
-                                .clickable {
-                                    onMinusItem(item.menuTitle, item.menuRadioOption)
-                                },
-                        painter = painterResource(R.drawable.minus),
-                        contentDescription = "감소 버튼",
-                    )
+                if (item.count > 1) {
+                    IconButton(
+                        onClick = { onMinusItem(item.menuTitle, item.menuRadioOption) },
+                        modifier = Modifier.size(20.dp), // Icon 크기와 동일한 크기로 클릭 영역 제한
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.minus),
+                            contentDescription = "감소 버튼",
+                            tint = Color.Unspecified, // 원본 색상 유지
+                        )
+                    }
                 } else {
-                    Image(
-                        modifier =
-                            Modifier
-                                .height(20.dp)
-                                .alpha(0F),
+                    Icon(
                         painter = painterResource(R.drawable.minus),
                         contentDescription = "감소 버튼",
+                        tint = Color.Unspecified, // 원본 색상 유지
+                        modifier =
+                            Modifier
+                                .size(20.dp)
+                                .alpha(0F), // 버튼을 숨김
                     )
                 }
+
                 Text(
                     text = item.count.toString(),
                     style = Typography.bodySmall,
                     color = Color.Black,
                 )
-                Image(
-                    modifier =
-                        Modifier
-                            .height(20.dp)
-                            .clickable {
-                                onAddItem(item.menuTitle, item.menuRadioOption)
-                            },
-                    painter = painterResource(R.drawable.plus),
-                    contentDescription = "추가 버튼",
-                )
+                if (item.count < 99) {
+                    IconButton(
+                        onClick = { onAddItem(item.menuTitle, item.menuRadioOption) },
+                        modifier = Modifier.size(20.dp), // Icon 크기와 동일한 크기로 클릭 영역 제한
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.plus),
+                            contentDescription = "추가 버튼",
+                            tint = Color.Unspecified, // 원본 색상 유지
+                        )
+                    }
+                } else {
+                    Icon(
+                        painter = painterResource(R.drawable.plus),
+                        contentDescription = "추가 버튼",
+                        tint = Color.Unspecified, // 원본 색상 유지
+                        modifier =
+                            Modifier
+                                .size(20.dp)
+                                .alpha(0F), // 버튼을 숨김
+                    )
+                }
             }
         }
     }
@@ -385,14 +402,14 @@ fun ShoppingCartDialogPreview() {
                 menuTitle = "딸111기쿠키프라페",
 //                menuPrice = 5000,
                 menuImgPath = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                count = 99,
+                count = 1,
             ),
             ShoppingCartItem(
                 menuId = 1,
                 menuTitle = "딸111기쿠키프라페",
 //                menuPrice = 5000,
                 menuImgPath = "https://img.freepik.com/free-photo/black-coffee-cup_74190-7411.jpg",
-                count = 99,
+                count = 23,
             ),
             ShoppingCartItem(
                 menuId = 1,
