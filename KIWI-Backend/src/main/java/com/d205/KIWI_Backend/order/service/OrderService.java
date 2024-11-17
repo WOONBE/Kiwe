@@ -70,6 +70,7 @@ public class OrderService {
             .age(orderRequest.getAge())
             .gender(orderRequest.getGender())
             .status("PENDING")  // 기본 상태: PENDING
+            .orderNumber(orderRequest.getOrderNumber())
             .build();
 
         int totalPrice = 0;
@@ -117,9 +118,10 @@ public class OrderService {
             .orderId(savedOrder.getId())
             .orderDate(savedOrder.getOrderDate())
             .status(savedOrder.getStatus())
-            .menuOrders(createMenuOrderResponses(orderMenus))  // 주문 메뉴 항목 응답 리스트 생성
+            .menuOrders(createMenuOrderResponses(orderMenus, savedOrder.getOrderNumber()))  // 주문 메뉴 항목 응답 리스트 생성
             .totalPrice(totalPrice)
             .kioskId(orderRequest.getKioskId())  // 요청받은 키오스크 ID
+            .orderNumber(savedOrder.getOrderNumber())
             .build();
 
         return orderResponse;
@@ -145,9 +147,10 @@ public class OrderService {
             .orderId(order.getId())
             .orderDate(order.getOrderDate())
             .status(order.getStatus())
-            .menuOrders(createMenuOrderResponses(orderMenus))
+            .menuOrders(createMenuOrderResponses(orderMenus, order.getOrderNumber()))
             .kioskId(order.getKioskOrders().get(0).getKiosk().getId())  // 첫 번째 키오스크 정보 가져오기
             .totalPrice(totalPrice)
+            .orderNumber(order.getOrderNumber())
             .build();
     }
 
@@ -169,9 +172,10 @@ public class OrderService {
                 .orderId(order.getId())
                 .orderDate(order.getOrderDate())
                 .status(order.getStatus())
-                .menuOrders(createMenuOrderResponses(orderMenus))
+                .menuOrders(createMenuOrderResponses(orderMenus, order.getOrderNumber()))
                 .kioskId(order.getKioskOrders().get(0).getKiosk().getId())  // 첫 번째 키오스크 정보 가져오기
                 .totalPrice(totalPrice)
+                .orderNumber(order.getOrderNumber())
                 .build();
 
             orderResponses.add(orderResponse);
@@ -220,7 +224,7 @@ public class OrderService {
             .orderId(updatedOrder.getId())
             .orderDate(updatedOrder.getOrderDate())
             .status(updatedOrder.getStatus())
-            .menuOrders(createMenuOrderResponses(orderMenus))  // totalPrice 포함
+            .menuOrders(createMenuOrderResponses(orderMenus, updatedOrder.getOrderNumber()))  // totalPrice 포함
             .totalPrice(totalPrice)
             .build();
 
@@ -236,7 +240,7 @@ public class OrderService {
         orderRepository.delete(existingOrder.get());  // 주문 삭제
     }
 
-    private List<MenuOrderResponse> createMenuOrderResponses(List<OrderMenu> orderMenus) {
+    private List<MenuOrderResponse> createMenuOrderResponses(List<OrderMenu> orderMenus, int orderNumber) {
         List<MenuOrderResponse> menuOrderResponses = new ArrayList<>();
         for (OrderMenu orderMenu : orderMenus) {
             MenuOrderResponse menuOrderResponse = MenuOrderResponse.builder()
@@ -244,6 +248,7 @@ public class OrderService {
                 .name(orderMenu.getMenu().getName())
                 .quantity(orderMenu.getQuantity())
                 .price(orderMenu.getMenu().getPrice())
+                .orderNumber(orderNumber)
                 .build();
             menuOrderResponses.add(menuOrderResponse);
         }
@@ -424,7 +429,7 @@ public class OrderService {
                 .orderId(order.getId())
                 .orderDate(order.getOrderDate())
                 .status(order.getStatus())
-                .menuOrders(createMenuOrderResponses(orderMenus))
+                .menuOrders(createMenuOrderResponses(orderMenus, order.getOrderNumber()))
                 .kioskId(order.getKioskOrders().get(0).getKiosk().getId())
                 .totalPrice(totalPrice)
                 .build();
@@ -817,7 +822,7 @@ public class OrderService {
 
         Order order = existingOrder.get();
         List<OrderMenu> orderMenus = order.getOrderMenus(); // 기존 메뉴 항목
-        return createMenuOrderResponses(orderMenus);
+        return createMenuOrderResponses(orderMenus, order.getOrderNumber());
     }
 
 

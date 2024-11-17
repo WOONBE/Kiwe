@@ -110,10 +110,6 @@ fun ContainerScreen(
     var isLogoutDialogOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.page) {
-        if (state.page == 1) {
-            Timber.tag(TAG).d("LaunchedEffect")
-//            viewModel.speakWithTTS("음성 도움을 받으시려면, '도와줘'라고 말씀해주세요", tts)
-        }
         if (state.page == 0) {
             isShoppingCartDialogOpen = false
         }
@@ -242,8 +238,11 @@ fun ContainerScreen(
         }
 
         if (state.isAddCartFalse) {
-            shoppingCartViewModel.onVoiceResult(state.voiceResult)
+            // 추천한 거 안담으면 그냥 장바구니 오픈
+            shoppingCartViewModel.onVoiceResult(state.voiceResult) // 담겨있던거 써야되는데,
             viewModel.clearVoiceRecord()
+            // 장바구니 오픈
+            viewModel.openShoppingCart()
         }
         viewModel.clearRecommendHistory()
     }

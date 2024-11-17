@@ -67,7 +67,6 @@ fun SpeechScreen(
     LaunchedEffect(state.voiceResult) {
         if (state.voiceResult.category == 1) { // 이러면 응답이 들어왔다는 의미이며 주문일 때만
             shoppingCartViewModel.onVoiceResult(state.voiceResult)
-//            ttsManager.speak(state.voiceResult.response) // tts로 읽어준다
             mainViewModel.clearVoiceRecord()
         }
     }
