@@ -7,6 +7,7 @@ interface PostOrderUseCase {
         kioskId: Int,
         age: Int,
         gender: String,
+        orderNumber: Int,
         order: Order,
     ): Result<String>
 }

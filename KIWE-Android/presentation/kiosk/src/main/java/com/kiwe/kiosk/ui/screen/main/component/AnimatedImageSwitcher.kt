@@ -70,13 +70,13 @@ fun AnimatedImageSwitcher(
     ) {
         if (imageVisible) {
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_playstore_nobg),
+                painter = painterResource(id = R.drawable.img_staff_speak_close),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_playstore_nobg_open),
+                painter = painterResource(id = R.drawable.img_staff_speak_open),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
             )

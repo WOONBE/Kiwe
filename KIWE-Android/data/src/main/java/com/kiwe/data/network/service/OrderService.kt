@@ -10,11 +10,15 @@ import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.utils.EmptyContent.contentType
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import timber.log.Timber
+import timber.log.Timber.Forest.tag
 import javax.inject.Inject
+
+private const val TAG = "POST 서비스"
 
 class OrderService
     @Inject
