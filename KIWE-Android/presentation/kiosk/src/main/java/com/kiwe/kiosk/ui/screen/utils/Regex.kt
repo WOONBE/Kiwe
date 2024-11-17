@@ -125,6 +125,8 @@ val temperatureCommands =
         "따뜻",
         "뜨거운",
         "차가운",
+        "아이스",
+        "핫", // 매직단어
     )
 val temperaturePattern = temperatureCommands.joinToString("|") { "(?:$it)" }
 val temperatureRegex = Regex(temperaturePattern)
