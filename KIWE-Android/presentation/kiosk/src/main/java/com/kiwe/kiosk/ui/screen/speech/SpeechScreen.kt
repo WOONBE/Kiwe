@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kiwe.kiosk.main.MainViewModel
+import com.kiwe.kiosk.ui.screen.main.MySpeechInputText
 import com.kiwe.kiosk.ui.screen.main.component.WavyAnimation
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
@@ -39,7 +40,7 @@ import kotlinx.coroutines.delay
 import org.orbitmvi.orbit.compose.collectAsState
 import timber.log.Timber
 
-const val MAX_SPEECH_WAIT_TIME = 5
+const val MAX_SPEECH_WAIT_TIME = 10
 
 private const val TAG = "SpeechScreen"
 
@@ -55,7 +56,6 @@ fun SpeechScreen(
     DisposableEffect(Unit) {
         onDispose {
             Timber.tag(TAG).d("onDispose")
-//            ttsManager.stop()
         }
     }
 
@@ -69,8 +69,8 @@ fun SpeechScreen(
     SpeechScreen(
         isOpen = state.isScreenShowing, // 녹음중인 상태일 때 SpeechScreen을 보여준다
         onDismissRequest = mainViewModel::onDismissRequest,
-        recognizedText = state.recognizedText,
-        commandText = "\"차가운 아메리카노 한잔 주세요\"",
+        isMySpeechInputTextOpen = state.isMySpeechInputTextOpen,
+        sentence = state.mySpeechText,
         shouldShowRetryMessage = state.shouldShowRetryMessage,
         isTemperatureEmpty = state.isTemperatureEmpty,
     )
@@ -80,8 +80,8 @@ fun SpeechScreen(
 private fun SpeechScreen(
     isOpen: Boolean,
     onDismissRequest: () -> Unit,
-    recognizedText: String,
-    commandText: String,
+    isMySpeechInputTextOpen: Boolean,
+    sentence: String = "\"차가운 아메리카노 한잔 주세요\"",
     shouldShowRetryMessage: Boolean,
     isTemperatureEmpty: Boolean,
 ) {
@@ -133,11 +133,9 @@ private fun SpeechScreen(
                                     .copy(fontWeight = FontWeight.Bold),
                             modifier = Modifier.padding(horizontal = 8.dp).padding(top = 20.dp),
                         )
-                        Text(
-                            text = recognizedText.ifEmpty { commandText },
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
-                            modifier = Modifier.padding(horizontal = 8.dp).padding(top = 8.dp),
+                        MySpeechInputText(
+                            isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+                            sentence = sentence,
                         )
                     }
 
@@ -169,9 +167,13 @@ private fun SpeechScreen(
                 }
                 if (elapsedTime >= MAX_SPEECH_WAIT_TIME) {
                     ExampleBox()
+                    MySpeechInputText(
+                        isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+                        sentence = sentence,
+                    )
                 }
                 if (isTemperatureEmpty) {
-                    elapsedTime = -6
+                    elapsedTime = -7 // 7초안에 온도 골라야됨
                     TempBox()
                 }
             }
@@ -276,9 +278,9 @@ fun SpeechScreenPreview() {
         SpeechScreen(
             isOpen = true,
             onDismissRequest = {},
-            recognizedText = "",
+            isMySpeechInputTextOpen = true,
             shouldShowRetryMessage = false,
-            commandText = "dicat",
+            sentence = "dfdfdfdfdfdfdfdfd",
             isTemperatureEmpty = true,
         )
     }

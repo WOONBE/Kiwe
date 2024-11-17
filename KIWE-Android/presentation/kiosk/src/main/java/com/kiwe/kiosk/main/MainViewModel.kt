@@ -88,6 +88,9 @@ class MainViewModel
             textToSpeechManager.setOnCompleteListener {
                 startSpeechRecognition() // tts가 끝나면 stt 살리게 했음
             }
+//            textToSpeechManager.setOnStartListener {
+//                stopSpeechRecognition()
+//            }
         }
 
         // 음성 인식 시작
@@ -116,10 +119,9 @@ class MainViewModel
         override fun onResultsReceived(results: List<String>) {
             val resultText = results.firstOrNull() ?: ""
             intent {
+                setMySpeechInput(resultText)
+                delay(1000L) // 1초 대기
                 Timber.tag("MainViewModel").d("Result: $resultText 하고 ${state.isScreenShowing}")
-                if (resultText.isNotEmpty()) {
-                    setMySpeechInput(resultText)
-                }
                 if (state.isScreenShowing) { // SpeechScreen여부
                     onSpeechResult(resultText)
                 } else if (helpPopupRegex.containsMatchIn(resultText)) {
@@ -463,8 +465,10 @@ class MainViewModel
 
         override fun onPartialResultsReceived(partialResults: List<String>) {
             val partialText = partialResults.firstOrNull() ?: ""
-            Timber.tag("MainViewModel").d("Partial Result: $partialText")
+            Timber.tag("MainViewModel").d("Partial Result: $partialResults")
             intent {
+                setMySpeechInput(partialText)
+                reduce { state.copy(isMySpeechInputTextOpen = true) }
                 if (state.isScreenShowing) {
                     // 다이얼로그가 보여지고 있는 상황이라면
                 } else if (helpPopupRegex.containsMatchIn(partialText)) {
@@ -677,6 +681,7 @@ data class MainState(
     val age: Int = 30,
     val gender: String = "male",
     val mySpeechText: String = "",
+    val isMySpeechInputTextOpen: Boolean = false,
     val voiceResult: VoiceBody =
         VoiceBody(
             category = 0,

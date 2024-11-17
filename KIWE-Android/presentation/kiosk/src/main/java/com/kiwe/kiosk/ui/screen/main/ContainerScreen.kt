@@ -80,7 +80,7 @@ import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import timber.log.Timber
 
-private const val TAG = "ContainerScreen"
+private const val TAG = "MySpeech"
 
 @Composable
 fun ContainerScreen(
@@ -108,16 +108,18 @@ fun ContainerScreen(
     LaunchedEffect(state.mySpeechText, state.isScreenShowing) {
         if (isQueryStateBoxOpen || state.isScreenShowing) {
             // true면 보이도록
+            Timber.tag(TAG).d("LaunchedEffect $isQueryStateBoxOpen") // yes no dialog는 안열렸음
             isMySpeechInputTextOpen = state.mySpeechText.isNotEmpty()
         }
     }
 
     if (isMySpeechInputTextOpen) {
+        Timber.tag(TAG).d("MySpeechInputText $isMySpeechInputTextOpen //  ${state.mySpeechText}")
+        // 텍스트가 일단 뽑힘
         MySpeechInputText(
             isMySpeechInputTextOpen = isMySpeechInputTextOpen,
             sentence = state.mySpeechText,
             onAnimationEnd = {
-                // 애니메이션이 끝난 후 동작 설정 (필요시)
                 isMySpeechInputTextOpen = false // 애니메이션 끝난 후 자동으로 숨기기
             },
         )
@@ -126,7 +128,6 @@ fun ContainerScreen(
     DisposableEffect(Unit) {
         onDispose {
             Timber.tag(TAG).d("onDispose")
-//            tts.stop()
         }
     }
 
@@ -220,7 +221,6 @@ fun ContainerScreen(
     QueryStateBox(
         isQueryStateBoxOpen = isQueryStateBoxOpen,
         page = state.page,
-        mySpeechInput = state.mySpeechText,
         onClose = {
             isQueryStateBoxOpen = false
         },
@@ -234,6 +234,8 @@ fun ContainerScreen(
             isShoppingCartDialogOpen = false
             viewModel.showSpeechScreen()
         },
+        isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+        sentence = state.mySpeechText,
     )
 
     if (state.isAddCartTrue || state.isAddCartFalse) {
@@ -264,6 +266,8 @@ fun ContainerScreen(
             onYesClick = {
                 viewModel.clearRecommendHistory()
             },
+            isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+            sentence = state.mySpeechText,
         )
     }
 
@@ -280,8 +284,6 @@ fun ContainerScreen(
             },
         )
     }
-
-    MySpeechInputText(isMySpeechInputTextOpen, state.mySpeechText, onAnimationEnd = {})
 
     ContainerScreen(
         page = state.page,
@@ -420,6 +422,8 @@ private fun ContainerScreen(
 fun RecommendStateBox(
     recommendString: String,
     recommendMenu: MenuCategoryParam,
+    isMySpeechInputTextOpen: Boolean,
+    sentence: String,
     onClose: () -> Unit,
     onYesClick: () -> Unit = {}, // 바로 장바구니에 넣기
 ) {
@@ -507,6 +511,8 @@ fun RecommendStateBox(
                             )
                         }
                     }
+
+                    MySpeechInputText(isMySpeechInputTextOpen = isMySpeechInputTextOpen, sentence = sentence)
                 }
             }
         }
@@ -516,8 +522,9 @@ fun RecommendStateBox(
 @Composable
 fun QueryStateBox(
     isQueryStateBoxOpen: Boolean,
+    isMySpeechInputTextOpen: Boolean,
+    sentence: String,
     page: Int = 0,
-    mySpeechInput: String = "",
     onClose: () -> Unit,
     onYesClick: () -> Unit = {},
     onNoClick: () -> Unit = {},
@@ -579,6 +586,7 @@ fun QueryStateBox(
                             )
                         }
                     }
+                    MySpeechInputText(isMySpeechInputTextOpen = isMySpeechInputTextOpen, sentence = sentence)
                 }
             }
         }
@@ -591,27 +599,29 @@ fun MySpeechInputText(
     sentence: String,
     onAnimationEnd: () -> Unit = {},
 ) {
-    if (isMySpeechInputTextOpen) {
+    if (isMySpeechInputTextOpen) { // 이게 true일거라서 보여야됨
+        Timber.tag(TAG).d("Composable $isMySpeechInputTextOpen")
         var displayedText by remember { mutableStateOf("") }
         val scope = rememberCoroutineScope()
-        if (isMySpeechInputTextOpen) {
-            LaunchedEffect(sentence) {
-                displayedText = ""
-                scope.launch {
-                    for (char in sentence) {
-                        displayedText += char
-                        delay(50)
-                    }
-                    onAnimationEnd()
+        LaunchedEffect(sentence) {
+            displayedText = ""
+            scope.launch {
+                for (char in sentence) {
+                    displayedText += char
+                    delay(100)
+                    Timber.tag(TAG).d("MySpeechInputText $displayedText")
                 }
+                onAnimationEnd() // 글자가 완성되면 할 것
+                // 글자 완성되면 플래그 하나 더 해서 그걸로 다뤄야할 것 같다.
             }
-
-            Text(
-                modifier = Modifier.padding(top = 12.dp),
-                text = "\"" + displayedText + "\"",
-                style = Typography.titleLarge.copy(color = Color.White),
-            )
         }
+
+        Text(
+            modifier = Modifier.fillMaxWidth().height(48.dp).padding(top = 12.dp),
+            text = "\"" + displayedText + "\"",
+            textAlign = TextAlign.Center,
+            style = Typography.titleLarge.copy(color = Color.White),
+        )
     }
 }
 
@@ -785,7 +795,14 @@ fun ContainerScreenPreview() {
 @Preview
 fun QueryStateBoxPreview() {
     KIWEAndroidTheme {
-        QueryStateBox(isQueryStateBoxOpen = true, page = 0, mySpeechInput = "내가 말할 곳", onClose = {})
+        QueryStateBox(
+            isQueryStateBoxOpen = true,
+            page = 0,
+            onClose = {},
+            onYesClick = {},
+            isMySpeechInputTextOpen = true,
+            sentence = "나는 무슨말을 할까",
+        )
     }
 }
 
@@ -807,6 +824,9 @@ fun RecommendStateBoxPreview() {
                     imgPath = "lacinia",
                 ),
             onClose = {},
+            onYesClick = {},
+            isMySpeechInputTextOpen = true,
+            sentence = "나는 무슨말을 할까",
         )
     }
 }
