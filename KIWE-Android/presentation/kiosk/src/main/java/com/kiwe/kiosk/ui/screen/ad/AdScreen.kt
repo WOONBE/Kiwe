@@ -4,6 +4,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,6 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import kotlinx.coroutines.delay
@@ -39,16 +45,30 @@ fun AdScreen(resetMainViewModel: () -> Unit = {}) {
         delay(5000L) // 5초 대기
         currentPage = (currentPage + 1) % imageResIds.size // 다음 이미지로 이동
     }
-    // 이미지 전환 시 Crossfade 애니메이션 적용
-    Crossfade(targetState = currentPage, label = "") { page ->
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Image(
-                painter = painterResource(id = imageResIds[page]),
-                contentDescription = null,
-                contentScale = ContentScale.Crop, // 이미지가 화면에 꽉 차게 표시되도록 설정
-                modifier = Modifier.fillMaxSize(),
-            )
+
+    // Lottie Animation Composition
+    val lottieComposition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.anim_touch_screen))
+
+    Box(modifier = Modifier.fillMaxSize()) {
+// 이미지 전환 시 Crossfade 애니메이션 적용
+        Crossfade(targetState = currentPage, label = "") { page ->
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Image(
+                    painter = painterResource(id = imageResIds[page]),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop, // 이미지가 화면에 꽉 차게 표시되도록 설정
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
+        LottieAnimation(
+            composition = lottieComposition,
+            iterations = LottieConstants.IterateForever,
+            modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .size(240.dp),
+        )
     }
 }
 
