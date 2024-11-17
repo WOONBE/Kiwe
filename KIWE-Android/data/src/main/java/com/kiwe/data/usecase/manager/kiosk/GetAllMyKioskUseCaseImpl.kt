@@ -10,5 +10,5 @@ class GetAllMyKioskUseCaseImpl
     constructor(
         private val kioskService: KioskManagerService,
     ) : GetAllMyKioskUseCase {
-        override suspend fun invoke(): List<Kiosk> = kioskService.getMyKiosk().getOrThrow()
+        override suspend fun invoke(): Result<List<Kiosk>> = kioskService.getMyKiosk()
     }
