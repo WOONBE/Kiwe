@@ -30,11 +30,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.screen.main.MySpeechInputText
 import com.kiwe.kiosk.ui.screen.main.component.WavyAnimation
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
+import com.kiwe.kiosk.ui.screen.payment.component.ChoiceButton
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
+import com.kiwe.kiosk.ui.theme.KiweHOT
+import com.kiwe.kiosk.ui.theme.KiweICE
+import com.kiwe.kiosk.ui.theme.KiweWhite1
 import com.kiwe.kiosk.ui.theme.Typography
 import kotlinx.coroutines.delay
 import org.orbitmvi.orbit.compose.collectAsState
@@ -188,39 +193,28 @@ fun TempBox(
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = "온도를 선택해주세요", style = Typography.titleLarge.copy(color = Color.White))
-        Row(modifier = Modifier.padding(top = 12.dp)) {
-            Box(
-                modifier =
-                    Modifier
-                        .background(color = Color.Red, shape = RoundedCornerShape(20.dp))
-                        .padding(8.dp)
-                        .clickable {
-                            onHotClick()
-                        },
-            ) {
-                Text(
-                    text = "뜨거운 거",
-                    modifier = Modifier.padding(8.dp),
-                    style = Typography.titleLarge.copy(color = Color.White),
-                )
-            }
-
-            Box(
-                modifier =
-                    Modifier
-                        .padding(start = 12.dp)
-                        .background(color = Color.Blue, shape = RoundedCornerShape(20.dp))
-                        .padding(8.dp)
-                        .clickable {
-                            onIceClick()
-                        },
-            ) {
-                Text(
-                    text = "차가운 거",
-                    modifier = Modifier.padding(8.dp),
-                    style = Typography.titleLarge.copy(color = Color.White),
-                )
-            }
+        Row(
+            modifier = Modifier.padding(top = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            ChoiceButton(
+                modifier = Modifier,
+                backgroundColor = KiweWhite1,
+                iconResourceId = R.drawable.img_hot_drink,
+                isImage = true,
+                label = "뜨겁게",
+                labelColor = KiweHOT,
+                onClick = onHotClick,
+            )
+            ChoiceButton(
+                modifier = Modifier,
+                backgroundColor = KiweWhite1,
+                iconResourceId = R.drawable.img_ice_drink,
+                isImage = true,
+                label = "차갑게",
+                labelColor = KiweICE,
+                onClick = onIceClick,
+            )
         }
     }
 }

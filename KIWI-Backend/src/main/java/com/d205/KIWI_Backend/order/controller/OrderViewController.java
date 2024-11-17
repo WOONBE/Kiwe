@@ -28,7 +28,6 @@ public class OrderViewController {
     @GetMapping("/latest/{kioskId}")
     public String getLatestOrderView(@PathVariable Long kioskId, Model model) {
         List<OrderResponse.MenuOrderResponse> orderMenus = orderService.getLatestOrderMenuByKioskId(kioskId);
-
         DecimalFormat formatter = new DecimalFormat("###,###"); // 세자리마다 쉼표 추가
 
         // 주문 데이터에 총 가격(totalPrice) 계산 추가
@@ -52,6 +51,11 @@ public class OrderViewController {
         long totalOrderPrice = enrichedOrders.stream()
                 .mapToLong(order -> ((Number) order.get("totalPrice")).longValue())
                 .sum();
+
+        // orderNumber를 첫 번째 주문에서 가져와 모델에 추가
+        if (!orderMenus.isEmpty()) {
+            model.addAttribute("orderNumber", orderMenus.get(0).getOrderNumber());
+        }
 
         model.addAttribute("orderMenus", enrichedOrders);
         model.addAttribute("totalOrderPrice", formatter.format(totalOrderPrice)); // 포맷된 총 주문 금액
