@@ -17,8 +17,10 @@ class PostOrderUseCaseImpl
             kioskId: Int,
             age: Int,
             gender: String,
+            orderNumber: Int,
             order: Order,
         ): Result<String> {
+            Timber.tag("POST 유스케이스").d("$age $gender")
             val genderInt =
                 when (gender) {
                     "Male" -> 1
@@ -32,11 +34,13 @@ class PostOrderUseCaseImpl
                     in 40..49 -> 40
                     else -> 50
                 }
+            Timber.tag("결제 나이 성별").d("$ageInt $genderInt")
             val orderRequest =
                 OrderRequest(
                     kioskId = kioskId,
                     age = ageInt,
                     gender = genderInt,
+                    orderNumber = orderNumber,
                     menuOrders = order.menuOrders.map { it.toRequest() },
                 )
             Timber.tag("결제 post 요청").d(orderRequest.toString())

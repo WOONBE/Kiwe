@@ -9,9 +9,11 @@ data class OrderRequest(
     @SerialName("kioskId")
     val kioskId: Int = 0,
     @SerialName("age")
-    val age: Int = 30,
+    val age: Int,
     @SerialName("gender")
-    val gender: Int = 1,
+    val gender: Int,
+    @SerialName("orderNumber")
+    val orderNumber: Int = 1000,
     @SerialName("menuOrders")
     val menuOrders: List<OrderItemRequest>,
 )

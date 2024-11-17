@@ -1,9 +1,7 @@
 package com.kiwe.kiosk.ui.screen.order
 
 import android.view.Gravity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,6 +43,7 @@ import com.kiwe.kiosk.ui.screen.order.component.OptionListItem
 import com.kiwe.kiosk.ui.screen.utils.prefixingImagePaths
 import com.kiwe.kiosk.ui.theme.Typography
 import org.orbitmvi.orbit.compose.collectAsState
+import java.util.Locale
 
 @Composable
 fun OptionDialog(
@@ -118,7 +119,7 @@ private fun OptionDialog(
         )
         Spacer(Modifier.height(5.dp))
         Text(
-            text = "${state.menuItem.price}원",
+            text = String.format(Locale.getDefault(), "%,d원", state.menuItem.price),
             style = Typography.bodyMedium,
         )
         state.optionList.forEach {
@@ -135,8 +136,10 @@ private fun OptionDialog(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val totalPrice = String.format(Locale.getDefault(), "%,d원", state.totalPrice * state.menuCount)
+
             Text(
-                text = "${(state.totalPrice * state.menuCount)}원",
+                text = totalPrice,
                 style = Typography.bodyMedium,
             )
 
@@ -144,34 +147,41 @@ private fun OptionDialog(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Image(
-                    painterResource(R.drawable.minus),
-                    modifier =
-                        Modifier
-                            .size(25.dp)
-                            .clickable {
-                                if (state.menuCount > 1) {
-                                    onMinus()
-                                }
-                            },
-                    contentDescription = "감소 버튼",
-                )
+                IconButton(
+                    onClick = {
+                        if (state.menuCount > 1) {
+                            onMinus()
+                        }
+                    },
+                    modifier = Modifier.size(28.dp), // 버튼 크기를 조정하여 클릭 영역 관리
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.minus),
+                        contentDescription = "감소 버튼",
+                        tint = Color.Unspecified, // 원본 색상을 유지
+                    )
+                }
+
                 Text(
-                    modifier =
-                        Modifier.padding(horizontal = 15.dp),
+                    modifier = Modifier.padding(horizontal = 15.dp),
                     text = state.menuCount.toString(),
                     style = Typography.bodyMedium,
                 )
-                Image(
-                    painterResource(R.drawable.plus),
-                    modifier =
-                        Modifier
-                            .size(25.dp)
-                            .clickable {
-                                onPlus()
-                            },
-                    contentDescription = "증가 버튼",
-                )
+
+                IconButton(
+                    onClick = {
+                        if (state.menuCount < 99) {
+                            onPlus()
+                        }
+                    },
+                    modifier = Modifier.size(28.dp), // 버튼 크기를 조정하여 클릭 영역 관리
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.plus),
+                        contentDescription = "증가 버튼",
+                        tint = Color.Unspecified, // 원본 색상을 유지
+                    )
+                }
             }
         }
 

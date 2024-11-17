@@ -422,15 +422,23 @@ class MainViewModel
                                 ?.value
                                 ?.split(", ")
                                 ?.map { it.toInt() }
-                        val requestMenuId = menuList!!.shuffled().first()
+                        val shuffledList = menuList!!.shuffled()
+                        val requestMenuId = shuffledList[0]
+                        val secondMenuId = shuffledList.getOrNull(1)
+                        val thirdMenuId = shuffledList.getOrNull(2)
                         val menu = getMenuByIdUseCase(requestMenuId).getOrThrow()
-                        textToSpeechManager.speak(TEXT_MENU_RECOMMENDATION + menu.name + "로 드릴까요?")
+                        val subRecommendMenus =
+                            listOfNotNull(
+                                secondMenuId?.let { getMenuByIdUseCase(it).getOrNull() },
+                                thirdMenuId?.let { getMenuByIdUseCase(it).getOrNull() },
+                            )
                         Timber.tag("추천").d("$menu")
                         reduce {
                             state.copy(
                                 isScreenShowing = false,
                                 isRecommend = menu.description,
                                 recommendMenu = menu,
+                                subRecommendMenu = subRecommendMenus,
                             )
                         }
                     }
@@ -631,6 +639,7 @@ class MainViewModel
                                 description = "",
                                 imgPath = "",
                             ),
+                        subRecommendMenu = emptyList(),
                     )
                 }
             }
@@ -678,6 +687,7 @@ data class MainState(
             description = "",
             imgPath = "",
         ),
+    val subRecommendMenu: List<MenuCategoryParam> = emptyList(),
 ) : BaseState
 
 sealed interface MainSideEffect : BaseSideEffect {

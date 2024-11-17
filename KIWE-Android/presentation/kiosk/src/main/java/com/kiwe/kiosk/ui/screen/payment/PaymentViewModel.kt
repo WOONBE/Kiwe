@@ -114,25 +114,46 @@ class PaymentViewModel
             gender: String,
             shoppingCartState: ShoppingCartState,
         ) {
-            val order =
-                Order(
-                    menuOrders =
-                        shoppingCartState.shoppingCartItem.map {
-                            it.toOrderItem()
-                        },
-                )
-            viewModelScope.launch {
-                runCatching {
-                    postOrderUseCase(kioskId, age, gender, order)
-                }.onSuccess {
-                    startConfirmPayment(kioskId)
-                    Timber.tag(javaClass.simpleName).d("postOrder success")
-                }.onFailure {
-                    Timber.tag(javaClass.simpleName).e("postOrder error : $it")
+            intent {
+                viewModelScope.launch {
+                    runCatching {
+                        val kioskName = getKioskNameUseCase()
+                        val orderNumber =
+                            String.format(Locale.KOREAN, "%03d", getOrderNumberUseCase()) // 3자리로 포맷팅
+                        reduce {
+                            state.copy(
+                                orderNumber = "$kioskName$orderNumber",
+                            )
+                        }
+                        val order =
+                            Order(
+                                menuOrders =
+                                    shoppingCartState.shoppingCartItem.map {
+                                        it.toOrderItem()
+                                    },
+                            )
+                        postOrderUseCase(kioskId, age, gender, state.orderNumber.toInt(), order)
+                    }.onSuccess {
+                        startConfirmPayment(kioskId)
+                        Timber.tag(javaClass.simpleName).d("postOrder success")
+                    }.onFailure {
+                        Timber.tag(javaClass.simpleName).e("postOrder error : $it")
+                    }
                 }
+                Timber.tag(javaClass.simpleName).d("postOrder")
             }
-            shoppingCartState.shoppingCartItem
-            Timber.tag(javaClass.simpleName).d("postOrder")
+
+//            intent {
+//                createOrderNumber()
+//                val order =
+//                    Order(
+//                        menuOrders =
+//                        shoppingCartState.shoppingCartItem.map {
+//                            it.toOrderItem()
+//                        },
+//                    )
+//                postOrderUseCase(kioskId, age, gender, state.orderNumber.toInt(), order)
+//            }
         }
 
         fun startConfirmPayment(kioskId: Int) {
@@ -188,7 +209,6 @@ class PaymentViewModel
         fun navigateToReceiptScreen() {
             // createOrderNumber 함수를 호출하여 orderNumber를 생성한 뒤, 이를 ReceiptScreen으로 전달
             intent {
-                createOrderNumber()
                 repeat(5) {
                     if (state.orderNumber.isBlank()) {
                         delay(500L)
@@ -236,7 +256,7 @@ data class PaymentState(
     val remainingTime: Long = 0,
     val userCardNumber: String = "",
     val completePayment: Boolean = false,
-    val orderNumber: String = "",
+    val orderNumber: String = "2005",
 ) : BaseState
 
 sealed interface PaymentSideEffect : BaseSideEffect {
