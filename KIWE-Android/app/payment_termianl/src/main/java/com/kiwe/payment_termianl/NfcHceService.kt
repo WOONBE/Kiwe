@@ -3,6 +3,7 @@ package com.kiwe.payment_termianl
 import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
 import android.util.Log
+import kotlinx.coroutines.runBlocking
 import java.util.Arrays
 
 private const val TAG = "NfcHceService 싸피"
@@ -14,14 +15,15 @@ class NfcHceService : HostApduService() {
     ): ByteArray {
         // NFC 태그가 읽혔을 때 보내는 데이터를 정의합니다.
         Log.d("NFC", "APDU Command: ${apdu.joinToString()}")
+        val kioskId = BuildConfig.KIOSK_ID
 
-        val response = "https://mml.pstatic.net/www/mobile/edit/20241108_1095/upload_1731050724313BInFr.gif".toByteArray() // B폰에 전달할 URL
+        val response = "https://k11d205.p.ssafy.io/api/view/orders/latest/$kioskId".toByteArray() // B폰에 전달할 URL
 
         return if (Arrays.equals(SELECT_APDU, apdu)) {
-//            val retrofit = RetrofitClient.create()
-//            CoroutineScope(Dispatchers.Main).launch {
-//                retrofit.test()
-//            }
+            val retrofit = RetrofitClient.create()
+            runBlocking {
+                retrofit.sendPaymentRequest(kioskId.toString())
+            }
             Log.d(TAG, "processCommandApdu: 정상")
             concatArrays(response, SELECT_OK_SW)
         } else {
