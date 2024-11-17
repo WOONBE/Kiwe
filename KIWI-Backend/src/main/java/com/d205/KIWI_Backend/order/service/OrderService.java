@@ -70,6 +70,7 @@ public class OrderService {
             .age(orderRequest.getAge())
             .gender(orderRequest.getGender())
             .status("PENDING")  // 기본 상태: PENDING
+            .orderNumber(orderRequest.getOrderNumber())
             .build();
 
         int totalPrice = 0;
@@ -120,6 +121,7 @@ public class OrderService {
             .menuOrders(createMenuOrderResponses(orderMenus))  // 주문 메뉴 항목 응답 리스트 생성
             .totalPrice(totalPrice)
             .kioskId(orderRequest.getKioskId())  // 요청받은 키오스크 ID
+            .orderNumber(savedOrder.getOrderNumber())
             .build();
 
         return orderResponse;
@@ -148,6 +150,7 @@ public class OrderService {
             .menuOrders(createMenuOrderResponses(orderMenus))
             .kioskId(order.getKioskOrders().get(0).getKiosk().getId())  // 첫 번째 키오스크 정보 가져오기
             .totalPrice(totalPrice)
+            .orderNumber(order.getOrderNumber())
             .build();
     }
 
@@ -172,6 +175,7 @@ public class OrderService {
                 .menuOrders(createMenuOrderResponses(orderMenus))
                 .kioskId(order.getKioskOrders().get(0).getKiosk().getId())  // 첫 번째 키오스크 정보 가져오기
                 .totalPrice(totalPrice)
+                .orderNumber(order.getOrderNumber())
                 .build();
 
             orderResponses.add(orderResponse);
@@ -710,32 +714,6 @@ public class OrderService {
         return topSoldMenusByAgeGroup;
     }
 
-//    public Map<YearMonth, Integer> getMonthlySalesForLastSixMonthsByMemberId(Integer memberId) {
-//        LocalDateTime endDate = LocalDateTime.now();
-//        LocalDateTime startDate = endDate.minusMonths(6).withDayOfMonth(1).toLocalDate().atStartOfDay();
-//
-//        List<Object[]> salesData = orderRepository.findMonthlySalesByMemberIdForLastSixMonths(memberId, startDate, endDate);
-//
-//        // 결과를 YearMonth 키와 Integer 매출 값으로 매핑
-//        Map<YearMonth, Integer> monthlySales = new HashMap<>();
-//        for (Object[] data : salesData) {
-//            int year = (int) data[0];
-//            int month = (int) data[1];
-//            int totalSales = ((Number) data[2]).intValue();
-//
-//            YearMonth yearMonth = YearMonth.of(year, month);
-//            monthlySales.put(yearMonth, totalSales);
-//        }
-//
-//        // 지난 6개월의 데이터가 없을 경우, 0으로 초기화
-//        YearMonth currentMonth = YearMonth.now();
-//        for (int i = 0; i < 6; i++) {
-//            YearMonth month = currentMonth.minusMonths(i);
-//            monthlySales.putIfAbsent(month, 0);
-//        }
-//
-//        return monthlySales;
-//    }
 
     public Map<YearMonth, Integer> getMonthlySalesForLastSixMonthsByMemberId(Integer memberId) {
         // 현재 월 기준 지난 6개월의 YearMonth 계산

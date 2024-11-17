@@ -28,6 +28,9 @@ public class Order {
     @Column
     private Integer gender;
 
+    @Column
+    private Integer orderNumber;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @Builder.Default
     private List<OrderMenu> orderMenus = new ArrayList<>();

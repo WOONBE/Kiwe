@@ -17,6 +17,7 @@ import java.util.List;
 public class OrderResponse {
     private Long orderId;  // 주문 ID
     private LocalDateTime orderDate;  // 주문 날짜
+    private Integer orderNumber;
     private String status;  // 주문 상태
     private List<MenuOrderResponse> menuOrders;  // 주문한 메뉴들
     private Integer totalPrice;  // 총 가격
