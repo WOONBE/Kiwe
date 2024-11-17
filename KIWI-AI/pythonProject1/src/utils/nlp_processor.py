@@ -28,8 +28,10 @@ class NLPProcessor:
     TEMPERATURES = {
         # Hot keywords
         "따뜻한": "HOT", "뜨거운": "HOT", "뜨겁게": "HOT", "뜨끈한": "HOT", "따뜻하게": "HOT", "핫": "HOT",
+        "따뜻한거": "HOT", "뜨거운거": "HOT", "뜨겁은거": "HOT", "뜨끈한거": "HOT",
         # Cold keywords
-        "차가운": "ICE", "시원한": "ICE", "얼음": "ICE", "아이스": "ICE", "차갑게": "ICE"
+        "차가운": "ICE", "시원한": "ICE", "얼음": "ICE", "아이스": "ICE", "차갑게": "ICE",
+        "차가운거": "ICE", "시원한거": "ICE", "차가운걸로": "ICE", "시원한걸로": "ICE"
     }
 
     SEPARATORS = ["랑", "이랑", "하고", "그리고", "에", "요"]
@@ -90,12 +92,13 @@ class NLPProcessor:
         """Process a Korean input sentence to extract intent and structured data."""
 
         order_type = self.detect_order_type(request.sentence)
+        print("order_type",order_type)
         if order_type == "unknown":
             return {"request_type": order_type, "data": "다시 말씀해 주세요"}
 
         else:
             data = self.extract_data(request, order_type)
-            print("data",data)
+            # print("extracted data",data)
             if data is None:
                 return {"request_type": order_type, "data": "다시 말씀해 주세요"}
             return {"request_type": order_type, "data": data}
@@ -125,6 +128,7 @@ class NLPProcessor:
         elif order_type == "recommendation":
             print("suggest_tmp")
             suggest_items = self.extract_suggestions(request)
+            # print("suggest_items",suggest_items)
             return suggest_items
         elif order_type == "explanation":
             explain_items = self.extract_explanations(request.sentence)
@@ -184,69 +188,43 @@ class NLPProcessor:
             # If no spike version exists, return the first menu_id
             return menu_ids[0][0]
 
-    # def parse_order(self, text):
-    #     # Preprocess text
-    #     text = self.preprocess_text(text)
-    #
-    #     segments = text.split()
-    #     items = []
-    #     current_temp = None
-    #
-    #     i = 0
-    #     while i < len(segments):
-    #         segment = segments[i]
-    #
-    #         # Check temperature
-    #         if segment in self.TEMPERATURES:
-    #             current_temp = self.TEMPERATURES[segment]
-    #             i += 1
-    #             continue
-    #
-    #         # Check menu items
-    #         menu_found = False
-    #         for menu_name in sorted(set(info["menu_name"] for info in self.menu_data.values()), key=len, reverse=True):
-    #             if menu_name in " ".join(segments[i:i + 2]):  # Look ahead for two-word menu names
-    #                 menu_id = self.find_menu_item(menu_name, current_temp)
-    #                 if menu_id:
-    #                     # Get the category to determine how to handle temperature
-    #                     category = self.menu_data[menu_id]["menu_category"]
-    #
-    #                     # Set temperature based on category and current_temp
-    #                     temp_to_use = "default" if category in self.special_categories else (current_temp or "spike")
-    #
-    #                     # Look for quantity **after** the menu
-    #                     pending_quantity = 1  # Default quantity
-    #                     if i + len(menu_name.split()) < len(segments):  # Check if there's more text after the menu
-    #                         next_segment = segments[i + len(menu_name.split())]
-    #                         for quantity_word, quantity_value in self.QUANTITIES:
-    #                             if next_segment.replace(" ", "") == quantity_word.replace(" ",
-    #                                                                                       ""):  # Match ignoring spaces
-    #                                 pending_quantity = quantity_value
-    #                                 i += 1  # Skip over the quantity word
-    #                                 break
-    #
-    #                     current_item = {
-    #                         "menu": menu_name,
-    #                         "menuId": menu_id,
-    #                         "temp": temp_to_use,
-    #                         "count": pending_quantity,
-    #                         "options": {"shot": 0, "sugar": 0}
-    #                     }
-    #                     items.append(current_item)
-    #                     menu_found = True
-    #
-    #                     # Reset current_temp and move the index past the menu name
-    #                     current_temp = None
-    #                     i += len(menu_name.split())
-    #                     break
-    #
-    #         if not menu_found:
-    #             i += 1
-    #
-    #     return items
 
+
+
+    # def preprocess_text(self, text):
+    #     """
+    #     Preprocess text to handle concatenated words and remove connectors.
+    #     """
+    #     # First, normalize spaces in basic quantity phrases
+    #     text = re.sub(r'(\b한|두|세|네|다섯|여섯|일곱|여덟|아홉|열)\s+(잔|개|번)', r'\1\2', text)
+    #
+    #     # Replace common order endings
+    #     text = text.replace("주세요", "").replace(",", " ").strip()
+    #
+    #     # Handle quantities with connectors in a single step
+    #     # This pattern matches quantities followed by units and optional connectors
+    #     pattern = r'(하나|둘|셋|넷|다섯|여섯|일곱|여덟|아홉|열|한|두|세|네|다섯|여섯|일곱|여덟|아홉|열)(잔|개|번)(?:(이랑|랑|하고)\s*)?'
+    #
+    #     def replace_with_space(match):
+    #         quantity = match.group(1)
+    #         unit = match.group(2)
+    #         # Keep the quantity and unit together, add space after
+    #         return f"{quantity}{unit} "
+    #
+    #     # Apply the replacement
+    #     text = re.sub(pattern, replace_with_space, text)
+    #
+    #     # Clean up any remaining connectors with spaces around them
+    #     for sep in self.SEPARATORS:
+    #         text = f" {text} ".replace(f" {sep} ", " ")
+    #
+    #     # Clean up extra spaces
+    #     text = " ".join(text.split())
+    #
+    #     return text
+    #
     # def parse_order(self, text):
-    #     # Preprocess text
+    #     # Preprocess text first
     #     text = self.preprocess_text(text)
     #
     #     # First extract and remove temperature from the text
@@ -261,97 +239,72 @@ class NLPProcessor:
     #
     #     i = 0
     #     while i < len(segments):
-    #         segment = segments[i]
-    #
     #         # Check menu items
     #         menu_found = False
-    #         for menu_name in sorted(set(info["menu_name"] for info in self.menu_data.values()), key=len, reverse=True):
+    #         for menu_name in sorted(set(info["menu_name"] for info in self.menu_data.values()), key=len,
+    #                                 reverse=True):
     #             if menu_name in " ".join(segments[i:i + 2]):  # Look ahead for two-word menu names
     #                 menu_id = self.find_menu_item(menu_name, current_temp)
     #                 if menu_id:
     #                     # Get the category to determine how to handle temperature
     #                     category = self.menu_data[menu_id]["menu_category"]
+    #                     temp_to_use = "default" if category in self.special_categories else (
+    #                                 current_temp or "spike")
     #
-    #                     # Set temperature based on category and current_temp
-    #                     temp_to_use = "default" if category in self.special_categories else (current_temp or "spike")
-    #
-    #                     # Look for quantity after the menu
+    #                     # Look for quantity after the menu name
     #                     pending_quantity = 1  # Default quantity
-    #                     if i + len(menu_name.split()) < len(segments):  # Check if there's more text after the menu
-    #                         next_segment = segments[i + len(menu_name.split())]
+    #                     next_idx = i + len(menu_name.split())
+    #                     if next_idx < len(segments):
+    #                         next_word = segments[next_idx].strip()
     #                         for quantity_word, quantity_value in self.QUANTITIES:
-    #                             if next_segment.replace(" ", "") == quantity_word.replace(" ",
-    #                                                                                       ""):  # Match ignoring spaces
+    #                             if next_word == quantity_word.replace(" ", ""):
     #                                 pending_quantity = quantity_value
-    #                                 i += 1  # Skip over the quantity word
+    #                                 i = next_idx + 1  # Move past the quantity word
     #                                 break
+    #                         else:
+    #                             i = next_idx  # If no quantity found, just move past the menu name
+    #                     else:
+    #                         i = next_idx
     #
-    #                     current_item = {
+    #                     items.append({
     #                         "menu": menu_name,
     #                         "menuId": menu_id,
     #                         "temp": temp_to_use,
     #                         "count": pending_quantity,
     #                         "options": {"shot": 0, "sugar": 0}
-    #                     }
-    #                     items.append(current_item)
+    #                     })
     #                     menu_found = True
-    #
-    #                     # Move the index past the menu name
-    #                     i += len(menu_name.split())
     #                     break
     #
     #         if not menu_found:
     #             i += 1
     #
     #     return items
-    #
-    #
-    # def preprocess_text(self, text):
-    #     """
-    #     Preprocess text to handle concatenated words and remove connectors.
-    #     """
-    #     # Normalize spaces in quantity-related phrases
-    #     text = re.sub(r'(\b한|두|세|네|다섯|여섯|일곱|여덟|아홉|열)\s+(잔|개|번)', r'\1\2', text)
-    #
-    #     # Replace common connectors with a space for separation
-    #     text = text.replace("주세요", "").replace(",", " ").strip()
-    #
-    #     # Define regex patterns for quantitative words concatenated with connectors
-    #     patterns = [
-    #         (r"(\b하나|둘|셋|넷|다섯|여섯|일곱|여덟|아홉|열|한|두|세|네|다섯|여섯|일곱|여덟|아홉|열)(잔|개|번|개씩)(이랑|랑|하고)?", r"\1\2 \3"),
-    #         (r"(한|두|세|네|다섯|여섯|일곱|여덟|아홉|열)(잔|개|번|개씩)(이랑|랑|하고)?", r"\1\2 \3"),
-    #     ]
-    #
-    #     # Apply regex patterns
-    #     for pattern, replacement in patterns:
-    #         text = re.sub(pattern, replacement, text)
-    #
-    #     # Replace remaining connectors with a space
-    #     for sep in self.SEPARATORS:
-    #         text = text.replace(sep, " ")
-    #
-    #     return text
-
-
 
     def preprocess_text(self, text):
         """
         Preprocess text to handle concatenated words and remove connectors.
         """
-        # First, normalize spaces in basic quantity phrases
+        # First, handle temperature words
+        temp_found = None
+        for temp_word in sorted(self.TEMPERATURES.keys(), key=len, reverse=True):
+            if temp_word in text:
+                temp_found = self.TEMPERATURES[temp_word]
+                text = text.replace(temp_word, '').strip()
+                break
+
+        # Normalize spaces in basic quantity phrases
         text = re.sub(r'(\b한|두|세|네|다섯|여섯|일곱|여덟|아홉|열)\s+(잔|개|번)', r'\1\2', text)
 
         # Replace common order endings
         text = text.replace("주세요", "").replace(",", " ").strip()
 
         # Handle quantities with connectors in a single step
-        # This pattern matches quantities followed by units and optional connectors
         pattern = r'(하나|둘|셋|넷|다섯|여섯|일곱|여덟|아홉|열|한|두|세|네|다섯|여섯|일곱|여덟|아홉|열)(잔|개|번)(?:(이랑|랑|하고)\s*)?'
 
         def replace_with_space(match):
             quantity = match.group(1)
             unit = match.group(2)
-            # Keep the quantity and unit together, add space after
             return f"{quantity}{unit} "
 
         # Apply the replacement
@@ -364,18 +317,11 @@ class NLPProcessor:
         # Clean up extra spaces
         text = " ".join(text.split())
 
-        return text
+        return text, temp_found
 
     def parse_order(self, text):
         # Preprocess text first
-        text = self.preprocess_text(text)
-
-        # First extract and remove temperature from the text
-        current_temp = None
-        for temp_word, temp_value in self.TEMPERATURES.items():
-            if temp_word in text:
-                current_temp = temp_value
-                text = text.replace(temp_word, '').strip()
+        text, current_temp = self.preprocess_text(text)
 
         segments = text.split()
         items = []
@@ -384,15 +330,13 @@ class NLPProcessor:
         while i < len(segments):
             # Check menu items
             menu_found = False
-            for menu_name in sorted(set(info["menu_name"] for info in self.menu_data.values()), key=len,
-                                    reverse=True):
+            for menu_name in sorted(set(info["menu_name"] for info in self.menu_data.values()), key=len, reverse=True):
                 if menu_name in " ".join(segments[i:i + 2]):  # Look ahead for two-word menu names
                     menu_id = self.find_menu_item(menu_name, current_temp)
                     if menu_id:
                         # Get the category to determine how to handle temperature
                         category = self.menu_data[menu_id]["menu_category"]
-                        temp_to_use = "default" if category in self.special_categories else (
-                                    current_temp or "spike")
+                        temp_to_use = "default" if category in self.special_categories else (current_temp or "spike")
 
                         # Look for quantity after the menu name
                         pending_quantity = 1  # Default quantity
@@ -423,8 +367,6 @@ class NLPProcessor:
                 i += 1
 
         return items
-
-
 
     def extract_multiple_orders(self, sentence):
         """Extract multiple orders using the optimized parser."""
@@ -493,8 +435,8 @@ class NLPProcessor:
     def extract_temperature(self,sentence):
         """Identify temperature preference from the sentence using lists of keywords."""
         # Lists of keywords for temperature preferences
-        hot_words = ["따뜻한", "뜨거운", "뜨겁게", "뜨끈한", "따뜻하게"]
-        ice_words = ["차가운", "시원한", "얼음", "아이스", "차갑게"]
+        hot_words = ["따뜻한", "뜨거운", "뜨겁게", "뜨끈한", "따뜻하게", "따뜻한거","뜨거운거"]
+        ice_words = ["차가운", "시원한", "얼음", "아이스", "차갑게", "차가운거","시원한거"]
 
         # Check if any hot word is in the sentence
         for word in hot_words:
@@ -513,19 +455,16 @@ class NLPProcessor:
 
     def extract_suggestions(self, request):
         """Extract suggestions based on temperature preference and age."""
+        # print("extract_suggestions",request)
         temperature = self.extract_suggest_keyworrds(request.sentence)
-
-        # Assuming we have access to age through some means
-        # For now, let's use a default age or you can modify to pass it as parameter
-        # age = 30  # Default age or you could pass this as a parameter
-
+        # print("test temp prev")
         if temperature == "default":
             # If no temperature preference, use general suggestion
             suggests = self.db.get_suggest_age_order_menu(request.age)
         else:
             # If temperature preference exists, use temperature-specific suggestion
             suggests = self.db.get_suggest_age_temp_order_menu(request.age, temperature)
-
+        # print("suggests",suggests)
         if suggests is None:
             raise HTTPException(status_code=500, detail="Error fetching suggestions from database")
 

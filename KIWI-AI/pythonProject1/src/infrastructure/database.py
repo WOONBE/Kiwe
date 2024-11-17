@@ -117,7 +117,10 @@ class Database:
 
     def get_suggest_age_order_menu(self, age):
         """Fetch unique combinations of menu category, name, and description based on age (rounded to the nearest 10)."""
+
+        # print("hello?")
         if not self.connection:
+            # print("connection error")
             self.connect()
 
         # Round age to the nearest multiple of 10
@@ -126,7 +129,7 @@ class Database:
         cursor = self.connection.cursor(dictionary=True)
         try:
             query = """
-                SELECT m.* 
+                SELECT m.*
                 FROM order_menu om
                 JOIN orders o ON o.id = om.order_id
                 JOIN menu m ON om.menu_id = m.menu_id

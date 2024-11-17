@@ -23,12 +23,14 @@ class ServiceRouter:
 
         request_type = processed_data["request_type"]
         data = processed_data["data"]
+        print("request_type",request_type)
 
         if request_type == "order":
             command = NewOrderCommand(self.infrastructure)
             ans = await command.execute(data, request)
             return ans
         elif request_type == "recommendation":
+            print("recommendation",request_type)
             command = RecommendationCommand(self.infrastructure)
             return await command.execute(data)
         elif request_type == "explanation":

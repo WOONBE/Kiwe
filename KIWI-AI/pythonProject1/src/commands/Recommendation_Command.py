@@ -15,8 +15,9 @@ class RecommendationCommand(BaseCommand):
         :param data: Dictionary containing user preferences or context for recommendations.
         :return: Dictionary with the recommendation response.
         """
-        print("data",data)
-        print("data length",len(data),data)
+        # print("data",data)
+        # print("data length",len(data),data)
+
         # print("data", data)
 
         # menu_response = []
@@ -24,17 +25,18 @@ class RecommendationCommand(BaseCommand):
         menu_name = []
         menu_info = []
         for i in data:
-            print("menu data",i["menu_name"],i["menu_desc"],i["hot_or_ice"],type(i["hot_or_ice"]))
+            # print("menu data",i["menu_name"],i["menu_desc"],i["hot_or_ice"],type(i["hot_or_ice"]))
             menu_name.append(i["menu_name"]+" ")
             menu_info.append(i["menu_desc"]+" ")
             menu_id.append(i["menu_id"])
         menu_response = [*menu_name,*menu_info]
         try:
             if self.llama_client:
+                print("llama_client")
                 context = f"Menu items: {data}\nUser preferences: {[]}"
                 recommendation = await self.llama_client.get_recommendation(context)
-                return {"status": "success", "message": recommendation}
-            return {"status": "success", "message": f"{menu_id} {menu_response}" }
+                return {"status": "success", "message": f"{menu_id} {recommendation}"}
+            return {"status": "client fail", "message": f"{menu_id} {menu_response}"}
         except Exception as e:
             print(f"Error in recommendation command: {str(e)}")
             return {"status": "No server", "message": f"{menu_id} {menu_response}"}

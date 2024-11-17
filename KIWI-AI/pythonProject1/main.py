@@ -43,7 +43,7 @@ def load_config():
 
 config = load_config()
 # setup_logger(config['logging'])
-llama_client = LLaMAClient(config['llama'])
+# llama_client = LLaMAClient(config['llama'])
 
 # Initialize Database and ELK client
 database = Database()
@@ -53,7 +53,7 @@ elk_client = ELKClient(config['elk'])
 infrastructure = {
     "database": database,
     "retriever": elk_client,
-    "llama_client": llama_client
+    # "llama_client": llama_client
 }
 
 # Initialize NLP Processor and Service Layer
