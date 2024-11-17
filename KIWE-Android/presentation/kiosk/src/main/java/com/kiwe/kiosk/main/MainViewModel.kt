@@ -20,6 +20,13 @@ import com.kiwe.kiosk.base.BaseState
 import com.kiwe.kiosk.base.BaseViewModel
 import com.kiwe.kiosk.ui.screen.utils.SpeechRecognizerManager
 import com.kiwe.kiosk.ui.screen.utils.SpeechResultListener
+import com.kiwe.kiosk.ui.screen.utils.TEXT_CHECK_TEMPERATURE
+import com.kiwe.kiosk.ui.screen.utils.TEXT_INTRO
+import com.kiwe.kiosk.ui.screen.utils.TEXT_INTRO_HELP
+import com.kiwe.kiosk.ui.screen.utils.TEXT_MENU_RECOMMENDATION
+import com.kiwe.kiosk.ui.screen.utils.TEXT_MORE_ORDER
+import com.kiwe.kiosk.ui.screen.utils.TEXT_TOGO
+import com.kiwe.kiosk.ui.screen.utils.TextToSpeechManager
 import com.kiwe.kiosk.ui.screen.utils.helpPopupRegex
 import com.kiwe.kiosk.ui.screen.utils.menuRegex
 import com.kiwe.kiosk.ui.screen.utils.noRegex
@@ -45,6 +52,7 @@ class MainViewModel
     @Inject
     constructor(
         private val speechRecognizerManager: SpeechRecognizerManager,
+        private val textToSpeechManager: TextToSpeechManager,
         private val voiceOrderUseCase: VoiceOrderUseCase,
         private val voiceRecommendUseCase: VoiceRecommendUseCase,
         private val getMenuByIdUseCase: GetMenuByIdUseCase,
@@ -68,10 +76,17 @@ class MainViewModel
         init {
             getMenuCategory()
             initSpeechRecognizer()
+            initTTSListener()
         }
 
         private fun initSpeechRecognizer() {
             speechRecognizerManager.setSpeechResultListener(this)
+        }
+
+        private fun initTTSListener() {
+            textToSpeechManager.setOnCompleteListener {
+                startSpeechRecognition() // tts가 끝나면 stt 살리게 했음
+            }
         }
 
         // 음성 인식 시작
@@ -218,10 +233,12 @@ class MainViewModel
                 if (state.voiceShoppingCart.isNotEmpty()) {
                     if (noRegex.containsMatchIn(result)) {
                         // 부정
+                        textToSpeechManager.speak(TEXT_TOGO)
                         reduce { state.copy(isOrderEndTrue = true) }
                     }
                     if (yesRegex.containsMatchIn(result)) {
                         // 긍정
+                        textToSpeechManager.speak(TEXT_INTRO_HELP)
                         reduce { state.copy(isOrderEndFalse = true) }
                     }
                 }
@@ -238,13 +255,24 @@ class MainViewModel
         private fun onRecommendProcess(result: String) {
             intent {
                 if (state.isRecommend.isNotEmpty()) {
+                    Timber.tag("추천").d("$result")
                     if (noRegex.containsMatchIn(result)) {
                         reduce {
                             state.copy(
-                                isAddCartFalse = true,
                                 isRecommend = "",
+                                voiceResult =
+                                    VoiceBody(
+                                        category = 1,
+                                        need_temp = 1,
+                                        order = state.voiceShoppingCart,
+                                        message = "",
+                                        response = "",
+                                    ),
+                                isScreenShowing = false,
+                                isAddCartFalse = true,
                             )
                         }
+                        textToSpeechManager.speak(TEXT_MORE_ORDER)
                     }
                     if (yesRegex.containsMatchIn(result)) {
                         val recommendVoiceBody =
@@ -271,6 +299,7 @@ class MainViewModel
                                 voiceShoppingCart = recommendVoiceBody.order,
                             )
                         }
+                        textToSpeechManager.speak(TEXT_MORE_ORDER)
                     }
                 }
             }
@@ -300,6 +329,7 @@ class MainViewModel
                                 ),
                         ).onSuccess { res ->
                             val it = res.data
+                            textToSpeechManager.speak(it.response)
                             // 온도까지 잘 들어가 있다면
                             reduce {
                                 state.copy(
@@ -338,6 +368,7 @@ class MainViewModel
                                 }
                             } else {
                                 if (it.response.contains("온도를 확인해주세요")) {
+                                    textToSpeechManager.speak(TEXT_CHECK_TEMPERATURE)
                                     Timber.tag("temp").d("${it.response}")
                                     val listPart =
                                         it.response.substringAfter("[").substringBefore("]")
@@ -350,6 +381,7 @@ class MainViewModel
                                         )
                                     }
                                 } else {
+                                    textToSpeechManager.speak(it.response + TEXT_MORE_ORDER)
                                     reduce {
                                         state.copy(
                                             voiceShoppingCart = it.order,
@@ -392,6 +424,7 @@ class MainViewModel
                                 ?.map { it.toInt() }
                         val requestMenuId = menuList!!.shuffled().first()
                         val menu = getMenuByIdUseCase(requestMenuId).getOrThrow()
+                        textToSpeechManager.speak(TEXT_MENU_RECOMMENDATION)
                         Timber.tag("추천").d("$menu")
                         reduce {
                             state.copy(
@@ -458,6 +491,9 @@ class MainViewModel
         fun setPage(page: Int) =
             intent {
                 reduce {
+                    if (page == 1) {
+                        textToSpeechManager.speak(TEXT_INTRO)
+                    }
                     state.copy(
                         page = page,
                     )
