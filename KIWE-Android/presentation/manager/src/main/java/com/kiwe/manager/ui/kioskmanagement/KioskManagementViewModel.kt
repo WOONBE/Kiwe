@@ -61,7 +61,7 @@ class KioskManagementViewModel
         fun onKioskDelete(kioskId: Int) =
             intent {
                 // val response = deleteKioskUseCase(kioskId = kioskId)
-                / val kioskId = kioskId
+                // val kioskId = kioskId
                 postSideEffect(KioskManagementSideEffect.Toast("삭제에 성공했습니다"))
                 val newList = getAllMyKioskUseCase().getOrThrow()
                 reduce {
