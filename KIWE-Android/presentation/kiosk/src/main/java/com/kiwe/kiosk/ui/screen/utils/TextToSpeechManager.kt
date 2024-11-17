@@ -6,6 +6,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Locale
 import javax.inject.Inject
 
+@Suppress("DEPRECATION")
 class TextToSpeechManager
     @Inject
     constructor(
@@ -15,6 +16,7 @@ class TextToSpeechManager
         private var tts: TextToSpeech = TextToSpeech(context, this)
         private var isInitialized = false
         private var onComplete: (() -> Unit)? = null
+        private var onStart: (() -> Unit)? = null
 
         override fun onInit(status: Int) {
             if (status == TextToSpeech.SUCCESS) {
@@ -27,8 +29,13 @@ class TextToSpeechManager
             this.onComplete = onComplete
         }
 
+        fun setOnStartListener(onStart: () -> Unit) {
+            this.onStart = onStart
+        }
+
         fun speak(text: String) {
             if (isInitialized && text.isNotEmpty()) {
+                onStart?.invoke()
                 tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "TTS_ID")
                 tts.setOnUtteranceCompletedListener { onComplete?.invoke() }
             }

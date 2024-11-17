@@ -29,6 +29,7 @@ import androidx.compose.ui.window.Dialog
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainViewModel
 import com.kiwe.kiosk.ui.component.BoldTextWithKeywords
+import com.kiwe.kiosk.ui.screen.main.MySpeechInputText
 import com.kiwe.kiosk.ui.screen.payment.component.ChoiceButton
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
@@ -85,6 +86,10 @@ fun TakeOutChoiceScreen(
         onClose = {
             isVoiceModeOn = false
         },
+        onPackagingClick = onPackagingClick,
+        onStoreClick = onStoreClick,
+        isMySpeechInputTextOpen = state.isMySpeechInputTextOpen,
+        sentence = state.mySpeechText,
     )
 }
 
@@ -148,6 +153,8 @@ private fun TakeOutChoiceScreen(
 fun PayQueryStateBox(
     isPayment: Boolean,
     page: Int = 0,
+    isMySpeechInputTextOpen: Boolean,
+    sentence: String,
     onClose: () -> Unit,
     onPackagingClick: () -> Unit = {},
     onStoreClick: () -> Unit = {},
@@ -194,6 +201,10 @@ fun PayQueryStateBox(
                             onClick = onStoreClick,
                         )
                     }
+                    MySpeechInputText(
+                        isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+                        sentence = sentence,
+                    )
                 }
             }
         }
@@ -219,6 +230,8 @@ private fun Preview2() {
             isPayment = true,
             page = 1,
             onClose = {},
+            isMySpeechInputTextOpen = true,
+            sentence = "테스트",
         )
     }
 }

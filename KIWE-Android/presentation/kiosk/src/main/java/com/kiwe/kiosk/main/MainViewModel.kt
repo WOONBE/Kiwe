@@ -25,6 +25,7 @@ import com.kiwe.kiosk.ui.screen.utils.TEXT_INTRO
 import com.kiwe.kiosk.ui.screen.utils.TEXT_INTRO_HELP
 import com.kiwe.kiosk.ui.screen.utils.TEXT_MENU_RECOMMENDATION
 import com.kiwe.kiosk.ui.screen.utils.TEXT_MORE_ORDER
+import com.kiwe.kiosk.ui.screen.utils.TEXT_PAYMENT
 import com.kiwe.kiosk.ui.screen.utils.TEXT_TOGO
 import com.kiwe.kiosk.ui.screen.utils.TextToSpeechManager
 import com.kiwe.kiosk.ui.screen.utils.helpPopupRegex
@@ -87,6 +88,9 @@ class MainViewModel
             textToSpeechManager.setOnCompleteListener {
                 startSpeechRecognition() // tts가 끝나면 stt 살리게 했음
             }
+//            textToSpeechManager.setOnStartListener {
+//                stopSpeechRecognition()
+//            }
         }
 
         // 음성 인식 시작
@@ -103,9 +107,20 @@ class MainViewModel
             }
         }
 
+        private fun setMySpeechInput(mySentence: String) { // text 처리만 수행한다
+            // 상태값 바뀌기 전에 이걸 수행하고 나서 하면 좋겠음
+            intent {
+                reduce {
+                    state.copy(mySpeechText = mySentence) // 이전 글자를 지우고
+                }
+            }
+        }
+
         override fun onResultsReceived(results: List<String>) {
             val resultText = results.firstOrNull() ?: ""
             intent {
+                setMySpeechInput(resultText)
+                delay(1000L) // 1초 대기
                 Timber.tag("MainViewModel").d("Result: $resultText 하고 ${state.isScreenShowing}")
                 if (state.isScreenShowing) { // SpeechScreen여부
                     onSpeechResult(resultText)
@@ -124,6 +139,10 @@ class MainViewModel
                     }
                 }
             }
+        }
+
+        fun speakPayment() {
+            textToSpeechManager.speak(TEXT_PAYMENT)
         }
 
         fun onDismissRequest() =
@@ -329,7 +348,7 @@ class MainViewModel
                                 ),
                         ).onSuccess { res ->
                             val it = res.data
-                            textToSpeechManager.speak(it.response)
+                            textToSpeechManager.speak(it.response + TEXT_MORE_ORDER)
                             // 온도까지 잘 들어가 있다면
                             reduce {
                                 state.copy(
@@ -454,8 +473,10 @@ class MainViewModel
 
         override fun onPartialResultsReceived(partialResults: List<String>) {
             val partialText = partialResults.firstOrNull() ?: ""
-            Timber.tag("MainViewModel").d("Partial Result: $partialText")
+            Timber.tag("MainViewModel").d("Partial Result: $partialResults")
             intent {
+                setMySpeechInput(partialText)
+                reduce { state.copy(isMySpeechInputTextOpen = true) }
                 if (state.isScreenShowing) {
                     // 다이얼로그가 보여지고 있는 상황이라면
                 } else if (helpPopupRegex.containsMatchIn(partialText)) {
@@ -668,6 +689,8 @@ data class MainState(
     val remainingTime: Long = 0,
     val age: Int = 30,
     val gender: String = "male",
+    val mySpeechText: String = "",
+    val isMySpeechInputTextOpen: Boolean = false,
     val voiceResult: VoiceBody =
         VoiceBody(
             category = 0,
