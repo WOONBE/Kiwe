@@ -31,5 +31,6 @@ public class OrderResponse {
         private String name;  // 메뉴 이름
         private Integer quantity;  // 수량
         private Integer price;  // 가격
+        private Integer orderNumber; //번호표
     }
 }

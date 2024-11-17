@@ -104,7 +104,7 @@
 </head>
 <body>
 <div class="receipt-container">
-    <h1>주문 내역</h1>
+    <h1><span th:text="'주문 번호 ' + ${orderNumber} + '번'">주문 번호 xx번</span></h1>
     <div th:each="order : ${orderMenus}" class="order-item">
         <p class="order-title" th:text="${order.menuName}">메뉴 이름</p>
         <p class="order-details">
@@ -119,6 +119,7 @@
         총 주문 금액: <span th:text="${totalOrderPrice}">0</span> 원
     </div>
 </div>
+
 
 </body>
 </html>
