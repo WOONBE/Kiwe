@@ -21,6 +21,7 @@ public class OrderResponse {
     private List<MenuOrderResponse> menuOrders;  // 주문한 메뉴들
     private Integer totalPrice;  // 총 가격
     private Integer kioskId;  // 키오스크 ID 추가
+    private Integer orderNumber;
 
     @Getter
     @Setter

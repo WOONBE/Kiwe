@@ -70,6 +70,7 @@ public class OrderService {
             .age(orderRequest.getAge())
             .gender(orderRequest.getGender())
             .status("PENDING")  // 기본 상태: PENDING
+            .orderNumber(orderRequest.getOrderNumber())
             .build();
 
         int totalPrice = 0;
@@ -120,6 +121,7 @@ public class OrderService {
             .menuOrders(createMenuOrderResponses(orderMenus))  // 주문 메뉴 항목 응답 리스트 생성
             .totalPrice(totalPrice)
             .kioskId(orderRequest.getKioskId())  // 요청받은 키오스크 ID
+            .orderNumber(savedOrder.getOrderNumber())
             .build();
 
         return orderResponse;
@@ -148,6 +150,7 @@ public class OrderService {
             .menuOrders(createMenuOrderResponses(orderMenus))
             .kioskId(order.getKioskOrders().get(0).getKiosk().getId())  // 첫 번째 키오스크 정보 가져오기
             .totalPrice(totalPrice)
+            .orderNumber(order.getOrderNumber())
             .build();
     }
 
@@ -172,6 +175,7 @@ public class OrderService {
                 .menuOrders(createMenuOrderResponses(orderMenus))
                 .kioskId(order.getKioskOrders().get(0).getKiosk().getId())  // 첫 번째 키오스크 정보 가져오기
                 .totalPrice(totalPrice)
+                .orderNumber(order.getOrderNumber())
                 .build();
 
             orderResponses.add(orderResponse);
