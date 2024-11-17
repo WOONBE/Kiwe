@@ -1,9 +1,7 @@
 package com.d205.KIWI_Backend.order.controller;
 
-import com.d205.KIWI_Backend.member.service.MemberService;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
 import com.d205.KIWI_Backend.order.service.OrderService;
-import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,9 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/view/orders")
@@ -25,26 +25,38 @@ public class OrderViewController {
         this.orderService = orderService;
     }
 
-    
     @GetMapping("/latest/{kioskId}")
-    @Operation(summary = "키오스크 최신 주문 영수증 출력", description = "키오스크의 주문에 대한 영수증 출력")
     public String getLatestOrderView(@PathVariable Long kioskId, Model model) {
         List<OrderResponse.MenuOrderResponse> orderMenus = orderService.getLatestOrderMenuByKioskId(kioskId);
 
-        // 주문 데이터에 총 가격(totalPrice) 계산 추가 (옵션)
+        DecimalFormat formatter = new DecimalFormat("###,###"); // 세자리마다 쉼표 추가
+
+        // 주문 데이터에 총 가격(totalPrice) 계산 추가
         List<Map<String, Object>> enrichedOrders = orderMenus.stream()
                 .map(order -> {
                     Map<String, Object> enrichedOrder = new HashMap<>();
                     enrichedOrder.put("menuName", order.getName());
-                    enrichedOrder.put("menuPrice", order.getPrice());
+                    enrichedOrder.put("menuPrice", order.getPrice()); // 가격을 숫자로 그대로 저장
                     enrichedOrder.put("quantity", order.getQuantity());
-                    enrichedOrder.put("totalPrice", order.getPrice() * order.getQuantity());
+                    enrichedOrder.put("totalPrice", order.getPrice() * order.getQuantity()); // 계산은 숫자 그대로 처리
                     return enrichedOrder;
                 })
-                .toList();
+                .collect(Collectors.toList());
+
+        // 포맷된 가격을 계산할 때만 포맷 적용
+        enrichedOrders.forEach(order -> {
+            order.put("formattedMenuPrice", formatter.format(order.get("menuPrice")));
+            order.put("formattedTotalPrice", formatter.format(order.get("totalPrice")));
+        });
+
+        long totalOrderPrice = enrichedOrders.stream()
+                .mapToLong(order -> ((Number) order.get("totalPrice")).longValue())
+                .sum();
 
         model.addAttribute("orderMenus", enrichedOrders);
-        return "order-list"; // order-list.html을 렌더링
-        //TODO : orders 테이블에 주문번호 전달 - html에 주문번호 삽입 필요
+        model.addAttribute("totalOrderPrice", formatter.format(totalOrderPrice)); // 포맷된 총 주문 금액
+
+        return "order-list";
     }
+
 }
