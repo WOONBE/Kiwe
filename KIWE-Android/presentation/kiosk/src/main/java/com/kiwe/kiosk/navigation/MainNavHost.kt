@@ -137,9 +137,9 @@ fun MainNavHost() {
                                 orderNumber = orderNumber,
                                 onEnterScreen = { page ->
                                     mainViewModel.setPage(page)
-                                    mainViewModel.stopSpeechRecognition()
                                 },
                                 onBackHome = {
+                                    mainViewModel.stopSpeechRecognition()
                                     navController.navigate(MainRoute.AD.route) {
                                         popUpTo(MainRoute.AD.route)
                                         mainViewModel.setPage(0)
