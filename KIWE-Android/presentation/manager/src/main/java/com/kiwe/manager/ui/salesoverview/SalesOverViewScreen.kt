@@ -65,7 +65,7 @@ fun SalesOverviewScreen(viewModel: SalesOverViewViewModel = hiltViewModel()) {
     ) {
         Text(
             modifier = Modifier.padding(vertical = 20.dp, horizontal = 10.dp),
-            text = "xx커피 ㅌㅌ점",
+            text = "싸피카페 인동점",
             style = Typography.headlineLarge,
         )
         HorizontalDivider(thickness = 1.dp)
