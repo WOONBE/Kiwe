@@ -43,6 +43,12 @@ fun PaymentScreen(
         rememberPagerState(pageCount = {
             PaymentStatus.entries.size
         })
+
+    LaunchedEffect(paymentState.showDialog) {
+        if (paymentState.showDialog) {
+            mainViewModel.speakPayment()
+        }
+    }
     LaunchedEffect(Unit) {
         onEnterScreen(2)
         viewModel.setAgeAndGender(mainState.age, mainState.gender)
