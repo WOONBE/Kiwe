@@ -47,11 +47,17 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
                 Toast.makeText(context, "", Toast.LENGTH_SHORT).show()
             }
 
-            KioskManagementSideEffect.ShowEditDialog ->{
-                KioskEditDialog(
-                    onDismissRequest = kioskManagementViewModel.
-                )
+            KioskManagementSideEffect.ShowEditDialog -> {
+//                KioskEditDialog(
+//                    onDismissRequest = {
+//                        //    kioskManagementViewModel.
+//                    },
+//                    {
+//
+//                    }
+//                )
             }
+
             else -> {}
         }
     }
@@ -93,7 +99,10 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
                         state.kioskList.forEach {
                             item {
                                 Row(
-                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp),
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 15.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                 ) {
                                     Text(
@@ -141,14 +150,20 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
                     var location by remember { mutableStateOf("") }
                     var status by remember { mutableStateOf("") }
                     OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth().padding(10.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(10.dp),
                         value = location,
                         onValueChange = { location = it },
                         label = { Text("지점") },
                     )
 
                     OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth().padding(10.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(10.dp),
                         value = status,
                         onValueChange = { status = it },
                         label = { Text("상태") },

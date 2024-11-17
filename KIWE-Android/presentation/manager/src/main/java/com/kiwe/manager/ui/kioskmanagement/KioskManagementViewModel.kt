@@ -3,7 +3,6 @@ package com.kiwe.manager.ui.kioskmanagement
 import androidx.lifecycle.ViewModel
 import com.kiwe.domain.exception.APIException
 import com.kiwe.domain.model.Kiosk
-import com.kiwe.domain.usecase.manager.kiosk.DeleteKioskUseCase
 import com.kiwe.domain.usecase.manager.kiosk.GetAllMyKioskUseCase
 import com.kiwe.domain.usecase.manager.search.SearchMyInfoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +19,7 @@ class KioskManagementViewModel
     constructor(
         private val getAllMyKioskUseCase: GetAllMyKioskUseCase,
         private val searchMyInfoUseCae: SearchMyInfoUseCase,
-        private val deleteKioskUseCase: DeleteKioskUseCase,
+        // private val deleteKioskUseCase: DeleteKioskUseCase,
     ) : ViewModel(),
         ContainerHost<KioskManagementState, KioskManagementSideEffect> {
         override val container: Container<KioskManagementState, KioskManagementSideEffect> =
@@ -61,7 +60,8 @@ class KioskManagementViewModel
 
         fun onKioskDelete(kioskId: Int) =
             intent {
-                val response = deleteKioskUseCase(kioskId = kioskId)
+                // val response = deleteKioskUseCase(kioskId = kioskId)
+                / val kioskId = kioskId
                 postSideEffect(KioskManagementSideEffect.Toast("삭제에 성공했습니다"))
                 val newList = getAllMyKioskUseCase().getOrThrow()
                 reduce {
