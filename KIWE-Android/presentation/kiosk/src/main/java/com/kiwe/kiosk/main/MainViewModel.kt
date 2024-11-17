@@ -104,10 +104,22 @@ class MainViewModel
             }
         }
 
+        private fun setMySpeechInput(mySentence: String) { // text 처리만 수행한다
+            // 상태값 바뀌기 전에 이걸 수행하고 나서 하면 좋겠음
+            intent {
+                reduce {
+                    state.copy(mySpeechText = mySentence) // 이전 글자를 지우고
+                }
+            }
+        }
+
         override fun onResultsReceived(results: List<String>) {
             val resultText = results.firstOrNull() ?: ""
             intent {
                 Timber.tag("MainViewModel").d("Result: $resultText 하고 ${state.isScreenShowing}")
+                if (resultText.isNotEmpty()) {
+                    setMySpeechInput(resultText)
+                }
                 if (state.isScreenShowing) { // SpeechScreen여부
                     onSpeechResult(resultText)
                 } else if (helpPopupRegex.containsMatchIn(resultText)) {
@@ -664,6 +676,7 @@ data class MainState(
     val remainingTime: Long = 0,
     val age: Int = 30,
     val gender: String = "male",
+    val mySpeechText: String = "",
     val voiceResult: VoiceBody =
         VoiceBody(
             category = 0,

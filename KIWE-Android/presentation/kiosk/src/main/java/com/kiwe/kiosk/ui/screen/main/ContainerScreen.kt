@@ -31,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -74,6 +75,7 @@ import com.kiwe.kiosk.ui.theme.KiweOrange1
 import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.utils.MainEnum
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import timber.log.Timber
@@ -96,11 +98,29 @@ fun ContainerScreen(
     var isQueryStateBoxOpen by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var isLogoutDialogOpen by remember { mutableStateOf(false) }
-
+    var isMySpeechInputTextOpen by remember { mutableStateOf(false) }
     LaunchedEffect(state.page) {
         if (state.page == 0) {
             isShoppingCartDialogOpen = false
         }
+    }
+
+    LaunchedEffect(state.mySpeechText, state.isScreenShowing) {
+        if (isQueryStateBoxOpen || state.isScreenShowing) {
+            // true면 보이도록
+            isMySpeechInputTextOpen = state.mySpeechText.isNotEmpty()
+        }
+    }
+
+    if (isMySpeechInputTextOpen) {
+        MySpeechInputText(
+            isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+            sentence = state.mySpeechText,
+            onAnimationEnd = {
+                // 애니메이션이 끝난 후 동작 설정 (필요시)
+                isMySpeechInputTextOpen = false // 애니메이션 끝난 후 자동으로 숨기기
+            },
+        )
     }
 
     DisposableEffect(Unit) {
@@ -200,6 +220,7 @@ fun ContainerScreen(
     QueryStateBox(
         isQueryStateBoxOpen = isQueryStateBoxOpen,
         page = state.page,
+        mySpeechInput = state.mySpeechText,
         onClose = {
             isQueryStateBoxOpen = false
         },
@@ -259,6 +280,8 @@ fun ContainerScreen(
             },
         )
     }
+
+    MySpeechInputText(isMySpeechInputTextOpen, state.mySpeechText, onAnimationEnd = {})
 
     ContainerScreen(
         page = state.page,
@@ -494,6 +517,7 @@ fun RecommendStateBox(
 fun QueryStateBox(
     isQueryStateBoxOpen: Boolean,
     page: Int = 0,
+    mySpeechInput: String = "",
     onClose: () -> Unit,
     onYesClick: () -> Unit = {},
     onNoClick: () -> Unit = {},
@@ -557,6 +581,36 @@ fun QueryStateBox(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun MySpeechInputText(
+    isMySpeechInputTextOpen: Boolean,
+    sentence: String,
+    onAnimationEnd: () -> Unit = {},
+) {
+    if (isMySpeechInputTextOpen) {
+        var displayedText by remember { mutableStateOf("") }
+        val scope = rememberCoroutineScope()
+        if (isMySpeechInputTextOpen) {
+            LaunchedEffect(sentence) {
+                displayedText = ""
+                scope.launch {
+                    for (char in sentence) {
+                        displayedText += char
+                        delay(50)
+                    }
+                    onAnimationEnd()
+                }
+            }
+
+            Text(
+                modifier = Modifier.padding(top = 12.dp),
+                text = "\"" + displayedText + "\"",
+                style = Typography.titleLarge.copy(color = Color.White),
+            )
         }
     }
 }
@@ -731,7 +785,7 @@ fun ContainerScreenPreview() {
 @Preview
 fun QueryStateBoxPreview() {
     KIWEAndroidTheme {
-        QueryStateBox(isQueryStateBoxOpen = true, page = 0, {})
+        QueryStateBox(isQueryStateBoxOpen = true, page = 0, mySpeechInput = "내가 말할 곳", onClose = {})
     }
 }
 
@@ -754,5 +808,13 @@ fun RecommendStateBoxPreview() {
                 ),
             onClose = {},
         )
+    }
+}
+
+@Composable
+@Preview
+fun SpeechMyTextInput() {
+    KIWEAndroidTheme {
+        MySpeechInputText(true, sentence = "나는 무슨말을 할까", onAnimationEnd = {})
     }
 }
