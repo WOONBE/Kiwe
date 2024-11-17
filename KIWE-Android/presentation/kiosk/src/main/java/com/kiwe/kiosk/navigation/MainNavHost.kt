@@ -137,6 +137,7 @@ fun MainNavHost() {
                                 orderNumber = orderNumber,
                                 onEnterScreen = { page ->
                                     mainViewModel.setPage(page)
+                                    mainViewModel.speakPaymentDone()
                                 },
                                 onBackHome = {
                                     mainViewModel.stopSpeechRecognition()

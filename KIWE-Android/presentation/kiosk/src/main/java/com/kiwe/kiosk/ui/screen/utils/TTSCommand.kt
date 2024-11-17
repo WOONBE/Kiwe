@@ -7,3 +7,4 @@ const val TEXT_CHECK_TEMPERATURE = "온도를 확인해주세요. 차가운 거�
 const val TEXT_MENU_RECOMMENDATION = "메뉴를 추천해드릴게요. "
 const val TEXT_TOGO = "이용장소를 말씀해주세요. 포장이신가요? 매장에서 이용하시나요?"
 const val TEXT_PAYMENT = "기기 하단에 카드를 태그해서 결제해주세요."
+const val TEXT_PAYMENT_DONE = "결제가 완료되었습니다. 기다리시면 불러드릴게요"

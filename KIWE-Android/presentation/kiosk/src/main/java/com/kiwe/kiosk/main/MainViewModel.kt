@@ -23,9 +23,9 @@ import com.kiwe.kiosk.ui.screen.utils.SpeechResultListener
 import com.kiwe.kiosk.ui.screen.utils.TEXT_CHECK_TEMPERATURE
 import com.kiwe.kiosk.ui.screen.utils.TEXT_INTRO
 import com.kiwe.kiosk.ui.screen.utils.TEXT_INTRO_HELP
-import com.kiwe.kiosk.ui.screen.utils.TEXT_MENU_RECOMMENDATION
 import com.kiwe.kiosk.ui.screen.utils.TEXT_MORE_ORDER
 import com.kiwe.kiosk.ui.screen.utils.TEXT_PAYMENT
+import com.kiwe.kiosk.ui.screen.utils.TEXT_PAYMENT_DONE
 import com.kiwe.kiosk.ui.screen.utils.TEXT_TOGO
 import com.kiwe.kiosk.ui.screen.utils.TextToSpeechManager
 import com.kiwe.kiosk.ui.screen.utils.helpPopupRegex
@@ -143,6 +143,10 @@ class MainViewModel
 
         fun speakPayment() {
             textToSpeechManager.speak(TEXT_PAYMENT)
+        }
+
+        fun speakPaymentDone()  {
+            textToSpeechManager.speak(TEXT_PAYMENT_DONE)
         }
 
         fun onDismissRequest() =
