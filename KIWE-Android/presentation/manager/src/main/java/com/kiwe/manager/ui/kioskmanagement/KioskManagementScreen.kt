@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -69,7 +70,7 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
     ) {
         Text(
             modifier = Modifier.padding(vertical = 20.dp, horizontal = 10.dp),
-            text = "xx커피 ㅌㅌ점",
+            text = "싸피카페 인동점",
             style = Typography.headlineLarge,
         )
         HorizontalDivider(thickness = 1.dp)
@@ -140,7 +141,8 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
                         Modifier
                             .weight(1F)
                             .fillMaxHeight()
-                            .fillMaxWidth(),
+                            .fillMaxWidth().align(Alignment.CenterHorizontally),
+
                     colors =
                         CardDefaults.cardColors(
                             containerColor = colorResource(R.color.dashboard_card_background),
@@ -168,6 +170,12 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
                         onValueChange = { status = it },
                         label = { Text("상태") },
                     )
+                    Button(
+                        modifier = Modifier.padding(10.dp),
+                        onClick = {},
+                    ) {
+                        Text("추가")
+                    }
                 }
             }
         }
@@ -184,7 +192,7 @@ private fun KioskManagementScreen(kioskList: List<Kiosk>) {
     ) {
         Text(
             modifier = Modifier.padding(vertical = 20.dp, horizontal = 10.dp),
-            text = "xx커피 ㅌㅌ점",
+            text = "싸피카페 인동점",
             style = Typography.headlineLarge,
         )
         HorizontalDivider(thickness = 1.dp)
