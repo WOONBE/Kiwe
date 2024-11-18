@@ -62,6 +62,7 @@ class ShoppingCartViewModel
                     cartList.add(eachItem)
                 }
                 // 장바구니에 담기
+                // 원래 플로우 타도록
                 reduce {
                     state.copy(shoppingCartItem = cartList)
                 }
