@@ -74,12 +74,12 @@ fun SalesOverviewScreen(viewModel: SalesOverViewViewModel = hiltViewModel()) {
                 Modifier
                     .weight(1F),
         ) {
-            LazyColumn(
+            Column(
                 modifier =
                     Modifier
                         .padding(vertical = 20.dp, horizontal = 10.dp),
             ) {
-                item {
+
                     Row(
                         modifier = Modifier.height(IntrinsicSize.Max),
                     ) {
@@ -155,26 +155,32 @@ fun SalesOverviewScreen(viewModel: SalesOverViewViewModel = hiltViewModel()) {
                                 "${orderIncreaseRate.toInt()}% 감소했습니다"
                             },
                         )
-                    }
-                }
-                item {
+                   }
+
+
                     Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        "최근 6개월간 매출 추이",
-                    )
-                    if (state.totalPriceRecent6Month.isNotEmpty()) {
-                        Chart2(Modifier, state.totalPriceRecent6Month)
+                    Row(modifier = Modifier.fillMaxHeight()) {
+                        Column(modifier = Modifier.weight(1F)) {
+                            Text(
+                                "최근 6개월간 매출 추이",
+                            )
+                            if (state.totalPriceRecent6Month.isNotEmpty()) {
+                                Chart2(Modifier.fillMaxHeight(), state.totalPriceRecent6Month)
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(20.dp))
+                        Column(
+                            Modifier.weight(1F),
+                        ) {
+
+                            Text(
+                                "최근 6개월간 주문 건수 추이",
+                            )
+                            if (state.totalOrderRecent6Month.isNotEmpty()) {
+                                Chart2(Modifier.fillMaxHeight(), state.totalOrderRecent6Month)
+                            }
+                        }
                     }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        "최근 6개월간 주문 건수 추이",
-                    )
-                    if (state.totalOrderRecent6Month.isNotEmpty()) {
-                        Chart2(Modifier, state.totalOrderRecent6Month)
-                    }
-                }
             }
         }
     }

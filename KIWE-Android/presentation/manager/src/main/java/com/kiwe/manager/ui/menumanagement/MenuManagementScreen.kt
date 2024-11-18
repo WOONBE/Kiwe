@@ -285,9 +285,6 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                                     }
 
                                     item {
-                                        var name by remember { mutableStateOf("") }
-                                        var price by remember { mutableStateOf("") }
-
                                         Row {
                                             OutlinedTextField(
                                                 value = state.itemCreated.name,
@@ -296,7 +293,13 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                                             )
                                             Spacer(modifier = Modifier.width(10.dp))
                                             OutlinedTextField(
-                                                value = state.itemCreated.price.toString(),
+                                                value =
+                                                    if (state.itemCreated.price != 0)
+                                                        {
+                                                            state.itemCreated.price.toString()
+                                                        } else {
+                                                        ""
+                                                    },
                                                 onValueChange = { menuManagementViewModel.onEditNewItemPrice(it.toInt()) },
                                                 label = { Text("가격") },
                                             )
@@ -304,9 +307,6 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                                     }
 
                                     item {
-                                        var description by remember { mutableStateOf("") }
-                                        var imgPath by remember { mutableStateOf("") }
-
                                         Row {
                                             OutlinedTextField(
                                                 value = state.itemCreated.description,

@@ -37,9 +37,11 @@ import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.decoration.HorizontalLine
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 @Composable
 internal fun Chart2(
@@ -76,15 +78,26 @@ private fun ComposeChart2(
                     ColumnCartesianLayer.ColumnProvider.series(
                         rememberLineComponent(
                             color = Color(0xffff5500),
-                            thickness = 16.dp,
+                            thickness = 8.dp,
                             shape = CorneredShape.rounded(allPercent = 40),
                         ),
                     ),
                 ),
                 startAxis =
                     VerticalAxis.rememberStart(
+                        itemPlacer =
+                            VerticalAxis.ItemPlacer.count({ _ ->
+                                10
+                            }),
+                        valueFormatter = { c, value, _ ->
+                            String.format(Locale.getDefault(), "%,d", value.toInt())
+                        },
                         guideline = null,
                         tick = null,
+                        label =
+                            TextComponent(
+                                textSizeSp = 15F,
+                            ),
                     ),
                 bottomAxis =
                     HorizontalAxis.rememberBottom(
@@ -93,6 +106,10 @@ private fun ComposeChart2(
                         valueFormatter = { _, value, _ ->
                             priceHistory[value.toInt()]
                         },
+                        label =
+                            TextComponent(
+                                textSizeSp = 15F,
+                            ),
                         itemPlacer =
                             remember {
                                 HorizontalAxis.ItemPlacer.aligned(spacing = 1, addExtremeLabelPadding = true)
