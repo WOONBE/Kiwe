@@ -1,0 +1,58 @@
+{
+  "디카페인 아메리카노": {
+    "calories": 5,
+    "carbs": 1,
+    "protein": 0,
+    "fat": 0,
+    "sugars": 0
+  },
+  "디카페인 꿀아메리카노": {
+    "calories": 120,
+    "carbs": 28,
+    "protein": 0,
+    "fat": 0,
+    "sugars": 28
+  },
+  "디카페인 카페라떼": {
+    "calories": 150,
+    "carbs": 14,
+    "protein": 8,
+    "fat": 7,
+    "sugars": 12
+  },
+  "디카페인 카페모카": {
+    "calories": 210,
+    "carbs": 30,
+    "protein": 6,
+    "fat": 9,
+    "sugars": 25
+  },
+  "스모어블랙쿠키프라페": {
+    "calories": 350,
+    "carbs": 50,
+    "protein": 5,
+    "fat": 15,
+    "sugars": 40
+  },
+  "수박 주스": {
+    "calories": 180,
+    "carbs": 45,
+    "protein": 1,
+    "fat": 0,
+    "sugars": 35
+  },
+  "감자빵": {
+    "calories": 250,
+    "carbs": 40,
+    "protein": 5,
+    "fat": 8,
+    "sugars": 2
+  },
+  "핫도그": {
+    "calories": 300,
+    "carbs": 35,
+    "protein": 12,
+    "fat": 12,
+    "sugars": 3
+  }
+}

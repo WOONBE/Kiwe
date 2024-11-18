@@ -3,6 +3,8 @@ from fastapi import HTTPException
 from konlpy.tag import Okt
 from src.infrastructure.database import Database
 from src.api_layer.models.order_item import OrderItem, OrderRequest, OrderResponseItem, OrderOption
+import json
+from pathlib import Path
 
 
 class NLPProcessor:
@@ -46,6 +48,7 @@ class NLPProcessor:
         self.menu_data = self.fetch_menu_combinations()  # Fetch menu data with menu_id, name, etc.
         self.options = self.fetch_options()  # Placeholder for dynamic options fetching
         self.menu_descs = self.fetch_menu_descs()
+        self.menu_nutri = self.fetch_menu_nutri()
         print("hiiiiiiiiiiii")
 
         self.menu_temp_to_id = {}  # Dictionary for menu+temp combinations
@@ -87,6 +90,37 @@ class NLPProcessor:
             # Convert to a dictionary for quick lookup by menu_name
             return {item['menu_id']: item for item in menu_data}
         return {}
+
+    def fetch_menu_nutri(self):
+        """Fetch menu items with nutrition and allergy data from the JSON files."""
+        data_folder_path = Path(__file__).parent.parent.parent / "data"  # Adjust path based on your project structure
+        nutrition_data_path = data_folder_path / "nutrition_facts.json"
+        allergy_data_path = data_folder_path / "allergy_levels.json"
+
+        # Read JSON files
+        with open(nutrition_data_path, "r", encoding="utf-8") as file:
+            nutrition_data = json.load(file)
+
+        with open(allergy_data_path, "r", encoding="utf-8") as file:
+            allergy_data = json.load(file)
+
+        # Combine the data into one list of dictionaries
+        menu_nutri = []
+        for menu_name, nutrition in nutrition_data.items():
+            # Fetch the allergy information from allergy_data (defaults to ["none"] if not found)
+            allergies = allergy_data.get(menu_name, ["none"])
+
+            # Create the combined menu item data
+            menu_item = {
+                "menu_name": menu_name,
+                "nutrition": nutrition,  # nutrition is a dictionary, directly added
+                "allergy": allergies  # allergy is a list, directly added
+            }
+
+            # Add the menu item to the list
+            menu_nutri.append(menu_item)
+
+        return menu_nutri
 
     def process_request(self, request):
         """Process a Korean input sentence to extract intent and structured data."""
@@ -493,20 +527,41 @@ class NLPProcessor:
         # Default case if no temperature keywords are found
         return temp
 
-
     def extract_explanations(self, sentence):
-        """Extract suggestions based on temperature preference and age."""
-        print("sentence",sentence)
-        # find menu and throw it to llm
+        """Extract explanations based on the menu items mentioned in the sentence."""
+        print("sentence:", sentence)
         menus = []
+
+        # Loop through the menu descriptions (menu_descs)
         for menu_info in self.menu_descs:
-            # print("menu_info",menu_info)
-            # Use regular expression to find menu_name as a whole word in the sentence
+            # Use regular expression to find the full menu_name as a whole word in the sentence
             pattern = re.escape(menu_info['menu_name'])
             match = re.search(pattern, sentence)
+
             if match:
                 # Remove the matched menu name from the sentence to process remaining words
                 sentence = sentence.replace(menu_info['menu_name'], '')
-                menus.append({"menu_name":menu_info['menu_name'],"menu_desc":menu_info['menu_desc']})
-        print("menu_list + desc_list",menus)
+
+                # Find the menu item in the nutrition and allergy data (menu_nutri)
+                menu_nutri_info = next(
+                    (item for item in self.menu_nutri if item['menu_name'] == menu_info['menu_name']), None)
+
+                if menu_nutri_info:
+                    # Append combined data to the response
+                    menus.append({
+                        "menu_name": menu_info['menu_name'],
+                        "menu_desc": menu_info['menu_desc'],
+                        "nutrition": menu_nutri_info['nutrition'],
+                        "allergy": menu_nutri_info['allergy']
+                    })
+                else:
+                    # If no nutrition data is found, just include the description
+                    menus.append({
+                        "menu_name": menu_info['menu_name'],
+                        "menu_desc": menu_info['menu_desc'],
+                        "nutrition": "영양 정보가 없습니다",
+                        "allergy": "알레르기 정보가 없습니다."
+                    })
+
+        print("menu_list + desc_list + nutrition_allergy:", menus)
         return menus
