@@ -59,12 +59,14 @@ class ShoppingCartViewModel
                             defaultPrice = menu.price,
                             count = eachOrder.count,
                         )
-                    cartList.add(eachItem)
+                    onInsertItem(eachItem) // 이러면 되는지?
+//                    cartList.add(eachItem)
                 }
                 // 장바구니에 담기
-                reduce {
-                    state.copy(shoppingCartItem = cartList)
-                }
+                // 원래 플로우 타도록
+//                reduce {
+//                    state.copy(shoppingCartItem = cartList)
+//                }
                 // 담고나서 장바구니 띄우기
                 reduce {
                     state.copy(isVoiceOrderConfirm = true)

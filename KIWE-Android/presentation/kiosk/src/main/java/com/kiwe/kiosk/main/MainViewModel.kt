@@ -65,6 +65,7 @@ class MainViewModel
         private var personDetectedRecently = false
         private val delayTime = TimeUnit.MINUTES.toMillis(5)
         private var timerJob: Job? = null
+        private var lastTtsText: String = ""
 
         override fun handleExceptionIntent(
             coroutineContext: CoroutineContext,
@@ -93,18 +94,82 @@ class MainViewModel
                         Timber.tag("MainViewModel").d("tts 종료 인지")
                         state.copy(isTtsOn = false)
                     }
-                    delay(1000L)
+                    delay(500L)
                     startSpeechRecognition()
                 }
             }
-            textToSpeechManager.setOnStartListener {
+            textToSpeechManager.setOnStartListener { lastText ->
                 intent {
                     reduce {
                         Timber.tag("MainViewModel").d("tts 시작 인지")
                         state.copy(isTtsOn = true)
                     }
+                    lastTtsText = lastText // 마지막에 재생된 tts 저장해두기
+                    // tts가 시작되면 stt를 끊는다
+                    speechRecognizerManager.stopListening()
                 }
             }
+        }
+
+        private fun removeOverlap(
+            sttText: String,
+            ttsText: String,
+        ): String {
+            val normalizedSttText = normalizeText(sttText)
+            val normalizedTtsText = normalizeText(ttsText)
+
+            val index = normalizedSttText.indexOf(normalizedTtsText)
+            return if (index != -1) {
+                val startIndex = getOriginalIndex(sttText, normalizedSttText, index)
+                val endIndex =
+                    getOriginalIndex(sttText, normalizedSttText, index + normalizedTtsText.length)
+
+                val beforeTts = sttText.substring(0, startIndex)
+                val afterTts = sttText.substring(endIndex)
+                (beforeTts + afterTts).trim()
+            } else {
+                sttText
+            }
+        }
+
+        private fun normalizeText(text: String): String {
+            return text
+                .replace("\\s+".toRegex(), "") // 모든 공백 제거
+                .replace("[^\\p{L}\\p{N}]".toRegex(), "") // 모든 문장 부호 제거
+        }
+
+        private fun getOriginalIndex(
+            originalText: String,
+            normalizedText: String,
+            targetNormalizedIndex: Int,
+        ): Int {
+            var originalIndex = 0
+            var normalizedIndex = 0
+
+            while (originalIndex < originalText.length && normalizedIndex < targetNormalizedIndex) {
+                val c = originalText[originalIndex]
+                if (!c.isWhitespace() && !c.isPunctuation()) {
+                    // 원본 텍스트의 문자가 공백이나 문장 부호가 아니면
+                    if (normalizedText[normalizedIndex] == c) {
+                        // 문자가 일치하면 normalizedIndex 증가
+                        normalizedIndex++
+                    }
+                    // 일치하지 않더라도 originalIndex 증가
+                }
+                originalIndex++
+            }
+            return originalIndex
+        }
+
+        private fun Char.isPunctuation(): Boolean {
+            val type = Character.getType(this)
+            return type == Character.CONNECTOR_PUNCTUATION.toInt() ||
+                type == Character.DASH_PUNCTUATION.toInt() ||
+                type == Character.END_PUNCTUATION.toInt() ||
+                type == Character.FINAL_QUOTE_PUNCTUATION.toInt() ||
+                type == Character.INITIAL_QUOTE_PUNCTUATION.toInt() ||
+                type == Character.OTHER_PUNCTUATION.toInt() ||
+                type == Character.START_PUNCTUATION.toInt()
         }
 
         // 음성 인식 시작
@@ -132,28 +197,34 @@ class MainViewModel
         override fun onResultsReceived(results: List<String>) {
             val resultText = results.firstOrNull() ?: ""
             intent {
-                if (!state.isTtsOn) {
-                    if (!state.isScreenShowing && helpPopupRegex.containsMatchIn(resultText) && !state.isPayment && !state.isCartOpen) {
-                        setMySpeechInput(resultText)
-                        textToSpeechManager.speak(TEXT_INTRO_HELP)
-                        reduce {
-                            state.copy(isScreenShowing = true)
-                        }
-                    } else {
-                        setMySpeechInput(resultText)
-                        delay(2000L) // 2초 대기
-                        if (state.isScreenShowing) { // SpeechScreen여부
-                            onSpeechResult(resultText)
+                if (!state.isTtsOn) { // when tts off
+                    val cleanedResultText = removeOverlap(resultText.trim(), lastTtsText.trim())
+                    if (cleanedResultText.isNotEmpty()) {
+                        Timber.tag("MainViewModel").d("필터링 된놈 $cleanedResultText")
+                        if (!state.isScreenShowing && helpPopupRegex.containsMatchIn(resultText) && !state.isPayment && !state.isCartOpen) {
+                            setMySpeechInput(resultText)
+                            textToSpeechManager.speak(TEXT_INTRO_HELP)
+                            reduce {
+                                state.copy(isScreenShowing = true)
+                            }
                         } else {
-                            // 여기서 로직 문제가 생겼음
-                            Timber.tag("추천췍").d("$resultText  ${state.isCartOpen}")
-                            if (state.isCartOpen) {
-                                onProcessResult(resultText)
+                            setMySpeechInput(resultText)
+                            delay(2000L) // 2초 대기
+                            if (state.isScreenShowing) { // SpeechScreen여부
+                                onSpeechResult(resultText)
                             } else {
-                                onPayProcess(resultText)
-                                onRecommendProcess(resultText)
+                                // 여기서 로직 문제가 생겼음
+                                Timber.tag("추천췍").d("$resultText  ${state.isCartOpen}")
+                                if (state.isCartOpen) {
+                                    onProcessResult(resultText)
+                                } else {
+                                    onPayProcess(resultText)
+                                    onRecommendProcess(resultText)
+                                }
                             }
                         }
+                    } else {
+                        Timber.tag("MainViewModel").d("TTS 음성만 인식되어 결과를 무시합니다.")
                     }
                 }
                 Timber
@@ -510,16 +581,18 @@ class MainViewModel
             val partialText = partialResults.firstOrNull() ?: ""
             Timber.tag("MainViewModel").d("Partial Result: $partialResults")
             intent {
-                reduce { state.copy(isMySpeechInputTextOpen = true) }
-                if (state.isScreenShowing) {
-                    // 다이얼로그가 보여지고 있는 상황이라면
-                } else if (helpPopupRegex.containsMatchIn(partialText)) {
-                    // 다이얼로그가 안보이는 상황에서 음성이 들어온다면 이걸 탐
-                    Timber
-                        .tag("MainViewModel")
-                        .d("${helpPopupRegex.containsMatchIn(partialText)}")
-                    reduce {
-                        state.copy(isScreenShowing = true)
+                if (!state.isTtsOn) { // tts가 꺼져있을 때 들어오도록
+                    reduce { state.copy(isMySpeechInputTextOpen = true) }
+                    if (state.isScreenShowing) {
+                        // 다이얼로그가 보여지고 있는 상황이라면
+                    } else if (helpPopupRegex.containsMatchIn(partialText)) {
+                        // 다이얼로그가 안보이는 상황에서 음성이 들어온다면 이걸 탐
+                        Timber
+                            .tag("MainViewModel")
+                            .d("${helpPopupRegex.containsMatchIn(partialText)}")
+                        reduce {
+                            state.copy(isScreenShowing = true)
+                        }
                     }
                 }
             }
