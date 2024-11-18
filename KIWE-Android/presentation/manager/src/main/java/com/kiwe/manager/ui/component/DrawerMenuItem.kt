@@ -38,7 +38,7 @@ fun DrawerMenuItem(
             if (selected) {
                 Modifier
                     .padding(horizontal = 20.dp)
-                    .width(150.dp)
+                    .width(200.dp)
                     .clip(RoundedCornerShape(30.dp))
                     .background(Color.White)
                     .padding(vertical = 10.dp, horizontal = 20.dp)
@@ -47,7 +47,7 @@ fun DrawerMenuItem(
             } else {
                 Modifier
                     .padding(horizontal = 20.dp)
-                    .width(150.dp)
+                    .width(200.dp)
                     .clip(RoundedCornerShape(30.dp))
                     .padding(vertical = 10.dp, horizontal = 20.dp)
                     .wrapContentHeight()
@@ -76,7 +76,7 @@ fun DrawerMenuItem(
                 } else {
                     colorResource(R.color.white)
                 },
-            style = Typography.labelSmall,
+            style = Typography.labelLarge,
         )
     }
 }
