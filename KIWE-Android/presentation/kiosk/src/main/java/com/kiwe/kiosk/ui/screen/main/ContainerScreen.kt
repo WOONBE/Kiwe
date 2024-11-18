@@ -490,6 +490,8 @@ fun RecommendStateBox(
     onClose: () -> Unit,
     onYesClick: () -> Unit = {}, // 바로 장바구니에 넣기
 ) {
+    subRecommendString
+    onYesClick
     if (recommendString.isNotEmpty()) {
         Dialog(onDismissRequest = {
             onClose()
@@ -775,7 +777,12 @@ fun MySpeechInputText(
         }
 
         Text(
-            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(top = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+                    .heightIn(min = 48.dp)
+                    .padding(top = 12.dp),
             text = "\"" + displayedText + "\"",
             textAlign = TextAlign.Center,
             style = Typography.titleLarge.copy(color = Color.White),

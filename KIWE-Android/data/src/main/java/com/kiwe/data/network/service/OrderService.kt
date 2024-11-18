@@ -18,8 +18,6 @@ import timber.log.Timber
 import timber.log.Timber.Forest.tag
 import javax.inject.Inject
 
-private const val TAG = "POST 서비스"
-
 class OrderService
     @Inject
     constructor(

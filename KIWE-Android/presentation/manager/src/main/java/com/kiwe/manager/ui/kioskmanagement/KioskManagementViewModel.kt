@@ -1,5 +1,6 @@
 package com.kiwe.manager.ui.kioskmanagement
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.kiwe.domain.exception.APIException
 import com.kiwe.domain.model.Kiosk
@@ -60,6 +61,7 @@ class KioskManagementViewModel
 
         fun onKioskDelete(kioskId: Int) =
             intent {
+                Log.d("kiosk", "onKioskDelete: $kioskId")
                 // val response = deleteKioskUseCase(kioskId = kioskId)
                 // val kioskId = kioskId
                 postSideEffect(KioskManagementSideEffect.Toast("삭제에 성공했습니다"))

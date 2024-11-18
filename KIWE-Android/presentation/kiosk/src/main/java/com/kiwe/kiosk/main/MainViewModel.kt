@@ -109,7 +109,6 @@ class MainViewModel
         }
 
         private fun setMySpeechInput(mySentence: String) { // text 처리만 수행한다
-            // 상태값 바뀌기 전에 이걸 수행하고 나서 하면 좋겠음
             intent {
                 reduce {
                     state.copy(mySpeechText = mySentence) // 이전 글자를 지우고
@@ -120,13 +119,12 @@ class MainViewModel
         override fun onResultsReceived(results: List<String>) {
             val resultText = results.firstOrNull() ?: ""
             intent {
-                if (!state.isScreenShowing && helpPopupRegex.containsMatchIn(resultText))
-                    {
-                        setMySpeechInput(resultText)
-                        reduce {
-                            state.copy(isScreenShowing = true)
-                        }
-                    } else {
+                if (!state.isScreenShowing && helpPopupRegex.containsMatchIn(resultText) && !state.isPayment && !state.isCartOpen) {
+                    setMySpeechInput(resultText)
+                    reduce {
+                        state.copy(isScreenShowing = true)
+                    }
+                } else {
                     setMySpeechInput(resultText)
                     delay(2000L) // 2초 대기
                     if (state.isScreenShowing) { // SpeechScreen여부
@@ -260,6 +258,7 @@ class MainViewModel
                 // 계속 주문할까요?
                 if (state.voiceShoppingCart.isNotEmpty()) {
                     if (noRegex.containsMatchIn(result)) {
+                        reduce { state.copy(mySpeechText = "") }
                         // 부정
                         textToSpeechManager.speak(TEXT_TOGO)
                         reduce { state.copy(isOrderEndTrue = true) }
