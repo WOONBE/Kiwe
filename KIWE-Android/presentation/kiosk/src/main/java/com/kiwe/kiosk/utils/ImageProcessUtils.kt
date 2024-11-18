@@ -64,74 +64,62 @@ class ImageProcessUtils
                         }
 
                         for (face in faces) {
-                            // 첫 번째 얼굴의 trackingId만 설정하고 유지
-                            val trackingId = face.trackingId
-                            if (initialTrackingId == null && trackingId != null) {
-                                initialTrackingId = trackingId
-//                                Timber.tag("Tracking ID").d("Initial Tracking ID set to: $trackingId")
+                            val bounds = face.boundingBox
+                            val faceWidth = bounds.width()
+                            val faceHeight = bounds.height()
+
+                            // 얼굴의 크기에 따른 콜백 호출
+                            if (faceWidth >= 100 || faceHeight >= 100) { // FIXME : 얼굴 크기 수정
+                                faceDetection(true)
+                            } else {
+                                faceDetection(false)
                             }
-
-                            // initialTrackingId와 일치하는 얼굴만 처리
-                            if (trackingId == initialTrackingId) {
-                                val bounds = face.boundingBox
-                                val faceWidth = bounds.width()
-                                val faceHeight = bounds.height()
-
-                                // 얼굴의 크기에 따른 콜백 호출
-                                if (faceWidth >= 100 || faceHeight >= 100) { // FIXME : 얼굴 크기 수정
-                                    faceDetection(true)
-                                } else {
-                                    faceDetection(false)
-                                }
 //                                Timber.tag("FC").d("Face width: $faceWidth, height: $faceHeight")
 
-                                val bitmap = imageProxyToBitmap(imageProxy)
-                                detectAgeAndGender(bitmap, face)
-                                val mpImage = BitmapImageBuilder(bitmap).build()
-                                val baseOptions =
-                                    BaseOptions
-                                        .builder()
-                                        .setModelAssetPath("face_landmarker.task")
-                                        .build()
+                            val bitmap = imageProxyToBitmap(imageProxy)
+                            detectAgeAndGender(bitmap, face)
+                            val mpImage = BitmapImageBuilder(bitmap).build()
+                            val baseOptions =
+                                BaseOptions
+                                    .builder()
+                                    .setModelAssetPath("face_landmarker.task")
+                                    .build()
 
-                                val landmarkerOptions =
-                                    FaceLandmarker.FaceLandmarkerOptions
-                                        .builder()
-                                        .setBaseOptions(baseOptions)
-                                        .setOutputFaceBlendshapes(true)
-                                        .build()
+                            val landmarkerOptions =
+                                FaceLandmarker.FaceLandmarkerOptions
+                                    .builder()
+                                    .setBaseOptions(baseOptions)
+                                    .setOutputFaceBlendshapes(true)
+                                    .build()
 
-                                val faceLandmarker =
-                                    FaceLandmarker.createFromOptions(context, landmarkerOptions)
+                            val faceLandmarker =
+                                FaceLandmarker.createFromOptions(context, landmarkerOptions)
 
-                                val imageProcessingOptions =
-                                    ImageProcessingOptions
-                                        .builder()
-                                        .setRotationDegrees(imageProxy.imageInfo.rotationDegrees)
-                                        .build()
+                            val imageProcessingOptions =
+                                ImageProcessingOptions
+                                    .builder()
+                                    .setRotationDegrees(imageProxy.imageInfo.rotationDegrees)
+                                    .build()
 
-                                val result = faceLandmarker.detect(mpImage, imageProcessingOptions)
+                            val result = faceLandmarker.detect(mpImage, imageProcessingOptions)
 
-                                val gazePoint = estimateGaze(face, image.width, image.height)
-                                gazeDetection(gazePoint)
-                                try {
-                                    val blendList = result.faceBlendshapes()
-                                    val shapeList =
-                                        blendList.get().flatMap { innerList -> innerList.orEmpty() }
-                                    shapeList
+                            val gazePoint = estimateGaze(face, image.width, image.height)
+                            gazeDetection(gazePoint)
+                            try {
+                                val blendList = result.faceBlendshapes()
+                                val shapeList =
+                                    blendList.get().flatMap { innerList -> innerList.orEmpty() }
+                                shapeList
 //                                    for (shape in shapeList) {
 //                                        Timber
 //                                            .tag("BlendShape")
 //                                            .d("Blend shape: ${shape.categoryName()} || ${shape.score()} || ${shape.index()}")
 //                                    }
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
-
-                                faceLandmarker.close()
-                            } else {
-//                                Timber.tag("Tracking ID").d("Ignored face with ID: $trackingId")
+                            } catch (e: Exception) {
+                                e.printStackTrace()
                             }
+
+                            faceLandmarker.close()
                         }
                     }.addOnFailureListener { e ->
                         e.printStackTrace()
