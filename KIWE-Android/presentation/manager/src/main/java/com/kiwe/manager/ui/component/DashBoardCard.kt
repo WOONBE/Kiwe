@@ -20,6 +20,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.kiwe.manager.R
+import com.kiwe.manager.ui.theme.Typography
 
 @Composable
 fun DashBoardCard(
@@ -53,11 +54,13 @@ fun DashBoardCard(
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     title,
+                    style = Typography.titleLarge,
                 )
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
                     value,
+                    style = Typography.bodyLarge,
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(

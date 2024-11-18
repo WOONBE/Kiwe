@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -73,6 +74,7 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
             modifier = Modifier.padding(vertical = 20.dp, horizontal = 10.dp),
             text = "싸피카페 인동점",
             style = Typography.headlineLarge,
+            fontWeight = FontWeight.Bold
         )
         HorizontalDivider(thickness = 1.dp)
         Box(

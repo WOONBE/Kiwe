@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -77,6 +78,7 @@ fun DashBoardScreen(viewModel: DashBoardViewModel = hiltViewModel()) {
             modifier = Modifier.padding(vertical = 20.dp, horizontal = 10.dp),
             text = "싸피카페 인동점",
             style = Typography.headlineLarge,
+            fontWeight = FontWeight.Bold
         )
         HorizontalDivider(thickness = 1.dp)
         Box(
@@ -93,6 +95,7 @@ fun DashBoardScreen(viewModel: DashBoardViewModel = hiltViewModel()) {
                     Text(
                         text = "OverView",
                         style = Typography.headlineLarge,
+                        fontWeight = FontWeight.Bold
                     )
                     var expanded by remember { mutableStateOf(false) }
                     val items = listOf("한 달")

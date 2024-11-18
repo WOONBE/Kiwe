@@ -56,12 +56,12 @@ fun HomeSideBar(
             selected = tabIdx == 3,
             onClick = { onTabChanged(3) },
         )
-        DrawerMenuItem(
-            icon = Icons.Outlined.Settings,
-            text = "설정",
-            selected = tabIdx == 4,
-            onClick = { onTabChanged(4) },
-        )
+//        DrawerMenuItem(
+//            icon = Icons.Outlined.Settings,
+//            text = "설정",
+//            selected = tabIdx == 4,
+//            onClick = { onTabChanged(4) },
+//        )
     }
 }
 
