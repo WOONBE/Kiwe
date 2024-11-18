@@ -23,6 +23,7 @@ import com.kiwe.kiosk.ui.screen.utils.SpeechResultListener
 import com.kiwe.kiosk.ui.screen.utils.TEXT_CHECK_TEMPERATURE
 import com.kiwe.kiosk.ui.screen.utils.TEXT_INTRO
 import com.kiwe.kiosk.ui.screen.utils.TEXT_INTRO_HELP
+import com.kiwe.kiosk.ui.screen.utils.TEXT_MENU_RECOMMENDATION
 import com.kiwe.kiosk.ui.screen.utils.TEXT_MORE_ORDER
 import com.kiwe.kiosk.ui.screen.utils.TEXT_PAYMENT
 import com.kiwe.kiosk.ui.screen.utils.TEXT_PAYMENT_DONE
@@ -120,7 +121,7 @@ class MainViewModel
             val resultText = results.firstOrNull() ?: ""
             intent {
                 setMySpeechInput(resultText)
-                delay(1000L) // 1초 대기
+                delay(2000L) // 1초 대기
                 Timber.tag("MainViewModel").d("Result: $resultText 하고 ${state.isScreenShowing}")
                 if (state.isScreenShowing) { // SpeechScreen여부
                     onSpeechResult(resultText)
@@ -145,7 +146,7 @@ class MainViewModel
             textToSpeechManager.speak(TEXT_PAYMENT)
         }
 
-        fun speakPaymentDone()  {
+        fun speakPaymentDone() {
             textToSpeechManager.speak(TEXT_PAYMENT_DONE)
         }
 
@@ -352,7 +353,7 @@ class MainViewModel
                                 ),
                         ).onSuccess { res ->
                             val it = res.data
-                            textToSpeechManager.speak(it.response + TEXT_MORE_ORDER)
+                            textToSpeechManager.speak(it.response + "." + TEXT_MORE_ORDER)
                             // 온도까지 잘 들어가 있다면
                             reduce {
                                 state.copy(
@@ -404,7 +405,7 @@ class MainViewModel
                                         )
                                     }
                                 } else {
-                                    textToSpeechManager.speak(it.response + TEXT_MORE_ORDER)
+                                    textToSpeechManager.speak(it.response + "." + TEXT_MORE_ORDER)
                                     reduce {
                                         state.copy(
                                             voiceShoppingCart = it.order,
@@ -450,6 +451,7 @@ class MainViewModel
                         val secondMenuId = shuffledList.getOrNull(1)
                         val thirdMenuId = shuffledList.getOrNull(2)
                         val menu = getMenuByIdUseCase(requestMenuId).getOrThrow()
+                        textToSpeechManager.speak(TEXT_MENU_RECOMMENDATION + menu.name + "을 주문하시겠습니까?")
                         val subRecommendMenus =
                             listOfNotNull(
                                 secondMenuId?.let { getMenuByIdUseCase(it).getOrNull() },
@@ -479,7 +481,6 @@ class MainViewModel
             val partialText = partialResults.firstOrNull() ?: ""
             Timber.tag("MainViewModel").d("Partial Result: $partialResults")
             intent {
-                setMySpeechInput(partialText)
                 reduce { state.copy(isMySpeechInputTextOpen = true) }
                 if (state.isScreenShowing) {
                     // 다이얼로그가 보여지고 있는 상황이라면
@@ -561,7 +562,7 @@ class MainViewModel
             timerJob?.cancel()
             timerJob =
                 viewModelScope.launch {
-                    var timeLeft = 180L // 5분을 초로 변환 // TODO : 5분
+                    var timeLeft = 300L // 5분을 초로 변환 // TODO : 5분
                     while (timeLeft > 0) {
                         intent {
                             reduce { state.copy(remainingTime = timeLeft) }

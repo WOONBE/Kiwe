@@ -108,13 +108,18 @@ val menuPattern =
 
 val menuRegex = Regex(menuPattern)
 
-val helpPopupRegex = Regex("도움|돔|도우미|도움이|도움말|돠|도와|돵|돠주|도와주")
+val helpPopupRegex = Regex("도움|도우미|도움이|도움말|돠|도와|돠주|도와주")
 
 val orderCommands =
     listOf(
         "주세요",
         "주문",
         "줘",
+        "중",
+        "조",
+        "죠",
+        "저",
+        "져",
     )
 val orderPattern = orderCommands.joinToString("|") { "(?:$it)" }
 val orderRegex = Regex(orderPattern)
@@ -122,8 +127,13 @@ val orderRegex = Regex(orderPattern)
 val temperatureCommands =
     listOf(
         "따뜻한",
+        "뜨겁게",
+        "따뜻하게",
+        "뜨끈하게",
         "따뜻",
+        "시원하게",
         "뜨거운",
+        "차갑게",
         "차가운",
         "아이스",
         "핫", // 매직단어

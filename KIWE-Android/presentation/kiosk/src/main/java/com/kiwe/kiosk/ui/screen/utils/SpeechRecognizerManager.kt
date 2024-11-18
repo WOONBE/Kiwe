@@ -51,6 +51,9 @@ class SpeechRecognizerManager
         }
 
         private fun initializeSpeechRecognizer() {
+            if (speechRecognizer != null) {
+                speechRecognizer?.destroy() // 기존 인스턴스 정리
+            }
             speechRecognizer =
                 SpeechRecognizer.createSpeechRecognizer(context).apply {
                     setRecognitionListener(createRecognitionListener())
@@ -144,6 +147,11 @@ class SpeechRecognizerManager
             speechRecognizer?.startListening(recognizerIntent)
         }
 
+        fun stopListening() {
+            isListening = false
+            speechRecognizer?.stopListening()
+        }
+
         private fun restartListeningWithDelay(delayMillis: Long = delayTime) {
             CoroutineScope(Dispatchers.Main).launch {
                 delay(delayMillis)
@@ -167,17 +175,10 @@ class SpeechRecognizerManager
             initializeSpeechRecognizer()
             isListening = false
         }
-
-        fun stopListening() {
-            isListening = false
-            speechRecognizer?.stopListening()
-        }
     }
 
 interface SpeechResultListener {
     fun onResultsReceived(results: List<String>)
 
     fun onPartialResultsReceived(partialResults: List<String>)
-//    fun onSpeechStarted()
-//    fun onSpeechEnded()
 }

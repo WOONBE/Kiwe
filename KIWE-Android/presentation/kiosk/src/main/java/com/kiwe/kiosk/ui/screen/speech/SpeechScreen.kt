@@ -171,11 +171,7 @@ private fun SpeechScreen(
                     }
                 }
                 if (elapsedTime >= MAX_SPEECH_WAIT_TIME) {
-                    ExampleBox()
-                    MySpeechInputText(
-                        isMySpeechInputTextOpen = isMySpeechInputTextOpen,
-                        sentence = sentence,
-                    )
+                    ExampleBox(isMySpeechInputTextOpen, sentence)
                 }
                 if (isTemperatureEmpty) {
                     elapsedTime = -7 // 7초안에 온도 골라야됨
@@ -220,19 +216,29 @@ fun TempBox(
 }
 
 @Composable
-fun ExampleBox() {
-    Column(
-        modifier =
+fun ExampleBox(
+    isMySpeechInputTextOpen: Boolean,
+    sentence: String,
+) {
+    Column {
+        Column(
+            modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
                 .background(shape = RoundedCornerShape(20.dp), color = Color.Black.copy(alpha = 0.5f))
                 .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        ExampleItem(text = "예시1", example = "\"차가운 아메리카노 한잔 줘\"")
-        ExampleItem(text = "예시2", example = "\"따뜻한 둥글레차 두 잔 줘\"")
-        ExampleItem(text = "예시3", example = "\"티라미수 케이크 하나 줘\"")
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            ExampleItem(text = "예시1", example = "\"차가운 아메리카노 한잔 줘\"")
+            ExampleItem(text = "예시2", example = "\"따뜻한 둥글레차 두 잔 줘\"")
+            ExampleItem(text = "예시3", example = "\"티라미수 케이크 하나 줘\"")
+        }
+
+        MySpeechInputText(
+            isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+            sentence = sentence,
+        )
     }
 }
 
