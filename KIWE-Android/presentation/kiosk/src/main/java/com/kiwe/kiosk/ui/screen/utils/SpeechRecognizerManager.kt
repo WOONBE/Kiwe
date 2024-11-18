@@ -16,166 +16,173 @@ import timber.log.Timber
 import java.util.Locale
 import javax.inject.Inject
 
-private const val TAG = "SpeechRecognizerManager"
+private const val TAG = "STT"
 
 class SpeechRecognizerManager
-    @Inject
-    constructor(
-        @ApplicationContext
-        private val context: Context,
-    ) {
-        private val delayTime = 200L
-        private var speechRecognizer: SpeechRecognizer? = null
-        private val recognizerIntent: Intent =
-            Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    putExtra(RecognizerIntent.EXTRA_MASK_OFFENSIVE_WORDS, true)
-                }
-                putExtra(
-                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM,
-                )
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.KOREAN)
-                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+@Inject
+constructor(
+    @ApplicationContext
+    private val context: Context,
+) {
+    private val delayTime = 200L
+    private var speechRecognizer: SpeechRecognizer? = null
+    private val recognizerIntent: Intent =
+        Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                putExtra(RecognizerIntent.EXTRA_MASK_OFFENSIVE_WORDS, true)
+            }
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM,
+            )
+            // 말 끝내고 1초 뒤에 마무리 됨
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1000L)
+            putExtra(
+                RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,
+                1000L
+            ) //
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.KOREAN)
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+        }
+
+    private var isListening = false
+    private var listener: SpeechResultListener? = null
+
+    fun setSpeechResultListener(listener: SpeechResultListener) {
+        this.listener = listener
+    }
+
+    init {
+        initializeSpeechRecognizer()
+    }
+
+    private fun initializeSpeechRecognizer() {
+        if (speechRecognizer != null) {
+            speechRecognizer?.destroy() // 기존 인스턴스 정리
+        }
+        speechRecognizer =
+            SpeechRecognizer.createSpeechRecognizer(context).apply {
+                setRecognitionListener(createRecognitionListener())
+            }
+    }
+
+    private fun createRecognitionListener(): RecognitionListener =
+        object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {
+                Timber.tag(TAG).d("onReadyForSpeech")
             }
 
-        private var isListening = false
-        private var listener: SpeechResultListener? = null
-
-        fun setSpeechResultListener(listener: SpeechResultListener) {
-            this.listener = listener
-        }
-
-        init {
-            initializeSpeechRecognizer()
-        }
-
-        private fun initializeSpeechRecognizer() {
-            if (speechRecognizer != null) {
-                speechRecognizer?.destroy() // 기존 인스턴스 정리
-            }
-            speechRecognizer =
-                SpeechRecognizer.createSpeechRecognizer(context).apply {
-                    setRecognitionListener(createRecognitionListener())
-                }
-        }
-
-        private fun createRecognitionListener(): RecognitionListener =
-            object : RecognitionListener {
-                override fun onReadyForSpeech(params: Bundle?) {
-                    Timber.tag(TAG).d("onReadyForSpeech")
-                }
-
-                override fun onBeginningOfSpeech() {
-                    Timber.tag(TAG).d("onBeginningOfSpeech")
+            override fun onBeginningOfSpeech() {
+                Timber.tag(TAG).d("onBeginningOfSpeech")
 //                    listener?.onSpeechStarted()
-                }
+            }
 
-                override fun onRmsChanged(rmsdB: Float) {
+            override fun onRmsChanged(rmsdB: Float) {
 //                    Timber.tag(TAG).d("onRmsChanged: $rmsdB")
-                }
+            }
 
-                override fun onBufferReceived(buffer: ByteArray?) {
-                    Timber.tag(TAG).d("onBufferReceived")
-                }
+            override fun onBufferReceived(buffer: ByteArray?) {
+                Timber.tag(TAG).d("onBufferReceived")
+            }
 
-                override fun onEndOfSpeech() {
-                    Timber.tag(TAG).d("onEndOfSpeech")
-                }
+            override fun onEndOfSpeech() {
+                Timber.tag(TAG).d("onEndOfSpeech")
+            }
 
-                override fun onError(error: Int) {
-                    Timber.tag(TAG).d("onError: $error")
-                    handleError(error)
-                }
+            override fun onError(error: Int) {
+                isListening = false
+                Timber.tag(TAG).d("onError: $error")
+                handleError(error)
+            }
 
-                override fun onResults(results: Bundle?) {
-                    val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                    matches?.let {
-                        Timber.tag(TAG).d("onResults: $it")
-                        listener?.onResultsReceived(it)
-                    }
-                    restartListeningImmediately() // 결과 후 즉시 다시 시작
+            override fun onResults(results: Bundle?) {
+                isListening = false
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                matches?.let {
+                    Timber.tag(TAG).d("onResults: $it")
+                    listener?.onResultsReceived(it)
                 }
+                restartListeningImmediately() // 결과 후 즉시 다시 시작
+            }
 
-                override fun onPartialResults(partialResults: Bundle?) {
-                    val partial =
-                        partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                    partial?.let {
-                        Timber.tag(TAG).d("onPartialResults: $it")
-                        listener?.onPartialResultsReceived(it)
-                    }
-                }
-
-                override fun onEvent(
-                    eventType: Int,
-                    params: Bundle?,
-                ) {
-                    Timber.tag(TAG).d("onEvent")
+            override fun onPartialResults(partialResults: Bundle?) {
+                val partial =
+                    partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                partial?.let {
+                    Timber.tag(TAG).d("onPartialResults: $it")
+                    listener?.onPartialResultsReceived(it)
                 }
             }
 
-        private fun restartListeningImmediately() {
-            CoroutineScope(Dispatchers.Main).launch {
-                speechRecognizer?.stopListening() // 기존 인식 종료
-                startListening() // 바로 다시 시작
+            override fun onEvent(
+                eventType: Int,
+                params: Bundle?,
+            ) {
+                Timber.tag(TAG).d("onEvent")
             }
         }
 
-        private fun handleError(error: Int) {
-            when (error) {
-                SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
-                    Timber.tag(TAG).d("Recognizer is busy. Retrying after delay...")
-                    resetSpeechRecognizerWithDelay(delayTime) // 1초 후 재설정
-                }
-
-                SpeechRecognizer.ERROR_CLIENT -> {
-                    Timber.tag(TAG).d("Client error. Resetting SpeechRecognizer.")
-                    resetSpeechRecognizer()
-                    startListening()
-                }
-
-                else -> {
-                    Timber.tag(TAG).d("Unhandled error: $error. Restarting...")
-                    restartListeningWithDelay()
-                }
-            }
-        }
-
-        fun startListening() {
-            if (isListening) return // Early Return 패턴 적용
-            isListening = true
-            speechRecognizer?.startListening(recognizerIntent)
-        }
-
-        fun stopListening() {
+    private fun restartListeningImmediately() {
+        CoroutineScope(Dispatchers.Main).launch {
+            speechRecognizer?.cancel() // 기존 인식 종료
             isListening = false
-            speechRecognizer?.stopListening()
+            startListening() // 바로 다시 시작
         }
+    }
 
-        private fun restartListeningWithDelay(delayMillis: Long = delayTime) {
-            CoroutineScope(Dispatchers.Main).launch {
-                delay(delayMillis)
-                if (isListening) {
-                    speechRecognizer?.stopListening()
-                    startListening()
-                }
+    private fun handleError(error: Int) {
+        when (error) {
+            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
+                Timber.tag(TAG).d("Recognizer is busy. Retrying after delay...")
+                resetSpeechRecognizerWithDelay()
             }
-        }
 
-        private fun resetSpeechRecognizerWithDelay(delayMillis: Long) {
-            CoroutineScope(Dispatchers.Main).launch {
-                delay(delayMillis)
+            SpeechRecognizer.ERROR_CLIENT -> {
+                Timber.tag(TAG).d("Client error. Resetting SpeechRecognizer.")
                 resetSpeechRecognizer()
                 startListening()
             }
-        }
 
-        private fun resetSpeechRecognizer() {
-            speechRecognizer?.destroy()
-            initializeSpeechRecognizer()
-            isListening = false
+            else -> {
+                Timber.tag(TAG).d("Unhandled error: $error. Restarting...")
+                restartListeningWithDelay()
+            }
         }
     }
+
+    fun startListening() {
+        if (isListening) return // Early Return 패턴 적용
+        isListening = true
+        speechRecognizer?.startListening(recognizerIntent)
+    }
+
+    fun stopListening() {
+        if (!isListening) return
+        isListening = false
+        speechRecognizer?.cancel()
+    }
+
+    private fun restartListeningWithDelay(delayMillis: Long = delayTime) {
+        CoroutineScope(Dispatchers.Main).launch {
+            speechRecognizer?.cancel()
+            isListening = false
+            startListening()
+        }
+    }
+
+    private fun resetSpeechRecognizerWithDelay() {
+        CoroutineScope(Dispatchers.Main).launch {
+            resetSpeechRecognizer()
+            startListening()
+        }
+    }
+
+    private fun resetSpeechRecognizer() {
+        speechRecognizer?.destroy()
+        initializeSpeechRecognizer()
+        isListening = false
+    }
+}
 
 interface SpeechResultListener {
     fun onResultsReceived(results: List<String>)
