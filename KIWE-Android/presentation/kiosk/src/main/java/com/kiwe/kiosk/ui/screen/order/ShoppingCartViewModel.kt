@@ -30,7 +30,7 @@ class ShoppingCartViewModel
         fun onVoiceResult(voiceOrder: VoiceBody) =
             intent {
                 // voice order -> 실제 장바구니 아이템 변환하고
-                val cartList = mutableListOf<ShoppingCartItem>()
+                onClearAllItem()
                 voiceOrder.order.forEach { eachOrder ->
                     val menu = getMenuByIdUseCase(eachOrder.menuId).getOrThrow()
                     Timber.tag("VoiceOrder").d("menu: $menu")
@@ -59,6 +59,7 @@ class ShoppingCartViewModel
                             defaultPrice = menu.price,
                             count = eachOrder.count,
                         )
+                    // 싹 날리고 새로 추가하기?
                     onInsertItem(eachItem) // 이러면 되는지?
 //                    cartList.add(eachItem)
                 }

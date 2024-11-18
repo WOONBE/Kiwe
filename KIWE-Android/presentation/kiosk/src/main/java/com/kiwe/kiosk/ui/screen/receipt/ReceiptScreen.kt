@@ -63,7 +63,9 @@ fun ReceiptScreen(
     }
 
     LaunchedEffect(showReceipt) {
-        onEnterScreen(3)
+        if(showReceipt){
+            onEnterScreen(3)
+        }
     }
 
     Column(
