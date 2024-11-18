@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -145,7 +146,7 @@ fun ContainerScreen(
     LaunchedEffect(shoppingCartState.isVoiceOrderConfirm, shoppingCartState.shoppingCartItem) {
         if (shoppingCartState.isVoiceOrderConfirm) {
             isShoppingCartDialogOpen = true
-            delay(1000L)
+            delay(2000L)
             isQueryStateBoxOpen = isShoppingCartDialogOpen
             Timber.tag("ContainerScreen").d("LaunchedEffect $isQueryStateBoxOpen")
         }
@@ -488,6 +489,8 @@ fun RecommendStateBox(
     onClose: () -> Unit,
     onYesClick: () -> Unit = {}, // 바로 장바구니에 넣기
 ) {
+    subRecommendString
+    onYesClick
     if (recommendString.isNotEmpty()) {
         Dialog(onDismissRequest = {
             onClose()
@@ -646,7 +649,10 @@ fun RecommendStateBox(
                         }
                     }
 
-                    MySpeechInputText(isMySpeechInputTextOpen = isMySpeechInputTextOpen, sentence = sentence)
+                    MySpeechInputText(
+                        isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+                        sentence = sentence,
+                    )
                 }
             }
         }
@@ -736,7 +742,10 @@ fun QueryStateBox(
                             )
                         }
                     }
-                    MySpeechInputText(isMySpeechInputTextOpen = isMySpeechInputTextOpen, sentence = sentence)
+                    MySpeechInputText(
+                        isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+                        sentence = sentence,
+                    )
                 }
             }
         }
@@ -767,7 +776,12 @@ fun MySpeechInputText(
         }
 
         Text(
-            modifier = Modifier.fillMaxWidth().height(48.dp).padding(top = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+                    .heightIn(min = 48.dp)
+                    .padding(top = 12.dp),
             text = "\"" + displayedText + "\"",
             textAlign = TextAlign.Center,
             style = Typography.titleLarge.copy(color = Color.White),
