@@ -93,7 +93,7 @@ class MainViewModel
                         Timber.tag("MainViewModel").d("tts 종료 인지")
                         state.copy(isTtsOn = false)
                     }
-                    delay(1000L)
+                    delay(500L)
                     startSpeechRecognition()
                 }
             }
@@ -103,6 +103,8 @@ class MainViewModel
                         Timber.tag("MainViewModel").d("tts 시작 인지")
                         state.copy(isTtsOn = true)
                     }
+                    // tts가 시작되면 stt를 끊는다
+                    speechRecognizerManager.stopListening()
                 }
             }
         }
@@ -132,7 +134,7 @@ class MainViewModel
         override fun onResultsReceived(results: List<String>) {
             val resultText = results.firstOrNull() ?: ""
             intent {
-                if (!state.isTtsOn) {
+                if (!state.isTtsOn) { // when tts off
                     if (!state.isScreenShowing && helpPopupRegex.containsMatchIn(resultText) && !state.isPayment && !state.isCartOpen) {
                         setMySpeechInput(resultText)
                         textToSpeechManager.speak(TEXT_INTRO_HELP)
@@ -510,16 +512,18 @@ class MainViewModel
             val partialText = partialResults.firstOrNull() ?: ""
             Timber.tag("MainViewModel").d("Partial Result: $partialResults")
             intent {
-                reduce { state.copy(isMySpeechInputTextOpen = true) }
-                if (state.isScreenShowing) {
-                    // 다이얼로그가 보여지고 있는 상황이라면
-                } else if (helpPopupRegex.containsMatchIn(partialText)) {
-                    // 다이얼로그가 안보이는 상황에서 음성이 들어온다면 이걸 탐
-                    Timber
-                        .tag("MainViewModel")
-                        .d("${helpPopupRegex.containsMatchIn(partialText)}")
-                    reduce {
-                        state.copy(isScreenShowing = true)
+                if (!state.isTtsOn) { // tts가 꺼져있을 때 들어오도록
+                    reduce { state.copy(isMySpeechInputTextOpen = true) }
+                    if (state.isScreenShowing) {
+                        // 다이얼로그가 보여지고 있는 상황이라면
+                    } else if (helpPopupRegex.containsMatchIn(partialText)) {
+                        // 다이얼로그가 안보이는 상황에서 음성이 들어온다면 이걸 탐
+                        Timber
+                            .tag("MainViewModel")
+                            .d("${helpPopupRegex.containsMatchIn(partialText)}")
+                        reduce {
+                            state.copy(isScreenShowing = true)
+                        }
                     }
                 }
             }
