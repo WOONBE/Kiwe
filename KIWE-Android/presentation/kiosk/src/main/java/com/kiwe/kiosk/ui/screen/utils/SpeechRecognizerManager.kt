@@ -10,13 +10,12 @@ import android.speech.SpeechRecognizer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.Locale
 import javax.inject.Inject
 
-private const val TAG = "SpeechRecognizerManager"
+private const val TAG = "STT"
 
 class SpeechRecognizerManager
     @Inject
@@ -33,8 +32,12 @@ class SpeechRecognizerManager
                 }
                 putExtra(
                     RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM,
+                    RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH, // FreeForm 말고 websearch로 바꾸니까 응답속도 빨라짐
                 )
+                putExtra(
+                    RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,
+                    1000L,
+                ) // 말 끝낸 킹능성 있을 때 대기할 1초
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.KOREAN)
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             }
@@ -84,11 +87,13 @@ class SpeechRecognizerManager
                 }
 
                 override fun onError(error: Int) {
+                    isListening = false
                     Timber.tag(TAG).d("onError: $error")
                     handleError(error)
                 }
 
                 override fun onResults(results: Bundle?) {
+                    isListening = false
                     val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     matches?.let {
                         Timber.tag(TAG).d("onResults: $it")
@@ -116,7 +121,8 @@ class SpeechRecognizerManager
 
         private fun restartListeningImmediately() {
             CoroutineScope(Dispatchers.Main).launch {
-                speechRecognizer?.stopListening() // 기존 인식 종료
+                speechRecognizer?.cancel() // 기존 인식 종료
+                isListening = false
                 startListening() // 바로 다시 시작
             }
         }
@@ -125,7 +131,7 @@ class SpeechRecognizerManager
             when (error) {
                 SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
                     Timber.tag(TAG).d("Recognizer is busy. Retrying after delay...")
-                    resetSpeechRecognizerWithDelay(delayTime) // 1초 후 재설정
+                    resetSpeechRecognizerWithDelay()
                 }
 
                 SpeechRecognizer.ERROR_CLIENT -> {
@@ -148,23 +154,37 @@ class SpeechRecognizerManager
         }
 
         fun stopListening() {
+            if (!isListening) return
             isListening = false
-            speechRecognizer?.stopListening()
+            speechRecognizer?.cancel()
+        }
+
+        fun destroyRecognizer() {
+            speechRecognizer?.destroy()
+            speechRecognizer = null
+            isListening = false
+            Timber.tag(TAG).d("STT 파괴")
+        }
+
+        fun initializeRecognizer() {
+            speechRecognizer =
+                SpeechRecognizer.createSpeechRecognizer(context).apply {
+                    setRecognitionListener(createRecognitionListener())
+                }
+            isListening = false
+            Timber.tag(TAG).d("STT 인스턴스 초기화")
         }
 
         private fun restartListeningWithDelay(delayMillis: Long = delayTime) {
             CoroutineScope(Dispatchers.Main).launch {
-                delay(delayMillis)
-                if (isListening) {
-                    speechRecognizer?.stopListening()
-                    startListening()
-                }
+                speechRecognizer?.cancel()
+                isListening = false
+                startListening()
             }
         }
 
-        private fun resetSpeechRecognizerWithDelay(delayMillis: Long) {
+        private fun resetSpeechRecognizerWithDelay() {
             CoroutineScope(Dispatchers.Main).launch {
-                delay(delayMillis)
                 resetSpeechRecognizer()
                 startListening()
             }
