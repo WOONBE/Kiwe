@@ -86,7 +86,6 @@ import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.utils.MainEnum
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.internal.format
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import timber.log.Timber
@@ -442,7 +441,7 @@ private fun ContainerScreen(
                             orderCount,
                             "장바구니",
                             R.drawable.shopping_cart,
-                            R.color.KIWE_orange1,
+                            R.color.KIWE_brown4,
                             borderColor.value,
                         ) {
                             onShoppingCartDialogClick()
@@ -808,12 +807,12 @@ fun VoiceIntro() {
     Box(
         modifier =
             Modifier
-                .offset(y = 24.dp)
+                .offset(y = 30.dp)
                 .padding(bottom = 8.dp)
                 .background(Color.White.copy(alpha = 0.8f), shape = RoundedCornerShape(8.dp))
                 .padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
-        Text(text = displayedText, style = MaterialTheme.typography.bodyMedium)
+        Text(text = displayedText, style = Typography.bodyMedium.copy(fontSize = 12.sp))
     }
 }
 
