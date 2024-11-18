@@ -39,3 +39,7 @@ val KiweGreen3 = Color(0xFF81C784)
 val KiweGreen4 = Color(0xFF66BB6A)
 val KiweGreen5 = Color(0xFF2E7D32)
 val KiweOrange1 = Color(0xFFE14700)
+val KiweYellow = Color(0xFFFFE31A)
+
+val KiweHOT = Color(0xFFFE9400)
+val KiweICE = Color(0xFF2081FF)

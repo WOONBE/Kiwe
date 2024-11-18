@@ -25,6 +25,8 @@ import com.kiwe.kiosk.ui.screen.utils.TEXT_INTRO
 import com.kiwe.kiosk.ui.screen.utils.TEXT_INTRO_HELP
 import com.kiwe.kiosk.ui.screen.utils.TEXT_MENU_RECOMMENDATION
 import com.kiwe.kiosk.ui.screen.utils.TEXT_MORE_ORDER
+import com.kiwe.kiosk.ui.screen.utils.TEXT_PAYMENT
+import com.kiwe.kiosk.ui.screen.utils.TEXT_PAYMENT_DONE
 import com.kiwe.kiosk.ui.screen.utils.TEXT_TOGO
 import com.kiwe.kiosk.ui.screen.utils.TextToSpeechManager
 import com.kiwe.kiosk.ui.screen.utils.helpPopupRegex
@@ -87,6 +89,9 @@ class MainViewModel
             textToSpeechManager.setOnCompleteListener {
                 startSpeechRecognition() // tts가 끝나면 stt 살리게 했음
             }
+//            textToSpeechManager.setOnStartListener {
+//                stopSpeechRecognition()
+//            }
         }
 
         // 음성 인식 시작
@@ -103,27 +108,48 @@ class MainViewModel
             }
         }
 
+        private fun setMySpeechInput(mySentence: String) { // text 처리만 수행한다
+            intent {
+                reduce {
+                    state.copy(mySpeechText = mySentence) // 이전 글자를 지우고
+                }
+            }
+        }
+
         override fun onResultsReceived(results: List<String>) {
             val resultText = results.firstOrNull() ?: ""
             intent {
-                Timber.tag("MainViewModel").d("Result: $resultText 하고 ${state.isScreenShowing}")
-                if (state.isScreenShowing) { // SpeechScreen여부
-                    onSpeechResult(resultText)
-                } else if (helpPopupRegex.containsMatchIn(resultText)) {
+                if (!state.isScreenShowing && helpPopupRegex.containsMatchIn(resultText) && !state.isPayment && !state.isCartOpen) {
+                    setMySpeechInput(resultText)
                     reduce {
                         state.copy(isScreenShowing = true)
                     }
                 } else {
-                    // 여기서 로직 문제가 생겼음
-                    Timber.tag("추천췍").d("$resultText  ${state.isCartOpen}")
-                    if (state.isCartOpen) {
-                        onProcessResult(resultText)
+                    setMySpeechInput(resultText)
+                    delay(2000L) // 2초 대기
+                    if (state.isScreenShowing) { // SpeechScreen여부
+                        onSpeechResult(resultText)
                     } else {
-                        onPayProcess(resultText)
-                        onRecommendProcess(resultText)
+                        // 여기서 로직 문제가 생겼음
+                        Timber.tag("추천췍").d("$resultText  ${state.isCartOpen}")
+                        if (state.isCartOpen) {
+                            onProcessResult(resultText)
+                        } else {
+                            onPayProcess(resultText)
+                            onRecommendProcess(resultText)
+                        }
                     }
                 }
+                Timber.tag("MainViewModel").d("Result: $resultText 하고 ${state.isScreenShowing}")
             }
+        }
+
+        fun speakPayment() {
+            textToSpeechManager.speak(TEXT_PAYMENT)
+        }
+
+        fun speakPaymentDone() {
+            textToSpeechManager.speak(TEXT_PAYMENT_DONE)
         }
 
         fun onDismissRequest() =
@@ -232,6 +258,7 @@ class MainViewModel
                 // 계속 주문할까요?
                 if (state.voiceShoppingCart.isNotEmpty()) {
                     if (noRegex.containsMatchIn(result)) {
+                        reduce { state.copy(mySpeechText = "") }
                         // 부정
                         textToSpeechManager.speak(TEXT_TOGO)
                         reduce { state.copy(isOrderEndTrue = true) }
@@ -329,7 +356,7 @@ class MainViewModel
                                 ),
                         ).onSuccess { res ->
                             val it = res.data
-                            textToSpeechManager.speak(it.response)
+                            textToSpeechManager.speak(it.response + "." + TEXT_MORE_ORDER)
                             // 온도까지 잘 들어가 있다면
                             reduce {
                                 state.copy(
@@ -381,7 +408,7 @@ class MainViewModel
                                         )
                                     }
                                 } else {
-                                    textToSpeechManager.speak(it.response + TEXT_MORE_ORDER)
+                                    textToSpeechManager.speak(it.response + "." + TEXT_MORE_ORDER)
                                     reduce {
                                         state.copy(
                                             voiceShoppingCart = it.order,
@@ -422,15 +449,24 @@ class MainViewModel
                                 ?.value
                                 ?.split(", ")
                                 ?.map { it.toInt() }
-                        val requestMenuId = menuList!!.shuffled().first()
+                        val shuffledList = menuList!!.shuffled()
+                        val requestMenuId = shuffledList[0]
+                        val secondMenuId = shuffledList.getOrNull(1)
+                        val thirdMenuId = shuffledList.getOrNull(2)
                         val menu = getMenuByIdUseCase(requestMenuId).getOrThrow()
-                        textToSpeechManager.speak(TEXT_MENU_RECOMMENDATION + menu.name + "로 드릴까요?")
+                        textToSpeechManager.speak(TEXT_MENU_RECOMMENDATION + menu.name + "을 주문하시겠습니까?")
+                        val subRecommendMenus =
+                            listOfNotNull(
+                                secondMenuId?.let { getMenuByIdUseCase(it).getOrNull() },
+                                thirdMenuId?.let { getMenuByIdUseCase(it).getOrNull() },
+                            )
                         Timber.tag("추천").d("$menu")
                         reduce {
                             state.copy(
                                 isScreenShowing = false,
                                 isRecommend = menu.description,
                                 recommendMenu = menu,
+                                subRecommendMenu = subRecommendMenus,
                             )
                         }
                     }
@@ -446,8 +482,9 @@ class MainViewModel
 
         override fun onPartialResultsReceived(partialResults: List<String>) {
             val partialText = partialResults.firstOrNull() ?: ""
-            Timber.tag("MainViewModel").d("Partial Result: $partialText")
+            Timber.tag("MainViewModel").d("Partial Result: $partialResults")
             intent {
+                reduce { state.copy(isMySpeechInputTextOpen = true) }
                 if (state.isScreenShowing) {
                     // 다이얼로그가 보여지고 있는 상황이라면
                 } else if (helpPopupRegex.containsMatchIn(partialText)) {
@@ -528,7 +565,7 @@ class MainViewModel
             timerJob?.cancel()
             timerJob =
                 viewModelScope.launch {
-                    var timeLeft = 180L // 5분을 초로 변환 // TODO : 5분
+                    var timeLeft = 300L // 5분을 초로 변환 // TODO : 5분
                     while (timeLeft > 0) {
                         intent {
                             reduce { state.copy(remainingTime = timeLeft) }
@@ -631,6 +668,7 @@ class MainViewModel
                                 description = "",
                                 imgPath = "",
                             ),
+                        subRecommendMenu = emptyList(),
                     )
                 }
             }
@@ -659,6 +697,8 @@ data class MainState(
     val remainingTime: Long = 0,
     val age: Int = 30,
     val gender: String = "male",
+    val mySpeechText: String = "",
+    val isMySpeechInputTextOpen: Boolean = false,
     val voiceResult: VoiceBody =
         VoiceBody(
             category = 0,
@@ -678,6 +718,7 @@ data class MainState(
             description = "",
             imgPath = "",
         ),
+    val subRecommendMenu: List<MenuCategoryParam> = emptyList(),
 ) : BaseState
 
 sealed interface MainSideEffect : BaseSideEffect {

@@ -7,8 +7,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     fun create(): ApiService {
-//        val baseUrl = "https://${BuildConfig.BASE_URL}"
-        val baseUrl = "https://www.naver.com"
+        val baseUrl = "https://${BuildConfig.BASE_URL}"
+//        val baseUrl = "https://www.naver.com"
         val retrofit =
             Retrofit
                 .Builder()

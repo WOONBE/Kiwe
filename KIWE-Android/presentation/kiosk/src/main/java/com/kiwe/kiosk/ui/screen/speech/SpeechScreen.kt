@@ -30,16 +30,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kiwe.kiosk.R
 import com.kiwe.kiosk.main.MainViewModel
+import com.kiwe.kiosk.ui.screen.main.MySpeechInputText
 import com.kiwe.kiosk.ui.screen.main.component.WavyAnimation
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
+import com.kiwe.kiosk.ui.screen.payment.component.ChoiceButton
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
+import com.kiwe.kiosk.ui.theme.KiweHOT
+import com.kiwe.kiosk.ui.theme.KiweICE
+import com.kiwe.kiosk.ui.theme.KiweWhite1
 import com.kiwe.kiosk.ui.theme.Typography
 import kotlinx.coroutines.delay
 import org.orbitmvi.orbit.compose.collectAsState
 import timber.log.Timber
 
-const val MAX_SPEECH_WAIT_TIME = 5
+const val MAX_SPEECH_WAIT_TIME = 10
 
 private const val TAG = "SpeechScreen"
 
@@ -55,7 +61,6 @@ fun SpeechScreen(
     DisposableEffect(Unit) {
         onDispose {
             Timber.tag(TAG).d("onDispose")
-//            ttsManager.stop()
         }
     }
 
@@ -69,8 +74,8 @@ fun SpeechScreen(
     SpeechScreen(
         isOpen = state.isScreenShowing, // 녹음중인 상태일 때 SpeechScreen을 보여준다
         onDismissRequest = mainViewModel::onDismissRequest,
-        recognizedText = state.recognizedText,
-        commandText = "\"차가운 아메리카노 한잔 주세요\"",
+        isMySpeechInputTextOpen = state.isMySpeechInputTextOpen,
+        sentence = state.mySpeechText,
         shouldShowRetryMessage = state.shouldShowRetryMessage,
         isTemperatureEmpty = state.isTemperatureEmpty,
     )
@@ -80,8 +85,8 @@ fun SpeechScreen(
 private fun SpeechScreen(
     isOpen: Boolean,
     onDismissRequest: () -> Unit,
-    recognizedText: String,
-    commandText: String,
+    isMySpeechInputTextOpen: Boolean,
+    sentence: String = "\"차가운 아메리카노 한잔 주세요\"",
     shouldShowRetryMessage: Boolean,
     isTemperatureEmpty: Boolean,
 ) {
@@ -133,11 +138,9 @@ private fun SpeechScreen(
                                     .copy(fontWeight = FontWeight.Bold),
                             modifier = Modifier.padding(horizontal = 8.dp).padding(top = 20.dp),
                         )
-                        Text(
-                            text = recognizedText.ifEmpty { commandText },
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
-                            modifier = Modifier.padding(horizontal = 8.dp).padding(top = 8.dp),
+                        MySpeechInputText(
+                            isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+                            sentence = sentence,
                         )
                     }
 
@@ -168,10 +171,10 @@ private fun SpeechScreen(
                     }
                 }
                 if (elapsedTime >= MAX_SPEECH_WAIT_TIME) {
-                    ExampleBox()
+                    ExampleBox(isMySpeechInputTextOpen, sentence)
                 }
                 if (isTemperatureEmpty) {
-                    elapsedTime = -6
+                    elapsedTime = -7 // 7초안에 온도 골라야됨
                     TempBox()
                 }
             }
@@ -186,57 +189,56 @@ fun TempBox(
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = "온도를 선택해주세요", style = Typography.titleLarge.copy(color = Color.White))
-        Row(modifier = Modifier.padding(top = 12.dp)) {
-            Box(
-                modifier =
-                    Modifier
-                        .background(color = Color.Red, shape = RoundedCornerShape(20.dp))
-                        .padding(8.dp)
-                        .clickable {
-                            onHotClick()
-                        },
-            ) {
-                Text(
-                    text = "뜨거운 거",
-                    modifier = Modifier.padding(8.dp),
-                    style = Typography.titleLarge.copy(color = Color.White),
-                )
-            }
-
-            Box(
-                modifier =
-                    Modifier
-                        .padding(start = 12.dp)
-                        .background(color = Color.Blue, shape = RoundedCornerShape(20.dp))
-                        .padding(8.dp)
-                        .clickable {
-                            onIceClick()
-                        },
-            ) {
-                Text(
-                    text = "차가운 거",
-                    modifier = Modifier.padding(8.dp),
-                    style = Typography.titleLarge.copy(color = Color.White),
-                )
-            }
+        Row(
+            modifier = Modifier.padding(top = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            ChoiceButton(
+                modifier = Modifier,
+                backgroundColor = KiweWhite1,
+                iconResourceId = R.drawable.img_hot_drink,
+                isImage = true,
+                label = "뜨겁게",
+                labelColor = KiweHOT,
+                onClick = onHotClick,
+            )
+            ChoiceButton(
+                modifier = Modifier,
+                backgroundColor = KiweWhite1,
+                iconResourceId = R.drawable.img_ice_drink,
+                isImage = true,
+                label = "차갑게",
+                labelColor = KiweICE,
+                onClick = onIceClick,
+            )
         }
     }
 }
 
 @Composable
-fun ExampleBox() {
-    Column(
-        modifier =
+fun ExampleBox(
+    isMySpeechInputTextOpen: Boolean,
+    sentence: String,
+) {
+    Column {
+        Column(
+            modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
                 .background(shape = RoundedCornerShape(20.dp), color = Color.Black.copy(alpha = 0.5f))
                 .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        ExampleItem(text = "예시1", example = "\"차가운 아메리카노 한잔 줘\"")
-        ExampleItem(text = "예시2", example = "\"따뜻한 둥글레차 두 잔 줘\"")
-        ExampleItem(text = "예시3", example = "\"티라미수 케이크 하나 줘\"")
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            ExampleItem(text = "예시1", example = "\"차가운 아메리카노 한잔 줘\"")
+            ExampleItem(text = "예시2", example = "\"따뜻한 둥글레차 두 잔 줘\"")
+            ExampleItem(text = "예시3", example = "\"티라미수 케이크 하나 줘\"")
+        }
+
+        MySpeechInputText(
+            isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+            sentence = sentence,
+        )
     }
 }
 
@@ -276,9 +278,9 @@ fun SpeechScreenPreview() {
         SpeechScreen(
             isOpen = true,
             onDismissRequest = {},
-            recognizedText = "",
+            isMySpeechInputTextOpen = true,
             shouldShowRetryMessage = false,
-            commandText = "dicat",
+            sentence = "dfdfdfdfdfdfdfdfd",
             isTemperatureEmpty = true,
         )
     }

@@ -33,6 +33,7 @@ import com.kiwe.kiosk.ui.component.BoldTextWithKeywords
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KiweBlack1
 import com.kiwe.kiosk.ui.theme.KiweBrown2
+import com.kiwe.kiosk.ui.theme.KiweBrown4
 import com.kiwe.kiosk.ui.theme.KiweGray1
 import com.kiwe.kiosk.ui.theme.KiweOrange1
 import com.kiwe.kiosk.ui.theme.KiweSilver1
@@ -177,7 +178,7 @@ fun CardCreditDialog(
                         .fillMaxWidth()
                         .padding(horizontal = 0.dp),
                 enabled = cardNumber.isBlank(),
-                colors = ButtonDefaults.buttonColors(KiweOrange1),
+                colors = ButtonDefaults.buttonColors(KiweBrown4),
                 shape = RoundedCornerShape(8.dp),
                 elevation = ButtonDefaults.buttonElevation(4.dp),
             ) {

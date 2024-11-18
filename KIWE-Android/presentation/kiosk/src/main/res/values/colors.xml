@@ -12,6 +12,8 @@
     <color name="KIWE_green5">#FF2E7D32</color>
     <color name="KIWE_brown1">#FFEDE0D4</color>
     <color name="KIWE_brown2">#FFD2B48C</color>
+    <color name="KIWE_brown3">#FFA67B5B</color>
+    <color name="KIWE_brown4">#FF7B4F3F</color>
     <color name="KIWE_silver1">#FFD6D6D6</color>
     <color name="KIWE_white_transparent_half">#80FFFFFF</color>
 </resources>

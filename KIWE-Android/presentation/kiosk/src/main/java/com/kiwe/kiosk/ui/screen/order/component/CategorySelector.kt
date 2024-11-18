@@ -31,6 +31,8 @@ import com.kiwe.domain.model.MenuCategoryGroup
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KiweBlack1
+import com.kiwe.kiosk.ui.theme.KiweBrown3
+import com.kiwe.kiosk.ui.theme.KiweBrown4
 import com.kiwe.kiosk.ui.theme.KiweOrange1
 import com.kiwe.kiosk.ui.theme.KiweSilver1
 import com.kiwe.kiosk.ui.theme.KiweWhite1
@@ -75,7 +77,7 @@ fun CategorySelector(
 
             pageCategories.forEach { category ->
                 val isSelected = category == categoryState
-                val backgroundColor = if (isSelected) KiweOrange1 else KiweWhite1
+                val backgroundColor = if (isSelected) KiweBrown4 else KiweWhite1
                 val textColor = if (isSelected) KiweWhite1 else KiweBlack1
                 val textStyle = if (isSelected) Typography.titleMedium else Typography.bodyMedium
                 Card(

@@ -2,10 +2,15 @@ package com.kiwe.kiosk.ui.screen.main
 
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -40,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -53,7 +61,6 @@ import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberAsyncImagePainter
 import com.kiwe.domain.model.MenuCategoryParam
-import com.kiwe.kiosk.BuildConfig
 import com.kiwe.kiosk.R
 import com.kiwe.kiosk.login.LoginActivity
 import com.kiwe.kiosk.main.MainSideEffect
@@ -65,20 +72,27 @@ import com.kiwe.kiosk.ui.screen.main.component.ImageButton
 import com.kiwe.kiosk.ui.screen.main.component.RoundStepItem
 import com.kiwe.kiosk.ui.screen.order.OrderListDialog
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartDialog
+import com.kiwe.kiosk.ui.screen.order.ShoppingCartState
 import com.kiwe.kiosk.ui.screen.order.ShoppingCartViewModel
+import com.kiwe.kiosk.ui.screen.utils.prefixingImagePaths
 import com.kiwe.kiosk.ui.theme.KIWEAndroidTheme
 import com.kiwe.kiosk.ui.theme.KioskBackgroundBrush
 import com.kiwe.kiosk.ui.theme.KiweGray1
 import com.kiwe.kiosk.ui.theme.KiweGreen5
 import com.kiwe.kiosk.ui.theme.KiweOrange1
+import com.kiwe.kiosk.ui.theme.KiweSilver1
+import com.kiwe.kiosk.ui.theme.KiweWhite1
+import com.kiwe.kiosk.ui.theme.KiweYellow
 import com.kiwe.kiosk.ui.theme.Typography
 import com.kiwe.kiosk.utils.MainEnum
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import timber.log.Timber
+import java.util.Locale
 
-private const val TAG = "ContainerScreen"
+private const val TAG = "MySpeech"
 
 @Composable
 fun ContainerScreen(
@@ -96,24 +110,43 @@ fun ContainerScreen(
     var isQueryStateBoxOpen by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var isLogoutDialogOpen by remember { mutableStateOf(false) }
-
+    var isMySpeechInputTextOpen by remember { mutableStateOf(false) }
     LaunchedEffect(state.page) {
         if (state.page == 0) {
             isShoppingCartDialogOpen = false
         }
     }
 
+    LaunchedEffect(state.mySpeechText, state.isScreenShowing) {
+        if (isQueryStateBoxOpen || state.isScreenShowing) {
+            // true면 보이도록
+            Timber.tag(TAG).d("LaunchedEffect $isQueryStateBoxOpen") // yes no dialog는 안열렸음
+            isMySpeechInputTextOpen = state.mySpeechText.isNotEmpty()
+        }
+    }
+
+    if (isMySpeechInputTextOpen) {
+        Timber.tag(TAG).d("MySpeechInputText $isMySpeechInputTextOpen //  ${state.mySpeechText}")
+        // 텍스트가 일단 뽑힘
+        MySpeechInputText(
+            isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+            sentence = state.mySpeechText,
+            onAnimationEnd = {
+                isMySpeechInputTextOpen = false // 애니메이션 끝난 후 자동으로 숨기기
+            },
+        )
+    }
+
     DisposableEffect(Unit) {
         onDispose {
             Timber.tag(TAG).d("onDispose")
-//            tts.stop()
         }
     }
 
     LaunchedEffect(shoppingCartState.isVoiceOrderConfirm, shoppingCartState.shoppingCartItem) {
         if (shoppingCartState.isVoiceOrderConfirm) {
             isShoppingCartDialogOpen = true
-            delay(1000L)
+            delay(2000L)
             isQueryStateBoxOpen = isShoppingCartDialogOpen
             Timber.tag("ContainerScreen").d("LaunchedEffect $isQueryStateBoxOpen")
         }
@@ -213,6 +246,8 @@ fun ContainerScreen(
             isShoppingCartDialogOpen = false
             viewModel.showSpeechScreen()
         },
+        isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+        sentence = state.mySpeechText,
     )
 
     if (state.isAddCartTrue || state.isAddCartFalse) {
@@ -239,10 +274,13 @@ fun ContainerScreen(
         RecommendStateBox(
             recommendString = state.isRecommend,
             recommendMenu = state.recommendMenu,
+            subRecommendMenu = state.subRecommendMenu,
             onClose = { viewModel.clearRecommendHistory() },
             onYesClick = {
                 viewModel.clearRecommendHistory()
             },
+            isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+            sentence = state.mySpeechText,
         )
     }
 
@@ -263,6 +301,7 @@ fun ContainerScreen(
     ContainerScreen(
         page = state.page,
         mode = state.mode,
+        shoppingCartState = shoppingCartState,
         onBackClick = onBackClick,
         onShoppingCartDialogClick = { isShoppingCartDialogOpen = true },
         setShoppingCartOffset = setShoppingCartOffset,
@@ -278,6 +317,7 @@ fun ContainerScreen(
 private fun ContainerScreen(
     page: Int,
     mode: MainEnum.KioskMode,
+    shoppingCartState: ShoppingCartState,
     onBackClick: () -> Unit,
     onShoppingCartDialogClick: () -> Unit,
     setShoppingCartOffset: (Offset) -> Unit,
@@ -287,6 +327,37 @@ private fun ContainerScreen(
     content: @Composable () -> Unit,
     onLogoutRequested: () -> Unit,
 ) {
+    val rotation = remember { Animatable(0f) }
+    val borderColor = remember { Animatable(Color.Transparent) }
+    val orderCount = "총 ${shoppingCartState.shoppingCartItem.size}건"
+    // orderCount가 변경될 때 애니메이션 실행
+    LaunchedEffect(orderCount) {
+        delay(1300L)
+        rotation.animateTo(
+            targetValue = 5f,
+            animationSpec = tween(durationMillis = 100, easing = LinearEasing),
+        )
+        rotation.animateTo(
+            targetValue = -5f,
+            animationSpec = tween(durationMillis = 100, easing = LinearEasing),
+        )
+        rotation.animateTo(
+            targetValue = 0f,
+            animationSpec = tween(durationMillis = 100, easing = LinearEasing),
+        )
+    }
+    LaunchedEffect(orderCount) {
+        delay(1300L)
+        // 테두리 색깔 애니메이션
+        borderColor.animateTo(
+            targetValue = KiweYellow,
+            animationSpec = tween(durationMillis = 300),
+        )
+        borderColor.animateTo(
+            targetValue = Color.Transparent,
+            animationSpec = tween(durationMillis = 300),
+        )
+    }
     gazePoint // TODO
     Scaffold(
         topBar = {
@@ -344,6 +415,7 @@ private fun ContainerScreen(
                 ) {
                     ImageButton(
                         modifier = Modifier.weight(1F),
+                        "",
                         "직원호출",
                         R.drawable.ic_employee_call,
                         R.color.KIWE_gray1,
@@ -351,10 +423,11 @@ private fun ContainerScreen(
                         // TODO : 직원 호출
                     }
                     Spacer(Modifier.width(5.dp))
-                    ImageButton(
+                    Box(
                         modifier =
                             Modifier
                                 .weight(1F)
+                                .graphicsLayer(rotationZ = rotation.value) // 흔들림 애니메이션 추가
                                 .onGloballyPositioned {
                                     setShoppingCartOffset(
                                         Offset(
@@ -363,15 +436,27 @@ private fun ContainerScreen(
                                         ),
                                     )
                                 },
-                        "장바구니",
-                        R.drawable.shopping_cart,
-                        R.color.KIWE_orange1,
                     ) {
-                        onShoppingCartDialogClick()
+                        ImageButton(
+                            modifier = Modifier,
+                            orderCount,
+                            "장바구니",
+                            R.drawable.shopping_cart,
+                            R.color.KIWE_brown4,
+                            borderColor.value,
+                        ) {
+                            onShoppingCartDialogClick()
+                        }
                     }
                     Spacer(Modifier.width(5.dp))
+                    var cost = 0
+                    for (shoppingCartItem in shoppingCartState.shoppingCartItem) {
+                        cost += shoppingCartItem.count * shoppingCartItem.totalPrice
+                    }
+                    val totalPrice = String.format(Locale.getDefault(), "%,d원", cost)
                     ImageButton(
                         modifier = Modifier.weight(1F),
+                        totalPrice,
                         "결제하기",
                         R.drawable.card_pos,
                         R.color.KIWE_green5,
@@ -397,9 +482,15 @@ private fun ContainerScreen(
 fun RecommendStateBox(
     recommendString: String,
     recommendMenu: MenuCategoryParam,
+    isMySpeechInputTextOpen: Boolean,
+    sentence: String,
+    subRecommendMenu: List<MenuCategoryParam>,
+    subRecommendString: String = "",
     onClose: () -> Unit,
     onYesClick: () -> Unit = {}, // 바로 장바구니에 넣기
 ) {
+    subRecommendString
+    onYesClick
     if (recommendString.isNotEmpty()) {
         Dialog(onDismissRequest = {
             onClose()
@@ -415,19 +506,21 @@ fun RecommendStateBox(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "추천 메뉴 입니다",
-                        style = Typography.titleLarge.copy(color = Color.White),
+                        text = "추천 메뉴",
+                        style = Typography.titleLarge.copy(color = KiweOrange1),
                     )
                     Box(
                         modifier =
                             Modifier
                                 .padding(vertical = 12.dp)
-                                .size(80.dp)
-                                .clip(shape = RoundedCornerShape(10.dp)),
+                                .size(120.dp)
+                                .clip(shape = RoundedCornerShape(10.dp))
+                                .border(2.dp, KiweOrange1, RoundedCornerShape(10.dp)),
                     ) {
-                        val imgUrl = "https://" + BuildConfig.BASE_IMAGE_URL + recommendMenu.imgPath
+                        val imgUrl = recommendMenu.imgPath.prefixingImagePaths()
                         Timber.tag("추천").d(imgUrl)
                         Image(
+                            modifier = Modifier.background(KiweWhite1).padding(5.dp),
                             painter =
                                 rememberAsyncImagePainter(
                                     model = imgUrl,
@@ -439,51 +532,127 @@ fun RecommendStateBox(
                     Text(
                         modifier = Modifier.padding(bottom = 8.dp),
                         text = recommendMenu.name,
-                        style = Typography.titleMedium.copy(color = Color.White),
+                        style = Typography.titleMedium.copy(color = KiweWhite1),
                     )
                     Text(
-                        text = "주문하시겠습니까?",
-                        style = Typography.titleMedium.copy(color = Color.White),
+                        modifier = Modifier.padding(vertical = 5.dp, horizontal = 20.dp),
+                        text = recommendMenu.description,
+                        style = Typography.bodyMedium.copy(fontSize = 10.sp, color = KiweSilver1),
                     )
                     Text(
-                        text = "음성으로 하셔도 됩니다",
-                        style = Typography.titleMedium.copy(color = Color.White),
+                        modifier = Modifier.padding(vertical = 5.dp, horizontal = 20.dp),
+                        text = String.format(Locale.KOREA, "%,d원", recommendMenu.price),
+                        style = Typography.bodyMedium.copy(fontSize = 20.sp, color = KiweWhite1),
                     )
-                    Row(modifier = Modifier.padding(top = 12.dp)) {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .background(color = KiweGray1, shape = RoundedCornerShape(20.dp))
-                                    .padding(8.dp)
-                                    .clickable {
-                                        onYesClick()
-                                        onClose()
-                                    },
-                        ) {
-                            Text(
-                                text = "네",
-                                modifier = Modifier.padding(8.dp),
-                                style = Typography.titleLarge.copy(color = Color.White),
-                            )
+                    Spacer(Modifier.height(10.dp))
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        text = "그 외의 추천 메뉴",
+                        style = Typography.bodyMedium.copy(color = KiweSilver1),
+                    )
+                    Row(
+                        modifier =
+                            Modifier
+                                .padding(top = 12.dp)
+                                .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                    ) {
+                        // 첫 번째 추천 메뉴 박스
+                        Timber.tag("추천 첫번째").d(subRecommendMenu.toString())
+                        if (subRecommendMenu.getOrNull(0) != null) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .size(80.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(KiweWhite1),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Column(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize()
+                                            .padding(5.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
+                                ) {
+                                    val imgPath1 = subRecommendMenu[0].imgPath.prefixingImagePaths()
+                                    Image(
+                                        painter =
+                                            rememberAsyncImagePainter(
+                                                model = imgPath1, // 첫 번째 이미지 URL
+                                            ),
+                                        contentDescription = "추천 메뉴 1",
+                                        contentScale = ContentScale.Crop,
+                                        modifier =
+                                            Modifier
+                                                .size(50.dp)
+                                                .clip(RoundedCornerShape(10.dp)),
+                                    )
+                                    Text(
+                                        modifier = Modifier,
+                                        text = subRecommendMenu[0].name, // 첫 번째 메뉴 이름
+                                        style =
+                                            Typography.bodySmall.copy(
+                                                fontSize = 8.sp,
+                                                color = KiweGray1,
+                                            ),
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
+                            }
                         }
 
-                        Box(
-                            modifier =
-                                Modifier
-                                    .padding(start = 12.dp)
-                                    .background(color = KiweGreen5, shape = RoundedCornerShape(20.dp))
-                                    .padding(8.dp)
-                                    .clickable {
-                                        onClose()
-                                    },
-                        ) {
-                            Text(
-                                text = "아니오",
-                                modifier = Modifier.padding(8.dp),
-                                style = Typography.titleLarge.copy(color = Color.White),
-                            )
+                        // 두 번째 추천 메뉴 박스
+                        if (subRecommendMenu.getOrNull(1) != null) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .size(80.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(KiweWhite1),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Column(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize()
+                                            .padding(5.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
+                                ) {
+                                    val imgPath2 = subRecommendMenu[1].imgPath.prefixingImagePaths()
+                                    Image(
+                                        painter =
+                                            rememberAsyncImagePainter(
+                                                model = imgPath2, // 두 번째 이미지 URL
+                                            ),
+                                        contentDescription = "추천 메뉴 2",
+                                        contentScale = ContentScale.Crop,
+                                        modifier =
+                                            Modifier
+                                                .size(50.dp)
+                                                .clip(RoundedCornerShape(10.dp)),
+                                    )
+                                    Text(
+                                        modifier = Modifier,
+                                        text = subRecommendMenu[1].name, // 두 번째 메뉴 이름
+                                        style =
+                                            Typography.bodySmall.copy(
+                                                fontSize = 8.sp,
+                                                color = KiweGray1,
+                                            ),
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
+                            }
                         }
                     }
+
+                    MySpeechInputText(
+                        isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+                        sentence = sentence,
+                    )
                 }
             }
         }
@@ -493,6 +662,8 @@ fun RecommendStateBox(
 @Composable
 fun QueryStateBox(
     isQueryStateBoxOpen: Boolean,
+    isMySpeechInputTextOpen: Boolean,
+    sentence: String,
     page: Int = 0,
     onClose: () -> Unit,
     onYesClick: () -> Unit = {},
@@ -512,52 +683,109 @@ fun QueryStateBox(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "더 주문하시겠습니까?",
-                        style = Typography.titleLarge.copy(color = Color.White),
+                        text = "추가로 주문하시겠습니까?",
+                        style = Typography.titleMedium.copy(color = KiweWhite1, fontSize = 20.sp),
                     )
                     Text(
                         text = "음성으로 하셔도 됩니다",
-                        style = Typography.titleMedium.copy(color = Color.White),
+                        style = Typography.bodyMedium.copy(color = KiweWhite1, fontSize = 16.sp),
                     )
-                    Row(modifier = Modifier.padding(top = 12.dp)) {
+                    Spacer(Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier.padding(top = 10.dp).padding(horizontal = 40.dp),
+                        horizontalArrangement = Arrangement.spacedBy(20.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Box(
                             modifier =
                                 Modifier
-                                    .background(color = KiweGray1, shape = RoundedCornerShape(20.dp))
-                                    .padding(8.dp)
+                                    .weight(1F)
+                                    .background(color = KiweGray1, shape = RoundedCornerShape(10.dp))
+                                    .padding(10.dp)
                                     .clickable {
                                         onYesClick()
                                         onClose()
                                     },
+                            contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 text = "네",
                                 modifier = Modifier.padding(8.dp),
-                                style = Typography.titleLarge.copy(color = Color.White),
+                                style =
+                                    Typography.titleLarge.copy(
+                                        fontSize = 20.sp,
+                                        color = KiweWhite1,
+                                    ),
                             )
                         }
 
                         Box(
                             modifier =
                                 Modifier
-                                    .padding(start = 12.dp)
-                                    .background(color = KiweGreen5, shape = RoundedCornerShape(20.dp))
-                                    .padding(8.dp)
+                                    .weight(1F)
+                                    .background(color = KiweGreen5, shape = RoundedCornerShape(10.dp))
+                                    .padding(10.dp)
                                     .clickable {
                                         onNoClick()
                                         onClose()
                                     },
+                            contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 text = "아니오",
                                 modifier = Modifier.padding(8.dp),
-                                style = Typography.titleLarge.copy(color = Color.White),
+                                style =
+                                    Typography.titleLarge.copy(
+                                        fontSize = 20.sp,
+                                        color = KiweWhite1,
+                                    ),
                             )
                         }
                     }
+                    MySpeechInputText(
+                        isMySpeechInputTextOpen = isMySpeechInputTextOpen,
+                        sentence = sentence,
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+fun MySpeechInputText(
+    isMySpeechInputTextOpen: Boolean,
+    sentence: String,
+    onAnimationEnd: () -> Unit = {},
+) {
+    if (isMySpeechInputTextOpen) { // 이게 true일거라서 보여야됨
+        Timber.tag(TAG).d("Composable $isMySpeechInputTextOpen")
+        var displayedText by remember { mutableStateOf("") }
+        val scope = rememberCoroutineScope()
+        LaunchedEffect(sentence) {
+            displayedText = ""
+            scope.launch {
+                for (char in sentence) {
+                    displayedText += char
+                    delay(100)
+                    Timber.tag(TAG).d("MySpeechInputText $displayedText")
+                }
+                onAnimationEnd() // 글자가 완성되면 할 것
+                // 글자 완성되면 플래그 하나 더 해서 그걸로 다뤄야할 것 같다.
+            }
+        }
+
+        Text(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+                    .heightIn(min = 48.dp)
+                    .padding(top = 12.dp),
+            text = "\"" + displayedText + "\"",
+            textAlign = TextAlign.Center,
+            style = Typography.titleLarge.copy(color = Color.White),
+        )
     }
 }
 
@@ -593,12 +821,12 @@ fun VoiceIntro() {
     Box(
         modifier =
             Modifier
-                .offset(y = 24.dp)
+                .offset(y = 30.dp)
                 .padding(bottom = 8.dp)
                 .background(Color.White.copy(alpha = 0.8f), shape = RoundedCornerShape(8.dp))
                 .padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
-        Text(text = displayedText, style = MaterialTheme.typography.bodyMedium)
+        Text(text = displayedText, style = Typography.bodyMedium.copy(fontSize = 12.sp))
     }
 }
 
@@ -611,19 +839,20 @@ fun PreviousButton(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 120.dp, vertical = 20.dp),
+                .padding(horizontal = 120.dp, vertical = 5.dp),
+        shape = RoundedCornerShape(10.dp),
         onClick = onBackClick,
         colors =
             ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2e7d32),
-                contentColor = Color.White,
+                containerColor = KiweGreen5,
+                contentColor = KiweWhite1,
             ),
     ) {
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = "이전으로",
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
+            style = Typography.titleLarge.copy(fontSize = 20.sp),
         )
     }
 }
@@ -715,6 +944,7 @@ fun ContainerScreenPreview() {
         ContainerScreen(
             page = 1,
             mode = MainEnum.KioskMode.MANUAL,
+            shoppingCartState = ShoppingCartState(),
             onBackClick = {},
             onShoppingCartDialogClick = {},
             onOrderListDialogClick = {},
@@ -731,7 +961,14 @@ fun ContainerScreenPreview() {
 @Preview
 fun QueryStateBoxPreview() {
     KIWEAndroidTheme {
-        QueryStateBox(isQueryStateBoxOpen = true, page = 0, {})
+        QueryStateBox(
+            isQueryStateBoxOpen = true,
+            page = 0,
+            onClose = {},
+            onYesClick = {},
+            isMySpeechInputTextOpen = true,
+            sentence = "나는 무슨말을 할까",
+        )
     }
 }
 
@@ -747,12 +984,46 @@ fun RecommendStateBoxPreview() {
                     category = "taciti",
                     categoryNumber = 3413,
                     hotOrIce = "sumo",
-                    name = "Ralph Rios",
+                    name = "디카페인 아메리카노",
                     price = 3282,
                     description = "fabulas",
                     imgPath = "lacinia",
                 ),
+            subRecommendMenu =
+                listOf(
+                    MenuCategoryParam(
+                        id = 2986,
+                        category = "curabitur",
+                        categoryNumber = 9225,
+                        hotOrIce = "pulvinar",
+                        name = "Clara Herman",
+                        price = 9414,
+                        description = "conclusionemque",
+                        imgPath = "definiebas",
+                    ),
+                    MenuCategoryParam(
+                        id = 4061,
+                        category = "pericula",
+                        categoryNumber = 8980,
+                        hotOrIce = "vivamus",
+                        name = "Jerry Hayden",
+                        price = 8638,
+                        description = "eruditi",
+                        imgPath = "docendi",
+                    ),
+                ),
             onClose = {},
+            onYesClick = {},
+            isMySpeechInputTextOpen = true,
+            sentence = "나는 무슨말을 할까",
         )
+    }
+}
+
+@Composable
+@Preview
+fun SpeechMyTextInput() {
+    KIWEAndroidTheme {
+        MySpeechInputText(true, sentence = "나는 무슨말을 할까", onAnimationEnd = {})
     }
 }
