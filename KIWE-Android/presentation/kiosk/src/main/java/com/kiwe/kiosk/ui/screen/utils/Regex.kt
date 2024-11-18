@@ -141,16 +141,20 @@ val temperatureCommands =
 val temperaturePattern = temperatureCommands.joinToString("|") { "(?:$it)" }
 val temperatureRegex = Regex(temperaturePattern)
 
-val noCommands = listOf("아니오", "아니", "아니요", "안해", "아뇨", "안해", "넘겨", "싫어", "주문안해", "아니야")
+val noCommands = listOf("아니오", "아니", "아니요", "안해", "안 해", "아뇨", "안해", "넘겨", "싫어", "주문안해", "주문 안해", "주문 안 해", "아니야", "결제할게", "결제")
 val yesCommands =
     listOf(
         "네",
         "내",
         "넵",
         "어",
-        "할게",
+        "이거로할게",
+        "이거로줘",
+        "이거로 할게",
         "이거로 줘",
         "줘",
+        "해줘",
+        "해 줘",
         "맞어",
         "예",
         "맞",
@@ -161,6 +165,12 @@ val yesCommands =
         "계속해",
         "계속",
         "계속할게",
+        "계속 할게",
+        "계속 주문 할게",
+        "계속 주문할게",
+        "계속주문할게",
+        "주문할게",
+        "주문 할게",
         "맞아요",
         "그래",
         "좋아",
