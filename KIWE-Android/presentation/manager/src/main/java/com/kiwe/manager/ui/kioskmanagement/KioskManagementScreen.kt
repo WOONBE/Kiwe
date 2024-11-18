@@ -6,12 +6,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -38,7 +36,6 @@ import com.kiwe.manager.R
 import com.kiwe.manager.ui.theme.Orange
 import com.kiwe.manager.ui.theme.PinkPurple
 import com.kiwe.manager.ui.theme.Typography
-import com.kiwe.manager.ui.theme.YellowOrange
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -49,7 +46,7 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
     kioskManagementViewModel.collectSideEffect {
         when (it) {
             is KioskManagementSideEffect.Toast -> {
-                Toast.makeText(context, "", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
             }
 
             KioskManagementSideEffect.ShowEditDialog -> {
@@ -57,9 +54,9 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
 //                    onDismissRequest = {
 //                        //    kioskManagementViewModel.
 //                    },
-//                    {
-//
-//                    }
+//                    onConfirm = {
+//                    },
+//                    item = Kiosk(2, "", ""),
 //                )
             }
 
@@ -68,9 +65,9 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
     }
     Column(
         modifier =
-            Modifier
-                .fillMaxSize()
-                .background(colorResource(R.color.dashboard_background)),
+        Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.dashboard_background)),
     ) {
         Text(
             modifier = Modifier.padding(vertical = 20.dp, horizontal = 10.dp),
@@ -80,9 +77,9 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
         HorizontalDivider(thickness = 1.dp)
         Box(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(vertical = 20.dp, horizontal = 10.dp),
+            Modifier
+                .fillMaxSize()
+                .padding(vertical = 20.dp, horizontal = 10.dp),
         ) {
             Column {
                 Text(
@@ -91,9 +88,9 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
 
                 Card(
                     modifier =
-                        Modifier
-                            .weight(1F)
-                            .fillMaxHeight(),
+                    Modifier
+                        .weight(1F)
+                        .fillMaxHeight(),
                     colors =
                         CardDefaults.cardColors(
                             containerColor = colorResource(R.color.dashboard_card_background),
@@ -105,39 +102,28 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
                             item {
                                 Row(
                                     modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 15.dp),
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 15.dp, vertical = 15.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
                                         it.id.toString() + "번 키오스크",
                                     )
-                                    Row {
-                                        Button(
-                                            onClick = {
-                                                kioskManagementViewModel.onKioskDelete(it.id)
-                                            },
-                                            colors =
-                                            ButtonDefaults.buttonColors(
-                                                containerColor = YellowOrange,
-                                            ),
-                                        ) {
-                                            Text("수정")
-                                        }
-                                        Spacer(modifier = Modifier.width(10.dp))
-                                        Button(
-                                            onClick = {
-                                                kioskManagementViewModel.onKioskDelete(it.id)
-                                            },
-                                            colors =
+
+                                    Button(
+                                        onClick = {
+                                            kioskManagementViewModel.onKioskDelete(it.id)
+                                        },
+                                        colors =
                                             ButtonDefaults.buttonColors(
                                                 containerColor = PinkPurple,
                                             ),
-                                        ) {
-                                            Text("삭제")
-                                        }
+                                    ) {
+                                        Text("삭제")
                                     }
+
                                 }
                             }
                         }
@@ -150,48 +136,36 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
 
                 Card(
                     modifier =
-                        Modifier
-                            .fillMaxWidth().align(Alignment.CenterHorizontally),
-
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
                     colors =
                         CardDefaults.cardColors(
                             containerColor = colorResource(R.color.dashboard_card_background),
                         ),
                     shape = RoundedCornerShape(20.dp),
                 ) {
-                    var location by remember { mutableStateOf("") }
-                    var status by remember { mutableStateOf("") }
                     Row {
-
                         OutlinedTextField(
                             modifier =
                             Modifier
                                 .weight(1F)
                                 .padding(horizontal = 10.dp),
-                            value = location,
+                            value = state.location,
                             singleLine = true,
-                            onValueChange = { location = it },
+                            onValueChange = { kioskManagementViewModel.onLocationChange(it) },
                             label = { Text("지점") },
-                        )
-
-                        OutlinedTextField(
-                            modifier =
-                            Modifier
-                                .weight(1F)
-                                .padding(horizontal = 10.dp),
-                            value = status,
-                            singleLine = true,
-                            onValueChange = { status = it },
-                            label = { Text("상태") },
                         )
                     }
                     Button(
                         modifier = Modifier.padding(10.dp),
                         colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = Orange,
-                        ),
-                        onClick = {},
+                            ButtonDefaults.buttonColors(
+                                containerColor = Orange,
+                            ),
+                        onClick = {
+                            kioskManagementViewModel.onKioskCreate()
+                        },
                     ) {
                         Text("추가")
                     }
@@ -205,9 +179,9 @@ fun KioskManagementScreen(kioskManagementViewModel: KioskManagementViewModel = h
 private fun KioskManagementScreen(kioskList: List<Kiosk>) {
     Column(
         modifier =
-            Modifier
-                .fillMaxSize()
-                .background(colorResource(R.color.dashboard_background)),
+        Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.dashboard_background)),
     ) {
         Text(
             modifier = Modifier.padding(vertical = 20.dp, horizontal = 10.dp),
@@ -285,28 +259,27 @@ private fun KioskManagementScreen(kioskList: List<Kiosk>) {
                     var location by remember { mutableStateOf("ssssssss") }
                     var status by remember { mutableStateOf("") }
                     Row {
-
                         OutlinedTextField(
                             modifier =
-                            Modifier
-                                .weight(1F)
-                                .padding(horizontal = 10.dp),
+                                Modifier
+                                    .weight(1F)
+                                    .padding(horizontal = 10.dp),
                             value = location,
                             singleLine = true,
                             onValueChange = { location = it },
                             label = { Text("지점") },
                         )
 
-                        OutlinedTextField(
-                            modifier =
-                            Modifier
-                                .weight(1F)
-                                .padding(horizontal = 10.dp),
-                            value = status,
-                            singleLine = true,
-                            onValueChange = { status = it },
-                            label = { Text("상태") },
-                        )
+//                        OutlinedTextField(
+//                            modifier =
+//                                Modifier
+//                                    .weight(1F)
+//                                    .padding(horizontal = 10.dp),
+//                            value = status,
+//                            singleLine = true,
+//                            onValueChange = { status = it },
+//                            label = { Text("상태") },
+//                        )
                     }
                 }
             }

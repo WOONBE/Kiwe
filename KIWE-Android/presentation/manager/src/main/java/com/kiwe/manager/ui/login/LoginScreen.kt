@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -114,6 +115,7 @@ private fun LoginScreen(
                     password,
                     onPasswordChange,
                     "비밀번호를 입력해주세요",
+                    PasswordVisualTransformation()
                 )
 
                 ContentArea(
