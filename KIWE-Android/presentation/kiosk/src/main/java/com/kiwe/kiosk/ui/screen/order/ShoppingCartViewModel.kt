@@ -166,10 +166,22 @@ class ShoppingCartViewModel
                 )
             }
         }
+
+        fun resetShoppingCart() {
+            intent {
+                reduce {
+                    state.copy(
+                        shoppingCartItem = emptyList(),
+                        voiceShoppingCartItem = emptyList(),
+                        isVoiceOrderConfirm = false,
+                    )
+                }
+            }
+        }
     }
 
 data class ShoppingCartState(
-    val voiceShoppingCartItem: List<ShoppingCartItem> = listOf(), // linkedlist 오류시 점검할 곳
+    val voiceShoppingCartItem: List<ShoppingCartItem> = emptyList(), // linkedlist 오류시 점검할 곳
     val isVoiceOrderConfirm: Boolean = false,
     val shoppingCartItem: List<ShoppingCartItem> =
         LinkedList<ShoppingCartItem>(),

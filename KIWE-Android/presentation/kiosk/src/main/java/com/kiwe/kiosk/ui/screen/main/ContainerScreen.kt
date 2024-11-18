@@ -32,7 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -137,13 +136,8 @@ fun ContainerScreen(
         )
     }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            Timber.tag(TAG).d("onDispose")
-        }
-    }
-
-    LaunchedEffect(shoppingCartState.isVoiceOrderConfirm, shoppingCartState.shoppingCartItem) {
+    LaunchedEffect(shoppingCartState.isVoiceOrderConfirm) {
+         // , shoppingCartState.shoppingCartItem
         if (shoppingCartState.isVoiceOrderConfirm) {
             isShoppingCartDialogOpen = true
             delay(2000L)
@@ -154,13 +148,14 @@ fun ContainerScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is MainSideEffect.Toast ->
+            is MainSideEffect.Toast -> {
                 Toast
                     .makeText(
                         context,
                         sideEffect.message,
                         Toast.LENGTH_SHORT,
                     ).show()
+            }
 
             MainSideEffect.NavigateToLoginScreen -> {
                 context.startActivity(

@@ -136,12 +136,14 @@ fun MainNavHost() {
                             ReceiptScreen(
                                 orderNumber = orderNumber,
                                 onEnterScreen = { page ->
-                                    mainViewModel.setPage(page)
                                     mainViewModel.speakPaymentDone()
+                                    mainViewModel.setPage(page)
                                 },
                                 onBackHome = {
                                     mainViewModel.stopSpeechRecognition()
                                     navController.navigate(MainRoute.AD.route) {
+                                        mainViewModel.resetMainViewModel()
+                                        shoppingCartViewModel.resetShoppingCart()
                                         popUpTo(MainRoute.AD.route)
                                         mainViewModel.setPage(0)
                                     }
