@@ -11,8 +11,8 @@ elk:
   user: "elastic"
   password: "elastic_kiwi"
 
-#llama:`
-#  url: "https://98c6-34-75-59-52.ngrok-free.app"
+llama:
+  url: "https://98c6-34-75-59-52.ngrok-free.app"
 
 logging:
   level: "INFO"

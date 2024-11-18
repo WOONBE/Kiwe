@@ -27,10 +27,10 @@ class ExplanationCommand(BaseCommand):
 
         for i in data:
             print("menu data",i["menu_name"],i["menu_desc"])
-            menu_infos.append(i["menu_name"] + " " + i["menu_desc"])
+            menu_infos.append(i["menu_name"] + "에 대한 설명은 다음과 같습니다. " + i["menu_desc"])
         try:
             if self.llama_client:
-                context = f"Menu items: {menu_infos}\nUser preferences: {[]}"
+                context = f"{menu_infos}"
                 recommendation = await self.llama_client.get_recommendation(context)
                 return {"status": "success", "message": recommendation}
             return {"status": "success", "message": f"{menu_infos}" }

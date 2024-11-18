@@ -32,7 +32,7 @@ class ServiceRouter:
         elif request_type == "recommendation":
             print("recommendation",request_type)
             command = RecommendationCommand(self.infrastructure)
-            return await command.execute(data)
+            return await command.execute(data,request)
         elif request_type == "explanation":
             command = ExplanationCommand(self.infrastructure)
             return await command.execute(data)

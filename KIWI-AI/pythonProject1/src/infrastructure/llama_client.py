@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 class LLaMAClient:
     def __init__(self, config):
-        self.base_url = config.get('llama_url', "https://2163-34-31-151-229.ngrok-free.app")
+        self.base_url = config.get('llama_url', "https://f6e0-34-125-63-65.ngrok-free.app")
 
     async def get_recommendation(self, message: str):
         async with httpx.AsyncClient() as client:
