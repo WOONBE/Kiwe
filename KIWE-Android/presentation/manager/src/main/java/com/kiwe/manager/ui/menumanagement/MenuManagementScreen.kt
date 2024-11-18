@@ -1,12 +1,15 @@
 package com.kiwe.manager.ui.menumanagement
 
 import android.content.Intent
+import android.os.Build
 import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +25,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -45,11 +49,17 @@ import com.kiwe.domain.model.MenuCategoryParam
 import com.kiwe.manager.BuildConfig.BASE_IMAGE_URL
 import com.kiwe.manager.R
 import com.kiwe.manager.ui.component.DashBoardAnalytics
+import com.kiwe.manager.ui.theme.Orange
+import com.kiwe.manager.ui.theme.PinkPurple
 import com.kiwe.manager.ui.theme.Typography
+import com.kiwe.manager.ui.theme.YellowOrange
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import java.util.Locale
 
+private const val TAG = "MenuManagementScreen 싸피"
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hiltViewModel()) {
     val state by menuManagementViewModel.collectAsState()
@@ -168,10 +178,12 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                                     text = "메뉴 한번에 삽입",
                                 )
                                 Column(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().fillMaxHeight(),
                                     horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
                                 ) {
                                     val context = LocalContext.current
+
                                     val launcher =
                                         rememberLauncherForActivityResult(
                                             contract = ActivityResultContracts.StartActivityForResult(),
@@ -203,19 +215,24 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                                     Text(
                                         modifier =
                                             Modifier.clickable {
-                                                val intent =
-                                                    Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                                                        addCategory(Intent.CATEGORY_OPENABLE)
-                                                        type = "*/*" // 모든 파일 타입 허용
-                                                    }
-                                                launcher.launch(intent)
                                             },
                                         text = text,
                                         textAlign = TextAlign.Center,
                                     )
                                     Button(
                                         modifier = Modifier.padding(18.dp),
+                                        colors =
+                                            ButtonDefaults.buttonColors(
+                                                containerColor = Orange,
+                                            ),
                                         onClick = {
+//                                            x.launch(permissions)
+                                            val intent =
+                                                Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                                    addCategory(Intent.CATEGORY_OPENABLE)
+                                                    type = "*/*" // 모든 파일 타입 허용
+                                                }
+                                            launcher.launch(intent)
                                         },
                                     ) {
                                         Text("파일 첨부")
@@ -252,69 +269,69 @@ fun MenuManagementScreen(menuManagementViewModel: MenuManagementViewModel = hilt
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                 ) {
                                     item {
-                                        var text by remember { mutableStateOf("") }
-
-                                        OutlinedTextField(
-                                            value = text,
-                                            onValueChange = { text = it },
-                                            label = { Text("카테고리") },
-                                        )
+                                        Row {
+                                            OutlinedTextField(
+                                                value = state.itemCreated.category,
+                                                onValueChange = { menuManagementViewModel.onEditNewItemCategory(it) },
+                                                label = { Text("카테고리") },
+                                            )
+                                            Spacer(modifier = Modifier.width(10.dp))
+                                            OutlinedTextField(
+                                                value = state.itemCreated.hotOrIce,
+                                                onValueChange = { menuManagementViewModel.onEditNewItemHotOrIce(it) },
+                                                label = { Text("Hot or Ice") },
+                                            )
+                                        }
                                     }
 
                                     item {
-                                        var text by remember { mutableStateOf("") }
+                                        var name by remember { mutableStateOf("") }
+                                        var price by remember { mutableStateOf("") }
 
-                                        OutlinedTextField(
-                                            value = text,
-                                            onValueChange = { text = it },
-                                            label = { Text("Hot or Ice") },
-                                        )
+                                        Row {
+                                            OutlinedTextField(
+                                                value = state.itemCreated.name,
+                                                onValueChange = { menuManagementViewModel.onEditNewItemName(it) },
+                                                label = { Text("이름") },
+                                            )
+                                            Spacer(modifier = Modifier.width(10.dp))
+                                            OutlinedTextField(
+                                                value = state.itemCreated.price.toString(),
+                                                onValueChange = { menuManagementViewModel.onEditNewItemPrice(it.toInt()) },
+                                                label = { Text("가격") },
+                                            )
+                                        }
                                     }
 
                                     item {
-                                        var text by remember { mutableStateOf("") }
+                                        var description by remember { mutableStateOf("") }
+                                        var imgPath by remember { mutableStateOf("") }
 
-                                        OutlinedTextField(
-                                            value = text,
-                                            onValueChange = { text = it },
-                                            label = { Text("이름") },
-                                        )
+                                        Row {
+                                            OutlinedTextField(
+                                                value = state.itemCreated.description,
+                                                onValueChange = { menuManagementViewModel.onEditNewItemDescription(it) },
+                                                label = { Text("메뉴 요약") },
+                                            )
+                                            Spacer(modifier = Modifier.width(10.dp))
+                                            OutlinedTextField(
+                                                value = state.itemCreated.imgPath,
+                                                onValueChange = { menuManagementViewModel.onEditNewItemImgPath(it) },
+                                                label = { Text("이미지 경로") },
+                                            )
+                                        }
                                     }
 
-                                    item {
-                                        var text by remember { mutableStateOf("") }
-
-                                        OutlinedTextField(
-                                            value = text,
-                                            onValueChange = { text = it },
-                                            label = { Text("가격") },
-                                        )
-                                    }
-
-                                    item {
-                                        var text by remember { mutableStateOf("") }
-
-                                        OutlinedTextField(
-                                            value = text,
-                                            onValueChange = { text = it },
-                                            label = { Text("메뉴 요약") },
-                                        )
-                                    }
-
-                                    item {
-                                        var text by remember { mutableStateOf("") }
-
-                                        OutlinedTextField(
-                                            value = text,
-                                            onValueChange = { text = it },
-                                            label = { Text("이미지 경로") },
-                                        )
-                                    }
                                     item {
                                         Button(
                                             modifier = Modifier.padding(18.dp),
                                             onClick = {
+                                                menuManagementViewModel.onCreate()
                                             },
+                                            colors =
+                                                ButtonDefaults.buttonColors(
+                                                    containerColor = Orange,
+                                                ),
                                         ) {
                                             Text("메뉴 등록")
                                         }
@@ -344,19 +361,30 @@ fun MenuItem(
             model = "https://" + BASE_IMAGE_URL + item.imgPath,
             contentDescription = item.description,
         )
-        Text(
-            modifier = Modifier.weight(1F),
-            text = item.name,
-        )
-        Text(
-            modifier = Modifier.weight(1F),
-            text = String.format(Locale.getDefault(), "%,d원", item.price),
-        )
+        Column(
+            modifier = Modifier.weight(2F).padding(vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = item.name,
+                style = Typography.bodySmall,
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = String.format(Locale.getDefault(), "%,d원", item.price),
+                style = Typography.labelLarge,
+            )
+        }
         Row {
             Button(
                 onClick = {
                     onItemEdit()
                 },
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = YellowOrange,
+                    ),
             ) {
                 Text(
                     text = "수정",
@@ -365,6 +393,10 @@ fun MenuItem(
             Spacer(Modifier.width(10.dp))
             Button(
                 onClick = { onItemDelete(item.id) },
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = PinkPurple,
+                    ),
             ) {
                 Text(
                     text = "삭제",
@@ -374,6 +406,7 @@ fun MenuItem(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Preview(device = "spec: width=2304dp, height=1440dp")
 @Composable
 private fun MenuManagementScreenPreview() {
