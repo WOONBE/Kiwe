@@ -135,6 +135,7 @@ class MainViewModel
                 if (!state.isTtsOn) {
                     if (!state.isScreenShowing && helpPopupRegex.containsMatchIn(resultText) && !state.isPayment && !state.isCartOpen) {
                         setMySpeechInput(resultText)
+                        textToSpeechManager.speak(TEXT_INTRO_HELP)
                         reduce {
                             state.copy(isScreenShowing = true)
                         }
