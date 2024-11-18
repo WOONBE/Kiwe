@@ -6,17 +6,26 @@ import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.kiwe.payment_receiver.ui.theme.KIWEAndroidTheme
 
@@ -30,14 +39,25 @@ class MainActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
         setContent {
+            enableEdgeToEdge(
+                navigationBarStyle = SystemBarStyle.dark(
+                    R.color.black
+                )
+            )
+
             KIWEAndroidTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = text,
-                        modifier = Modifier.padding(innerPadding),
-                    )
+                Surface {
+                    Box(
+
+                    ){
+                        Image(
+                            painterResource(R.drawable.card),
+                            contentScale = ContentScale.FillHeight,
+                            contentDescription = "",
+                        )
+                    }
                 }
             }
         }
@@ -82,16 +102,6 @@ class MainActivity :
         Log.d(TAG, "onAccountReceived: $account")
         text = account ?: ""
         openWebPage(text)
-        setContent {
-            KIWEAndroidTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Text(
-                        text = account ?: "",
-                        modifier = Modifier.padding(innerPadding),
-                    )
-                }
-            }
-        }
     }
 }
 

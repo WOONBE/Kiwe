@@ -5,6 +5,7 @@ import com.kiwe.domain.exception.APIException
 import com.kiwe.domain.model.MenuCategoryParam
 import com.kiwe.domain.model.MenuParam
 import com.kiwe.domain.usecase.GetCategoryListUseCase
+import com.kiwe.domain.usecase.manager.menu.CreateMenuUseCase
 import com.kiwe.domain.usecase.manager.menu.DeleteMenuUseCase
 import com.kiwe.domain.usecase.manager.menu.EditMenuUseCase
 import com.kiwe.domain.usecase.manager.menu.GetAllMenuListUseCase
@@ -24,6 +25,7 @@ class MenuManagementViewModel
         private val getCategoryListUseCase: GetCategoryListUseCase,
         private val deleteMenuUseCase: DeleteMenuUseCase,
         private val editMenuUseCase: EditMenuUseCase,
+        private val createMenuUseCase: CreateMenuUseCase,
     ) : ViewModel(),
         ContainerHost<MenuManagementState, MenuManagementSideEffect> {
         override val container: Container<MenuManagementState, MenuManagementSideEffect> =
@@ -90,9 +92,60 @@ class MenuManagementViewModel
         fun onDelete(menuId: Int) =
             intent {
                 deleteMenuUseCase(menuId).getOrThrow()
+                val menuListResponse = getCategoryListUseCase(state.category).getOrThrow()
+                reduce {
+                    state.copy(menuList = menuListResponse)
+                }
+            }
+
+        fun onCreate() =
+            intent {
+                createMenuUseCase(state.itemCreated).getOrThrow()
                 val menuListResponse = getAllMenuListUseCase().getOrThrow()
                 reduce {
                     state.copy(menuList = menuListResponse)
+                }
+            }
+
+        fun onEditNewItemCategory(category: String) =
+            intent {
+                reduce {
+                    state.copy(itemCreated = state.itemCreated.copy(category = category))
+                }
+            }
+
+        fun onEditNewItemHotOrIce(hotOrIce: String) =
+            intent {
+                reduce {
+                    state.copy(itemCreated = state.itemCreated.copy(hotOrIce = hotOrIce))
+                }
+            }
+
+        fun onEditNewItemName(name: String) =
+            intent {
+                reduce {
+                    state.copy(itemCreated = state.itemCreated.copy(name = name))
+                }
+            }
+
+        fun onEditNewItemPrice(price: Int) =
+            intent {
+                reduce {
+                    state.copy(itemCreated = state.itemCreated.copy(price = price))
+                }
+            }
+
+        fun onEditNewItemDescription(description: String) =
+            intent {
+                reduce {
+                    state.copy(itemCreated = state.itemCreated.copy(description = description))
+                }
+            }
+
+        fun onEditNewItemImgPath(imgPath: String) =
+            intent {
+                reduce {
+                    state.copy(itemCreated = state.itemCreated.copy(imgPath = imgPath))
                 }
             }
 
@@ -120,6 +173,15 @@ data class MenuManagementState(
             price = 4876,
             description = "putent",
             imgPath = "viderer",
+        ),
+    val itemCreated: MenuParam =
+        MenuParam(
+            category = "",
+            hotOrIce = "",
+            name = "",
+            price = 0,
+            description = "",
+            imgPath = "",
         ),
 )
 
