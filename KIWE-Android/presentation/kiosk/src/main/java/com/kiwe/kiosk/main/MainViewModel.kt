@@ -120,25 +120,29 @@ class MainViewModel
         override fun onResultsReceived(results: List<String>) {
             val resultText = results.firstOrNull() ?: ""
             intent {
-                setMySpeechInput(resultText)
-                delay(2000L) // 1초 대기
-                Timber.tag("MainViewModel").d("Result: $resultText 하고 ${state.isScreenShowing}")
-                if (state.isScreenShowing) { // SpeechScreen여부
-                    onSpeechResult(resultText)
-                } else if (helpPopupRegex.containsMatchIn(resultText)) {
-                    reduce {
-                        state.copy(isScreenShowing = true)
-                    }
-                } else {
-                    // 여기서 로직 문제가 생겼음
-                    Timber.tag("추천췍").d("$resultText  ${state.isCartOpen}")
-                    if (state.isCartOpen) {
-                        onProcessResult(resultText)
+                if (!state.isScreenShowing && helpPopupRegex.containsMatchIn(resultText))
+                    {
+                        setMySpeechInput(resultText)
+                        reduce {
+                            state.copy(isScreenShowing = true)
+                        }
                     } else {
-                        onPayProcess(resultText)
-                        onRecommendProcess(resultText)
+                    setMySpeechInput(resultText)
+                    delay(2000L) // 2초 대기
+                    if (state.isScreenShowing) { // SpeechScreen여부
+                        onSpeechResult(resultText)
+                    } else {
+                        // 여기서 로직 문제가 생겼음
+                        Timber.tag("추천췍").d("$resultText  ${state.isCartOpen}")
+                        if (state.isCartOpen) {
+                            onProcessResult(resultText)
+                        } else {
+                            onPayProcess(resultText)
+                            onRecommendProcess(resultText)
+                        }
                     }
                 }
+                Timber.tag("MainViewModel").d("Result: $resultText 하고 ${state.isScreenShowing}")
             }
         }
 
