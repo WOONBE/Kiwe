@@ -29,11 +29,12 @@ class ExplanationCommand(BaseCommand):
             print("menu data",i["menu_name"],i["menu_desc"])
             menu_infos.append(i["menu_name"] + "에 대한 설명은 다음과 같습니다. " + i["menu_desc"])
         try:
+            menu_info_str = ", ".join(menu_infos)
             if self.llama_client:
                 context = f"{menu_infos}"
                 recommendation = await self.llama_client.get_recommendation(context)
                 return {"status": "success", "message": recommendation}
-            return {"status": "success", "message": f"{menu_infos}" }
+            return {"status": "success", "message": f"{menu_info_str}" }
         except Exception as e:
             print(f"Error in recommendation command: {str(e)}")
-            return {"status": "No server", "message": f"{menu_infos}"}
+            return {"status": "No server", "message": f"{menu_info_str}"}
