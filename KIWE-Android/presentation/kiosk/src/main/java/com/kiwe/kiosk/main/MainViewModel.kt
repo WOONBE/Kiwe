@@ -87,11 +87,24 @@ class MainViewModel
 
         private fun initTTSListener() {
             textToSpeechManager.setOnCompleteListener {
-                startSpeechRecognition() // tts가 끝나면 stt 살리게 했음
+                // tts가 끝나면 stt 살리게 했음
+                intent {
+                    reduce {
+                        Timber.tag("MainViewModel").d("tts 종료 인지")
+                        state.copy(isTtsOn = false)
+                    }
+                    delay(1000L)
+                    startSpeechRecognition()
+                }
             }
-//            textToSpeechManager.setOnStartListener {
-//                stopSpeechRecognition()
-//            }
+            textToSpeechManager.setOnStartListener {
+                intent {
+                    reduce {
+                        Timber.tag("MainViewModel").d("tts 시작 인지")
+                        state.copy(isTtsOn = true)
+                    }
+                }
+            }
         }
 
         // 음성 인식 시작
@@ -119,28 +132,32 @@ class MainViewModel
         override fun onResultsReceived(results: List<String>) {
             val resultText = results.firstOrNull() ?: ""
             intent {
-                if (!state.isScreenShowing && helpPopupRegex.containsMatchIn(resultText) && !state.isPayment && !state.isCartOpen) {
-                    setMySpeechInput(resultText)
-                    reduce {
-                        state.copy(isScreenShowing = true)
-                    }
-                } else {
-                    setMySpeechInput(resultText)
-                    delay(2000L) // 2초 대기
-                    if (state.isScreenShowing) { // SpeechScreen여부
-                        onSpeechResult(resultText)
+                if (!state.isTtsOn) {
+                    if (!state.isScreenShowing && helpPopupRegex.containsMatchIn(resultText) && !state.isPayment && !state.isCartOpen) {
+                        setMySpeechInput(resultText)
+                        reduce {
+                            state.copy(isScreenShowing = true)
+                        }
                     } else {
-                        // 여기서 로직 문제가 생겼음
-                        Timber.tag("추천췍").d("$resultText  ${state.isCartOpen}")
-                        if (state.isCartOpen) {
-                            onProcessResult(resultText)
+                        setMySpeechInput(resultText)
+                        delay(2000L) // 2초 대기
+                        if (state.isScreenShowing) { // SpeechScreen여부
+                            onSpeechResult(resultText)
                         } else {
-                            onPayProcess(resultText)
-                            onRecommendProcess(resultText)
+                            // 여기서 로직 문제가 생겼음
+                            Timber.tag("추천췍").d("$resultText  ${state.isCartOpen}")
+                            if (state.isCartOpen) {
+                                onProcessResult(resultText)
+                            } else {
+                                onPayProcess(resultText)
+                                onRecommendProcess(resultText)
+                            }
                         }
                     }
                 }
-                Timber.tag("MainViewModel").d("Result: $resultText 하고 ${state.isScreenShowing}")
+                Timber
+                    .tag("MainViewModel")
+                    .d("Result: $resultText 하고 ${state.isScreenShowing}이고, tts는 ${state.isTtsOn}")
             }
         }
 
@@ -251,6 +268,14 @@ class MainViewModel
                     )
                 }
             }
+
+        fun clearMySpeech() {
+            intent {
+                reduce {
+                    state.copy(mySpeechText = "")
+                }
+            }
+        }
 
         private fun onProcessResult(result: String) =
             intent {
@@ -639,6 +664,7 @@ class MainViewModel
                         shouldShowRetryMessage = false,
                         recognizedText = "",
                         tempOrder = "",
+                        isTtsOn = false,
                         voiceResult =
                             VoiceBody(
                                 category = 0,
@@ -688,6 +714,7 @@ data class MainState(
     val isAddCartFalse: Boolean = false, // 장바구니에 추가 안함
     val isPayment: Boolean = false, // 포장인지 매장인지 고를 때
     val isCartOpen: Boolean = false,
+    val isTtsOn: Boolean = false,
     val voiceShoppingCart: List<OrderList> = mutableListOf(),
     val category: List<Category> = emptyList(),
     val recognizedText: String = "",

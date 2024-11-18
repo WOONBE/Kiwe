@@ -149,12 +149,12 @@ fun ContainerScreen(
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is MainSideEffect.Toast -> {
-                Toast
-                    .makeText(
-                        context,
-                        sideEffect.message,
-                        Toast.LENGTH_SHORT,
-                    ).show()
+//                Toast
+//                    .makeText(
+//                        context,
+//                        sideEffect.message,
+//                        Toast.LENGTH_SHORT,
+//                    ).show()
             }
 
             MainSideEffect.NavigateToLoginScreen -> {
@@ -532,7 +532,7 @@ fun RecommendStateBox(
                     Text(
                         modifier = Modifier.padding(vertical = 5.dp, horizontal = 20.dp),
                         text = recommendMenu.description,
-                        style = Typography.bodyMedium.copy(fontSize = 10.sp, color = KiweSilver1),
+                        style = Typography.bodyMedium.copy(fontSize = 12.sp, color = KiweSilver1),
                     )
                     Text(
                         modifier = Modifier.padding(vertical = 5.dp, horizontal = 20.dp),

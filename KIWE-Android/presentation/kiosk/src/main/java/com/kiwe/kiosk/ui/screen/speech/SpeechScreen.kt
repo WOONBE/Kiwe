@@ -64,6 +64,10 @@ fun SpeechScreen(
         }
     }
 
+    LaunchedEffect(state.mySpeechText) {
+
+    }
+
     LaunchedEffect(state.voiceResult) {
         if (state.voiceResult.category == 1) { // 이러면 응답이 들어왔다는 의미이며 주문일 때만
             shoppingCartViewModel.onVoiceResult(state.voiceResult)
@@ -175,7 +179,7 @@ private fun SpeechScreen(
                 }
                 if (isTemperatureEmpty) {
                     elapsedTime = -7 // 7초안에 온도 골라야됨
-                    TempBox()
+                    TempBox(isMySpeechInputTextOpen, sentence)
                 }
             }
         }
@@ -184,6 +188,8 @@ private fun SpeechScreen(
 
 @Composable
 fun TempBox(
+    isMySpeechInputTextOpen: Boolean,
+    sentence: String,
     onHotClick: () -> Unit = {},
     onIceClick: () -> Unit = {},
 ) {
@@ -212,6 +218,7 @@ fun TempBox(
                 onClick = onIceClick,
             )
         }
+        MySpeechInputText(isMySpeechInputTextOpen, sentence)
     }
 }
 
@@ -223,11 +230,13 @@ fun ExampleBox(
     Column {
         Column(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .background(shape = RoundedCornerShape(20.dp), color = Color.Black.copy(alpha = 0.5f))
-                .padding(16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .background(
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color.Black.copy(alpha = 0.5f),
+                    ).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             ExampleItem(text = "예시1", example = "\"차가운 아메리카노 한잔 줘\"")
