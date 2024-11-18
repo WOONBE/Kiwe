@@ -1,6 +1,8 @@
 package com.kiwe.kiosk.ui.screen.utils
 
 import android.content.Context
+import android.media.AudioManager
+import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Locale
@@ -36,7 +38,9 @@ class TextToSpeechManager
         fun speak(text: String) {
             if (isInitialized && text.isNotEmpty()) {
                 onStart?.invoke()
-                tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "TTS_ID")
+                val bundle = Bundle()
+                bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC)
+                tts.speak(text, TextToSpeech.QUEUE_FLUSH, bundle, "TTS_ID")
                 tts.setOnUtteranceCompletedListener { onComplete?.invoke() }
             }
         }
