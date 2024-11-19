@@ -57,71 +57,77 @@ class ImageProcessUtils
                 detector
                     .process(image)
                     .addOnSuccessListener { faces: List<Face> ->
-                        if (faces.isEmpty()) {
-                            initialTrackingId = null
-                            faceDetection(false)
-//                            Timber.tag("FaceTracking").d("얼굴 사라져서 initialTrackingId 초기화")
-                            return@addOnSuccessListener
-                        }
-
-                        for (face in faces) {
-                            val bounds = face.boundingBox
-                            val faceWidth = bounds.width()
-                            val faceHeight = bounds.height()
-
-                            // 얼굴의 크기에 따른 콜백 호출
-                            if (faceWidth >= 100 || faceHeight >= 100) { // FIXME : 얼굴 크기 수정
-                                Timber.tag("MainViewModel").d("Face width: $faceWidth, height: $faceHeight")
-                                faceDetection(true)
-                            } else {
+                        try {
+                            if (faces.isEmpty()) {
+                                initialTrackingId = null
                                 faceDetection(false)
+//                            Timber.tag("FaceTracking").d("얼굴 사라져서 initialTrackingId 초기화")
+                                return@addOnSuccessListener
                             }
+
+                            for (face in faces) {
+                                val bounds = face.boundingBox
+                                val faceWidth = bounds.width()
+                                val faceHeight = bounds.height()
+
+                                // 얼굴의 크기에 따른 콜백 호출
+                                if (faceWidth >= 100 || faceHeight >= 100) { // FIXME : 얼굴 크기 수정
+                                    Timber
+                                        .tag("MainViewModel")
+                                        .d("Face width: $faceWidth, height: $faceHeight")
+                                    faceDetection(true)
+                                } else {
+                                    faceDetection(false)
+                                }
 //                                Timber.tag("FC").d("Face width: $faceWidth, height: $faceHeight")
 
-                            val bitmap = imageProxyToBitmap(imageProxy)
-                            detectAgeAndGender(bitmap, face)
-                            val mpImage = BitmapImageBuilder(bitmap).build()
-                            val baseOptions =
-                                BaseOptions
-                                    .builder()
-                                    .setModelAssetPath("face_landmarker.task")
-                                    .build()
+                                val bitmap = imageProxyToBitmap(imageProxy)
+                                detectAgeAndGender(bitmap, face)
+                                val mpImage = BitmapImageBuilder(bitmap).build()
+                                val baseOptions =
+                                    BaseOptions
+                                        .builder()
+                                        .setModelAssetPath("face_landmarker.task")
+                                        .build()
 
-                            val landmarkerOptions =
-                                FaceLandmarker.FaceLandmarkerOptions
-                                    .builder()
-                                    .setBaseOptions(baseOptions)
-                                    .setOutputFaceBlendshapes(true)
-                                    .build()
+                                val landmarkerOptions =
+                                    FaceLandmarker.FaceLandmarkerOptions
+                                        .builder()
+                                        .setBaseOptions(baseOptions)
+                                        .setOutputFaceBlendshapes(true)
+                                        .build()
 
-                            val faceLandmarker =
-                                FaceLandmarker.createFromOptions(context, landmarkerOptions)
+                                val faceLandmarker =
+                                    FaceLandmarker.createFromOptions(context, landmarkerOptions)
 
-                            val imageProcessingOptions =
-                                ImageProcessingOptions
-                                    .builder()
-                                    .setRotationDegrees(imageProxy.imageInfo.rotationDegrees)
-                                    .build()
+                                val imageProcessingOptions =
+                                    ImageProcessingOptions
+                                        .builder()
+                                        .setRotationDegrees(imageProxy.imageInfo.rotationDegrees)
+                                        .build()
 
-                            val result = faceLandmarker.detect(mpImage, imageProcessingOptions)
+                                val result = faceLandmarker.detect(mpImage, imageProcessingOptions)
 
-                            val gazePoint = estimateGaze(face, image.width, image.height)
-                            gazeDetection(gazePoint)
-                            try {
-                                val blendList = result.faceBlendshapes()
-                                val shapeList =
-                                    blendList.get().flatMap { innerList -> innerList.orEmpty() }
-                                shapeList
+                                val gazePoint = estimateGaze(face, image.width, image.height)
+                                gazeDetection(gazePoint)
+                                try {
+                                    val blendList = result.faceBlendshapes()
+                                    val shapeList =
+                                        blendList.get().flatMap { innerList -> innerList.orEmpty() }
+                                    shapeList
 //                                    for (shape in shapeList) {
 //                                        Timber
 //                                            .tag("BlendShape")
 //                                            .d("Blend shape: ${shape.categoryName()} || ${shape.score()} || ${shape.index()}")
 //                                    }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
 
-                            faceLandmarker.close()
+                                faceLandmarker.close()
+                            }
+                        } catch (e: Throwable) {
+                            Timber.tag("Error").d(e)
                         }
                     }.addOnFailureListener { e ->
                         e.printStackTrace()
@@ -134,25 +140,60 @@ class ImageProcessUtils
         }
 
         private fun imageProxyToBitmap(imageProxy: ImageProxy): Bitmap {
-            val yBuffer = imageProxy.planes[0].buffer // Y
-            val uBuffer = imageProxy.planes[1].buffer // U
-            val vBuffer = imageProxy.planes[2].buffer // V
+            try {
+                if (imageProxy.image == null || imageProxy.planes.size < 3) {
+                    Timber.e("유효하지 않은 ImageProxy")
+                    return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+                }
 
-            val ySize = yBuffer.remaining()
-            val uSize = uBuffer.remaining()
-            val vSize = vBuffer.remaining()
+                val yBuffer = imageProxy.planes[0].buffer
+                val uBuffer = imageProxy.planes[1].buffer
+                val vBuffer = imageProxy.planes[2].buffer
 
-            val nv21 = ByteArray(ySize + uSize + vSize)
+                if (yBuffer == null || uBuffer == null || vBuffer == null) {
+                    Timber.e("YUV 버퍼가 null입니다.")
+                    return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+                }
 
-            yBuffer.get(nv21, 0, ySize)
-            vBuffer.get(nv21, ySize, vSize)
-            uBuffer.get(nv21, ySize + vSize, uSize)
+                val ySize = yBuffer.remaining()
+                val uSize = uBuffer.remaining()
+                val vSize = vBuffer.remaining()
 
-            val yuvImage = YuvImage(nv21, ImageFormat.NV21, imageProxy.width, imageProxy.height, null)
-            val out = ByteArrayOutputStream()
-            yuvImage.compressToJpeg(Rect(0, 0, imageProxy.width, imageProxy.height), 100, out)
-            val imageBytes = out.toByteArray()
-            return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                val nv21 = ByteArray(ySize + uSize + vSize)
+                yBuffer.get(nv21, 0, ySize)
+                vBuffer.get(nv21, ySize, vSize)
+                uBuffer.get(nv21, ySize + vSize, uSize)
+
+                val yuvImage =
+                    YuvImage(nv21, ImageFormat.NV21, imageProxy.width, imageProxy.height, null)
+                val out = ByteArrayOutputStream()
+                yuvImage.compressToJpeg(Rect(0, 0, imageProxy.width, imageProxy.height), 100, out)
+                val imageBytes = out.toByteArray()
+
+                if (imageBytes.isEmpty()) {
+                    Timber.e("JPEG 압축 실패")
+                    return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+                }
+
+                val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+                // 이미지 회전 처리
+                val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+                return if (rotationDegrees != 0) {
+                    val matrix =
+                        android.graphics.Matrix().apply {
+                            postRotate(rotationDegrees.toFloat())
+                        }
+                    Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                } else {
+                    bitmap
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "ImageProxy -> Bitmap 변환 중 오류 발생")
+                return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+            } finally {
+                imageProxy.close()
+            }
         }
 
         fun estimateGaze(
