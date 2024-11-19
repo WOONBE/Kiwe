@@ -18,6 +18,7 @@ import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.google.mlkit.vision.face.FaceLandmark
+import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 import kotlin.math.tan
@@ -70,6 +71,7 @@ class ImageProcessUtils
 
                             // 얼굴의 크기에 따른 콜백 호출
                             if (faceWidth >= 100 || faceHeight >= 100) { // FIXME : 얼굴 크기 수정
+                                Timber.tag("MainViewModel").d("Face width: $faceWidth, height: $faceHeight")
                                 faceDetection(true)
                             } else {
                                 faceDetection(false)
