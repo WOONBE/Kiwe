@@ -24,15 +24,11 @@
 
 # 🐮 Footer RulePermalink
 # 1. 유형: #이슈 번호의 형식으로 작성
-# 2. 이슈 트래커 ID를 작성
+# 2. JIra의 Issue Key를 작성
 # 3. 여러개의 이슈 번호는 ,로 구분
-# 4. 이슈 트래커 유형은 아래와 같다
+# 4. Smart Commit 유형은 아래 설명을 참고
 
-# Issue Tracker	설명
-# Fixes:	이슈 수정중(아직 해결되지 않은 경우)
-# Resolves:	이슈를 해결한 경우
-# Ref:	참조할 이슈가 있을 때 사용
-# Related to:	해당 커밋에 관련된 이슈 번호(아직 해결되지 않은 경우)
+
 ##################
 #✨feat - Jira Issue 번호 : 새로운 기능 추가 (로그인 기능, 새로운 API 추가)
 #🐛fix - Jira Issue 번호 : 버그 수정 (NullPointerException 해결)
@@ -54,6 +50,17 @@
 #🚨chore - Jira Issue 번호 : 린터 경고 또는 오류 수정 (ESLint, Checkstyle 경고 해결)
 #🔒security - Jira Issue 번호 : 보안 패치 또는 개선 (취약점 수정, 인증 추가)
 #🏗️refactor - Jira Issue 번호 : 큰 구조 변경 (모듈화 작업, 폴더 구조 변경)
+##################
+#comment: 해당 이슈에 주석을 남김
+#예시: S11P31D205-89 #comment API 호출 시간 개선
+#time: 작업 시간을 로그로 기록 (시간 추적 활성화된 경우)
+#예시: S11P31D205-89 #time 2h
+#in-progress: 이슈를 "진행 중(In Progress)" 상태로 변경
+#예시: S11P31D205-89 #in-progress
+#done: 이슈를 "완료(Done)" 상태로 변경
+#예시: S11P31D205-89 #done
+#transition: 특정 상태로 이슈를 전환 (Jira 워크플로우에 따라 설정된 상태 이름 사용)
+#예시: S11P31D205-89 #transition "Waiting for Review"
 ##################
 # 예시
 # 간단한 것 등의 이유로 이슈 번호 없을 때는 생략

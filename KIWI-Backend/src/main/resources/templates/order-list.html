@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>주문 내역</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .receipt-container {
+            max-width: 380px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #444;
+        }
+
+        .order-item {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .order-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .order-summary {
+            font-size: 1.1rem;
+            margin-top: 20px;
+            text-align: right;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .order-summary span {
+            font-size: 1.3rem;
+            color: #007bff;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 480px) {
+            .receipt-container {
+                max-width: 100%;
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.25rem;
+            }
+
+            .order-item {
+                margin-bottom: 10px;
+                padding-bottom: 8px;
+            }
+
+            .order-title {
+                font-size: 1rem;
+            }
+
+            .order-details {
+                font-size: 0.85rem;
+            }
+
+            .order-summary {
+                font-size: 1rem;
+            }
+
+            .order-summary span {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* 중간 크기 화면 */
+        @media (max-width: 768px) {
+            .receipt-container {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="receipt-container">
+    <h1><span th:text="'주문 번호 ' + ${orderNumber} + '번'">주문 번호 xx번</span></h1>
+    <div th:each="order : ${orderMenus}" class="order-item">
+        <p class="order-title" th:text="${order.menuName}">메뉴 이름</p>
+        <p class="order-details">
+            가격: <span th:text="${order.formattedMenuPrice}">0</span> 원 |
+            수량: <span th:text="${order.quantity}">0</span>
+        </p>
+        <p class="order-details">
+            총 금액: <span th:text="${order.formattedTotalPrice}">0</span> 원
+        </p>
+    </div>
+    <div class="order-summary">
+        총 주문 금액: <span th:text="${totalOrderPrice}">0</span> 원
+    </div>
+</div>
+
+
+</body>
+</html>

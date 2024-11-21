@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="login_text_button">#FF9EABB8</color>
+    <color name="login_btn">#FF1A80E5</color>
+    <color name="login_dark">#FF121417</color>
+    <color name="login_text_field_inside">#FF1C2126</color>
+    <color name="home_side_bar_background">#FF4C7D38</color>
+    <color name="home_side_bar_item_selected">#FF864924</color>
+    <color name="dashboard_background">#FFebdfd7</color>
+    <color name="dashboard_card_background">#FFf2eae5</color>
+    <color name="dashboard_card_decrease">#FFEE201C</color>
+    <color name="dashboard_card_increase">#FF1A932E</color>
+    <color name="KIWE_orange1">#FFE14700</color>
+</resources>

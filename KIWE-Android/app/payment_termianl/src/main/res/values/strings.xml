@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">payment_termianl</string>
+    <string name="nfc_service_description">Payment Terminal Service</string>
+
+
+        <string name="service_name">CardEmulation Sample</string>
+        <string name="card_title">Sample Loyalty Card</string>
+        <string name="account_number">Account Number</string>
+</resources>
