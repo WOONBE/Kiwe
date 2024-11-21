@@ -13,6 +13,25 @@
 
 ↑ 클릭하면 UCC를 볼 수 있습니다.
 
+
+## 👨‍👩‍👧‍👦 팀원 소개
+---
+
+### Android
+
+| [전형선](https://github.com/todayis-sunny)  | [김민규](https://github.com/kimmandoo)|[신영민](https://github.com/hangeulmansae) |
+|:---------:|:---------:|:---------:|
+|  ![](https://avatars.githubusercontent.com/u/77258780?v=4) | ![](https://avatars.githubusercontent.com/u/46841652?v=4) | ![](https://avatars.githubusercontent.com/u/101043296?v=4)
+
+### Backend
+|[이문현](https://github.com/Leejieon) | [구동현](https://github.com/TK711) | [김헌우](https://github.com/WOONBE) 
+|:--------:|:---------:|:---------:|
+| ![](https://avatars.githubusercontent.com/u/99390399?v=4)  | ![](https://avatars.githubusercontent.com/u/147051227?v=4) | ![](https://avatars.githubusercontent.com/u/98148896?v=4) |
+
+ 
+
+
+
 ### **🚩 목차**
 
 ---
@@ -243,7 +262,7 @@
 
 포터블 모니터 ↔ 윈도우 노트북 ↔ s20+를 scrspy프로그램을 통해 화면 송출 및 터치 입력을 받아 처리하였습니다.
 
-### **✨** 팀원 소개
+### **✨** 마무리
 
 ---
 
