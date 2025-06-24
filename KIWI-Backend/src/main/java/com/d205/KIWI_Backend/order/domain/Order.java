@@ -41,7 +41,7 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<KioskOrder> kioskOrders = new ArrayList<>(); // 주문과 관련된 키오스크 목록
 
-    // 추가된 필드: 어떤 키오스크에서 발생한 주문인지 명시
+    //kafka 사용시 어떤 키오스크에서 발생한 주문인지 명시하기 위하여 추가
     @Column(name = "kiosk_id", nullable = false)
     private Integer kioskId;
 
