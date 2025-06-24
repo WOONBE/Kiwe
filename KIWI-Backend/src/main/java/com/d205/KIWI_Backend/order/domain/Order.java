@@ -36,11 +36,14 @@ public class Order {
     @Builder.Default
     private List<OrderMenu> orderMenus = new ArrayList<>();
 
-
+    //kafka 사용시 삭제해도 무방
     @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<KioskOrder> kioskOrders = new ArrayList<>(); // 주문과 관련된 키오스크 목록
 
+    // 추가된 필드: 어떤 키오스크에서 발생한 주문인지 명시
+    @Column(name = "kiosk_id", nullable = false)
+    private Integer kioskId;
 
     // 연관관계 편의 메서드
     public void addOrderMenu(OrderMenu orderMenu) {
