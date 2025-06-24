@@ -4,9 +4,11 @@ import com.d205.KIWI_Backend.global.exception.BadRequestException;
 import com.d205.KIWI_Backend.member.service.MemberService;
 import com.d205.KIWI_Backend.menu.dto.MenuResponse;
 import com.d205.KIWI_Backend.order.dto.MenuSales;
+import com.d205.KIWI_Backend.order.dto.OrderEventDto;
 import com.d205.KIWI_Backend.order.dto.OrderRequest;
 import com.d205.KIWI_Backend.order.dto.OrderResponse;
 import com.d205.KIWI_Backend.order.dto.OrderResponse.MenuOrderResponse;
+import com.d205.KIWI_Backend.order.producer.OrderEventProducer;
 import com.d205.KIWI_Backend.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.YearMonth;
@@ -25,11 +27,13 @@ public class OrderController {
 
     private final OrderService orderService;
     private final MemberService memberService;
+    private final OrderEventProducer orderEventProducer;
 
     @Autowired
-    public OrderController(OrderService orderService, MemberService memberService) {
+    public OrderController(OrderService orderService, MemberService memberService, OrderEventProducer orderEventProducer) {
         this.orderService = orderService;
         this.memberService = memberService;
+        this.orderEventProducer = orderEventProducer;
     }
 
     @PostMapping
@@ -37,6 +41,16 @@ public class OrderController {
     public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest orderRequest) {
         OrderResponse orderResponse = orderService.createOrder(orderRequest);
         return new ResponseEntity<>(orderResponse, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/create")
+    @Operation(summary = "주문 생성", description = "kafka를 사용한 주문을 생성하는 API")
+    public ResponseEntity<String> createOrder(@RequestBody OrderEventDto orderDto) {
+        // 1. 주문 데이터를 Kafka로 전송
+        orderEventProducer.sendOrder(orderDto);
+
+        // 2. 키오스크에는 즉시 성공 응답을 반환
+        return ResponseEntity.ok("Order has been successfully received.");
     }
 
     // 단건 조회 API
@@ -78,14 +92,6 @@ public class OrderController {
 
         return orderService.getTopSellingMenusByAgeGroup();
     }
-
-//
-//    @PutMapping("/{orderId}")
-//    @Operation(summary = "주문 업데이트", description = "주문을 업데이트하는 API")
-//    public ResponseEntity<OrderResponse> updateOrder(@PathVariable Long orderId, @RequestBody OrderRequest orderRequest) {
-//        OrderResponse orderResponse = orderService.updateOrder(orderId, orderRequest);
-//        return new ResponseEntity<>(orderResponse, HttpStatus.OK);
-//    }
 
     @DeleteMapping("/{orderId}")
     @Operation(summary = "주문 삭제", description = "주문을 삭제하는 API")
